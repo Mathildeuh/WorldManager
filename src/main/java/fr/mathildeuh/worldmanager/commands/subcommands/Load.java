@@ -20,7 +20,7 @@ public class Load {
         // Vérifier si le monde est déjà chargé
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
-            sender.sendMessage("The world " + worldName + " is already loaded.");
+            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>The world \"" + worldName + "\" is already loaded.</color>");
             return;
         }
 
@@ -36,10 +36,11 @@ public class Load {
         // Spécifier le type de dimension
         Environment env = getEnvironment(dimension);
         if (env == null) {
-            sender.sendMessage("Invalid dimension type: " + dimension);
-            sender.sendMessage("Available dimension types:");
+            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Invalid dimension types !</color>");
+            message.parse("<color:#19cdff>Available dimension types:</color>");
             for (Environment env2 : Environment.values()) {
-                sender.sendMessage(env2.toString());
+                if (env2 != Environment.CUSTOM)
+                    message.parse("<color:#19cdff> <color:#7471b0>➥</color> " + env2.toString().toLowerCase() + "</color>");
             }
             return;
         } else {
@@ -51,10 +52,10 @@ public class Load {
 
         // Vérifier si le monde a été chargé correctement
         if (world != null) {
-            message.load(worldName);
-            sender.sendMessage("World " + worldName + " loaded successfully!");
+            message.parse(worldName);
+            message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow>World \"" + worldName + "\" loaded successfully!</yellow>");
         } else {
-            sender.sendMessage("Failed to load world " + worldName + ".");
+            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Failed loading world \"" + worldName + "\".</color>");
         }
     }
 

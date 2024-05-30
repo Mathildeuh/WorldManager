@@ -32,8 +32,9 @@ public class MessageManager {
         helpMessage.add("");
         helpMessage.add("<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>load</color> <dark_green>[name] [type]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Load a world</color></click>");
         helpMessage.add("<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>unload</color> <dark_green>[name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Unload a world</color></click>");
-        helpMessage.add("");
         helpMessage.add("<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teleport</color> <dark_green>[world]</dark_green> <dark_aqua><player></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Teleport you/player to world</color></click>");
+        helpMessage.add("<click:suggest_command:'/wm list '><color:#7471b0>➥</color> <color:#ff9900>list</color> <dark_gray>-</dark_gray> <color:#ffa1f9>See loaded worlds list</color></click>");
+
     }
 
     public void help() {
@@ -43,20 +44,13 @@ public class MessageManager {
         }
     }
 
-    public void create(String data) {
-        sender.sendMessage("Starting world creation ...");
+    public void parse(String data) {
+        if (sender instanceof Player player) {
+            WorldManager.adventure().player(player).sendMessage(MiniMessage.miniMessage().deserialize(data));
+            return;
+        }
         sender.sendMessage(data);
     }
 
-    public void delete(String worldName) {
-        sender.sendMessage("Deleting world " + worldName + " ...");
-    }
 
-    public void load(String worldName) {
-        sender.sendMessage("Loading world " + worldName + " ...");
-    }
-
-    public void unload(String worldName) {
-        sender.sendMessage("Unloading world " + worldName + " ...");
-    }
 }

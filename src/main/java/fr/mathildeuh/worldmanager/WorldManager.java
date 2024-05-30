@@ -19,8 +19,6 @@ public final class WorldManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
-        saveDefaultConfig();
 
         new Metrics(this, 22073);
         adventure = BukkitAudiences.create(this);

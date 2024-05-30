@@ -13,18 +13,12 @@ import java.io.File;
 import java.io.IOException;
 
 public class Delete {
-    private static final String WORLD_DOES_NOT_EXIST = "The specified world does not exist.";
-    private static final String CANNOT_DELETE_DEFAULT_WORLD = "You can't delete the default world.";
-    private static final String WORLD_DELETED_SUCCESS = "World %s deleted successfully.";
-    private static final String WORLD_DELETION_FAILED = "Failed to delete world folder for %s.";
 
     private final JavaPlugin plugin;
-    private final CommandSender sender;
     private final MessageManager message;
 
     public Delete(CommandSender sender) {
         this.plugin = JavaPlugin.getPlugin(WorldManager.class);
-        this.sender = sender;
         this.message = new MessageManager(sender);
     }
 
@@ -32,16 +26,16 @@ public class Delete {
         World targetWorld = Bukkit.getWorld(name);
 
         if (targetWorld == null) {
-            sender.sendMessage(WORLD_DOES_NOT_EXIST);
+            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>The specified world does not exist.</color>");
             return;
         }
 
         if (targetWorld.equals(Bukkit.getWorlds().get(0))) {
-            sender.sendMessage(CANNOT_DELETE_DEFAULT_WORLD);
+            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>You can't delete the default world.</color>");
             return;
         }
 
-        message.delete(name);
+        message.parse("<gold>⌛</gold> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>World \"" + name + "\" and it's folder will be erased.</color>");
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getWorld().equals(targetWorld)) {
@@ -51,16 +45,16 @@ public class Delete {
 
         boolean unloadSuccess = plugin.getServer().unloadWorld(targetWorld, false);
         if (!unloadSuccess) {
-            sender.sendMessage("Failed to unload the world " + name + ".");
+            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Failed to delete the world \"" + name + "\".</color>");
             return;
         }
 
         File worldFolder = targetWorld.getWorldFolder();
         try {
             FileUtils.deleteDirectory(worldFolder);
-            sender.sendMessage(String.format(WORLD_DELETED_SUCCESS, name));
+            message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow>Success !</yellow>");
         } catch (IOException e) {
-            sender.sendMessage(String.format(WORLD_DELETION_FAILED, name));
+            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Failed to delete world folder for \"" + name + "\".</color>");
             e.printStackTrace();
         }
     }

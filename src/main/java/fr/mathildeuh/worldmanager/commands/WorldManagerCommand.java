@@ -31,6 +31,13 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
             message.help();
             return true;
         }
+        if (args.length == 1) {
+            if (args[0].equalsIgnoreCase("list")) {
+
+                new Lists(sender).execute();
+                return true;
+            }
+        }
         if (args.length >= 2) {
             String name = args[1];
             String type;
@@ -39,7 +46,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 case "create":
                     type = (args.length >= 3) ? args[2] : null;
                     String seed = (args.length >= 4) ? args[3] : null;
-                    String gen = (args.length >= 5) ? args[3] : null;
+                    String gen = (args.length >= 5) ? args[4] : null;
                     new Create(sender).execute(name, type, seed, gen);
                     break;
                 case "del":
@@ -75,9 +82,8 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         List<String> completions = new ArrayList<>();
-
         if (args.length == 1) {
-            String[] commands = {"create", "delete", "load", "unload", "teleport"};
+            String[] commands = {"create", "delete", "load", "unload", "teleport", "list"};
             String partialName = args[0].toLowerCase();
 
             // Ajout des commandes correspondantes
@@ -93,6 +99,13 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     completions.add(world.getName());
                 }
         } else if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("load")) {
+                for (World.Environment env2 : World.Environment.values()) {
+                    completions.add(env2.name().toLowerCase());
+                    completions.remove("custom");
+                }
+                return completions;
+            }
             String partialName = args[2].toLowerCase();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.getName().toLowerCase().contains(partialName)) {
