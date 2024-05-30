@@ -1,0 +1,11 @@
+name: WorldManager
+version: '${version}'
+main: fr.mathildeuh.worldmanager.WorldManager
+api-version: '1.20'
+commands:
+  worldmanager:
+    permission: "worldmanager.command"
+    aliases: wm
+    description: Main command of WorldManager
+    usage: /<command> <subcommand> [arguments]
+    permission-message: "§cYou can't use this command. §7(Missing permission: §eworldmanager.command§7)"
