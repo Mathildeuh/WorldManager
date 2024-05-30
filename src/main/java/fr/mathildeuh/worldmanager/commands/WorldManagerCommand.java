@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,14 +95,27 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
             }
             return completions;
         } else if (args.length == 2) {
-            if (!(args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("c")))
-                for (World world : Bukkit.getWorlds()) {
-                    completions.add(world.getName());
+            if (!(args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("c"))) {
+                // Obtenir tous les mondes chargés
+                List<String> loadedWorlds = new ArrayList<>();
+                for (World world : Bukkit.getServer().getWorlds()) {
+                    loadedWorlds.add(world.getName());
                 }
+
+                // Obtenir les noms des mondes dans le dossier du serveur
+                File[] worldFolders = Bukkit.getServer().getWorldContainer().listFiles();
+                if (worldFolders != null) {
+                    for (File worldFolder : worldFolders) {
+                        if (worldFolder.isDirectory() && containsLevelDat(worldFolder) && !loadedWorlds.contains(worldFolder.getName())) {
+                            completions.add(worldFolder.getName());
+                        }
+                    }
+                }
+            }
         } else if (args.length == 3) {
             if (args[0].equalsIgnoreCase("load")) {
-                for (World.Environment env2 : World.Environment.values()) {
-                    completions.add(env2.name().toLowerCase());
+                for (World.Environment env : World.Environment.values()) {
+                    completions.add(env.name().toLowerCase());
                     completions.remove("custom");
                 }
                 return completions;
@@ -116,4 +130,18 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
 
         return completions;
     }
+
+    private boolean containsLevelDat(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().equalsIgnoreCase("level.dat")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
 }
