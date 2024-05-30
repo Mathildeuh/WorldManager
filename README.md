@@ -1,4 +1,4 @@
-WIP Release !
+First release, create issue for suggestions or bug reports
 
 Easily create worlds and manage it !
 
