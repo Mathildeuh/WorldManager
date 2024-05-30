@@ -18,8 +18,7 @@ public class Create {
         this.message = new MessageManager(sender);
     }
 
-    public void run(String name, String type, @Nullable String seed, @Nullable String generator) {
-        // Vérifie d'abord la validité de la graine
+    public void run(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
         long seedValue = 0L;
         if (seed != null && seed.matches("\\d+")) {
             seedValue = Long.parseLong(seed);
@@ -31,9 +30,13 @@ public class Create {
         Object worldTypeOrEnvironment = getWorldType(type);
 
         if (worldTypeOrEnvironment instanceof WorldType) {
+            sendStarting(type, name, seed, generator);
+
             createWorld(name, World.Environment.NORMAL, (WorldType) worldTypeOrEnvironment, seedValue, generator);
         } else if (worldTypeOrEnvironment instanceof World.Environment) {
+            sendStarting(type, name, seed, generator);
             createWorld(name, (World.Environment) worldTypeOrEnvironment, WorldType.NORMAL, seedValue, generator);
+
         } else {
             message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Invalid dimension types !</color>");
             message.parse("<color:#19cdff>Available dimension types:</color>");
@@ -44,9 +47,12 @@ public class Create {
             for (WorldType worldType : WorldType.values()) {
                 message.parse("<color:#19cdff> <color:#7471b0>➥</color> " + worldType.name().toLowerCase() + "</color>");
             }
-            return;
         }
 
+
+    }
+
+    public void sendStarting(String type, String name, String seed, String generator){
         message.parse("<gold>⌛</gold> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <gray>Starting world creation...</gray>");
         message.parse("<color:#19cdff> <color:#7471b0>➥</color> Seed: <yellow>" + name + " </yellow></color>");
 
@@ -62,7 +68,7 @@ public class Create {
 
     private Object getWorldType(String type) {
         if (type == null) {
-            return null;
+            return WorldType.NORMAL;
         }
         switch (type.toLowerCase(Locale.ROOT)) {
             case "normal" -> {
