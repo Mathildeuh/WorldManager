@@ -43,7 +43,6 @@ public class Create {
             }
             for (WorldType worldType : WorldType.values()) {
                 message.parse("<color:#19cdff> <color:#7471b0>➥</color> " + worldType.name().toLowerCase() + "</color>");
-                //TODO
             }
             return;
         }
