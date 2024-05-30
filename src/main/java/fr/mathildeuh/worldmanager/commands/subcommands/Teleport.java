@@ -50,6 +50,6 @@ public class Teleport {
         }
 
         targetPlayer.teleport(targetWorld.getSpawnLocation());
-        message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow> Teleported " + targetPlayer.getName() + " to \"" + targetWorld.getName() + "\" </yellow>");
+        message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow> Teleported " + targetPlayer.getName() + " to \"" + targetWorld.getName() + "\". </yellow>");
     }
 }
