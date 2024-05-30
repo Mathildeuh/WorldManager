@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 
 public class Unload {
 
-    // TODO: KICK PLAYERS
     private final CommandSender sender;
     private final MessageManager message;
 
