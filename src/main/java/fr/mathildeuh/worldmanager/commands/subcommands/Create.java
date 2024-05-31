@@ -115,7 +115,7 @@ public class Create {
         } else {
             message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow>World \"" + name + "\" created successfully!</yellow>");
             world.save();
-            WorldManager.addWorld(creator.name(), creator.type().name(), creator.environment(), creator.generator());
+            WorldManager.addWorld(creator.name(), creator.type().name(), creator.environment(), generator);
         }
     }
 

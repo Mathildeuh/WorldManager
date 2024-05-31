@@ -17,7 +17,7 @@ public class Load {
         this.message = new MessageManager(sender);
     }
 
-    public void execute(String worldName, String dimension) {
+    public void execute(String worldName, String dimension, String generator) {
         // Vérifier si le monde est déjà chargé
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
@@ -56,7 +56,7 @@ public class Load {
         if (world != null) {
             message.parse(worldName);
             message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow>World \"" + worldName + "\" loaded successfully!</yellow>");
-            WorldManager.addWorld(worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), worldCreator.generator());
+            WorldManager.addWorld(worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);
 
         } else {
             message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Failed loading world \"" + worldName + "\".</color>");

@@ -8,12 +8,10 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 public final class WorldManager extends JavaPlugin {
 
@@ -31,6 +29,7 @@ public final class WorldManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
 
         new Metrics(this, 22073);
         adventure = BukkitAudiences.create(this);
@@ -90,20 +89,16 @@ public final class WorldManager extends JavaPlugin {
         }
     }
 
-    public static void addWorld(String name, String type, World.Environment environement, ChunkGenerator generator) {
+    public static void addWorld(String name, String type, World.Environment environement, String generator) {
         WorldManager plugin = WorldManager.getPlugin(WorldManager.class);
         plugin.addWorld1(name, type, environement, generator);
     }
 
     // Méthode pour ajouter un monde au fichier de configuration
-    public void addWorld1(String name, String type, World.Environment environement, ChunkGenerator generator) {
+    public void addWorld1(String name, String type, World.Environment environement, String generator) {
         config.set("worlds." + name + ".type", type);
         config.set("worlds." + name + ".environment", environement.name());
-        if (generator != null) {
-            config.set("worlds." + name + ".generator", generator.toString());
-        } else {
-            config.set("worlds." + name + ".generator", null);
-        }
+        config.set("worlds." + name + ".generator", generator);
         try {
             config.save(configFile);
         } catch (IOException e) {
@@ -140,4 +135,5 @@ public final class WorldManager extends JavaPlugin {
             throw new RuntimeException(e);
         }
     }
+
 }

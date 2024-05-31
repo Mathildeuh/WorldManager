@@ -2,6 +2,7 @@ package fr.mathildeuh.worldmanager.commands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.commands.subcommands.*;
+import fr.mathildeuh.worldmanager.commands.subcommands.pregen.Pregen;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -42,12 +43,13 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
         if (args.length >= 2) {
             String name = args[1];
             String type;
+            String gen;
             switch (args[0].toLowerCase()) {
                 case "c":
                 case "create":
                     type = (args.length >= 3) ? args[2] : null;
                     String seed = (args.length >= 4) ? args[3] : null;
-                    String gen = (args.length >= 5) ? args[4] : null;
+                    gen = (args.length >= 5) ? args[4] : null;
                     new Create(sender).execute(name, type, seed, gen);
                     break;
                 case "del":
@@ -58,7 +60,8 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 case "load":
                 case "import":
                     type = (args.length >= 3) ? args[2] : null;
-                    new Load(sender).execute(name, type);
+                    gen = (args.length >= 4) ? args[3] : null;
+                    new Load(sender).execute(name, type, gen);
                     break;
                 case "u":
                 case "unload":
@@ -67,6 +70,9 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 case "tp":
                 case "teleport":
                     new Teleport(sender).execute(args);
+                    break;
+                case "pregen":
+                    new Pregen(sender).execute(args);
                     break;
                 case "help":
                 default:
@@ -86,7 +92,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 1) {
             // Sous-commandes disponibles
-            String[] commands = {"create", "delete", "list", "load", "teleport", "unload"};
+            String[] commands = {"create", "delete", "list", "load", "teleport", "unload", "pregen"};
             String partialName = args[0].toLowerCase();
 
             for (String cmd : commands) {
@@ -100,8 +106,8 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 case "load":
                     completions.addAll(getUnloadedWorlds());
                     break;
-                case "unload":
-                case "delete", "teleport", "tp":
+
+                case "delete", "teleport", "tp", "unload", "pregen":
                     for (World world : Bukkit.getWorlds()) {
                         completions.add(world.getName());
                     }

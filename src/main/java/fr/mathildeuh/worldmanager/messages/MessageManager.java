@@ -30,7 +30,7 @@ public class MessageManager {
         helpMessage.add("<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>create</color> <dark_green>[name]</dark_green> <dark_aqua><type> <seed> <generator></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Create a new world</color></click>");
         helpMessage.add("<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>delete</color> <dark_green>[name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Remove a world =(</color></click>");
         helpMessage.add("");
-        helpMessage.add("<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>load</color> <dark_green>[name] [type]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Load a world</color></click>");
+        helpMessage.add("<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>load</color> <dark_green>[name] [type] <dark_aqua><generator></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Load a world</color></click>");
         helpMessage.add("<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>unload</color> <dark_green>[name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Unload a world</color></click>");
         helpMessage.add("<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teleport</color> <dark_green>[world]</dark_green> <dark_aqua><player></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Teleport you/player to world</color></click>");
         helpMessage.add("<click:suggest_command:'/wm list '><color:#7471b0>➥</color> <color:#ff9900>list</color> <dark_gray>-</dark_gray> <color:#ffa1f9>See loaded worlds list</color></click>");
