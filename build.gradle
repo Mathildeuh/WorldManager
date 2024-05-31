@@ -57,7 +57,6 @@ processResources {
 
 compileJava.options.encoding("UTF-8")
 
-libsDirectory = file("E:\\Servers\\1.20.4\\plugins")
 shadowJar {
     archiveClassifier.set('')
     relocate 'org.bstats', 'fr.mathildeuh.utils'
