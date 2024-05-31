@@ -6,12 +6,14 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.WorldType;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 public final class WorldManager extends JavaPlugin {
 
@@ -73,17 +75,36 @@ public final class WorldManager extends JavaPlugin {
         }
     }
 
-    private void createWorld(String name, String type, String environement, String generator) {
+    private void createWorld(String name, String type, String environment, String generator) {
         WorldCreator worldCreator = new WorldCreator(name);
-        if (type != null) {
-            worldCreator.environment(World.Environment.valueOf(type.toUpperCase()));
+
+        if (environment != null) {
+            try {
+                World.Environment env = World.Environment.valueOf(environment.toUpperCase(Locale.ROOT));
+                worldCreator.environment(env);
+            } catch (IllegalArgumentException e) {
+                getLogger().warning("Invalid environment: " + environment);
+                return;
+            }
         }
+
+        if (type != null) {
+            try {
+                WorldType worldType = WorldType.valueOf(type.toUpperCase(Locale.ROOT));
+                worldCreator.type(worldType);
+            } catch (IllegalArgumentException e) {
+                getLogger().warning("Invalid world type: " + type);
+                return;
+            }
+        }
+
         if (generator != null) {
             worldCreator.generator(generator);
         }
+
         World world = worldCreator.createWorld();
         if (world != null) {
-            getLogger().info("Created world: " + name);
+            getLogger().info("Loaded world: " + name);
         } else {
             getLogger().warning("Can't load world: " + name);
         }
