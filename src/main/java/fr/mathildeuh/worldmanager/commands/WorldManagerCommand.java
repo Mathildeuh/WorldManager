@@ -83,64 +83,80 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         List<String> completions = new ArrayList<>();
+
         if (args.length == 1) {
-            String[] commands = {"create", "delete", "load", "unload", "teleport", "list"};
+            // Sous-commandes disponibles
+            String[] commands = {"create", "delete", "list", "load", "teleport", "unload"};
             String partialName = args[0].toLowerCase();
 
-            // Ajout des commandes correspondantes
             for (String cmd : commands) {
-                if (cmd.contains(partialName)) {
+                if (cmd.startsWith(partialName)) {
                     completions.add(cmd);
                 }
             }
-            return completions;
         } else if (args.length == 2) {
-            if (!(args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("c"))) {
-                // Obtenir tous les mondes chargés
-                List<String> loadedWorlds = new ArrayList<>();
-                for (World world : Bukkit.getServer().getWorlds()) {
-                    loadedWorlds.add(world.getName());
-                }
-
-                // Obtenir les noms des mondes dans le dossier du serveur
-                File[] worldFolders = Bukkit.getServer().getWorldContainer().listFiles();
-                if (worldFolders != null) {
-                    for (File worldFolder : worldFolders) {
-                        if (worldFolder.isDirectory() && containsLevelDat(worldFolder) && !loadedWorlds.contains(worldFolder.getName())) {
-                            completions.add(worldFolder.getName());
-                        }
+            String subCommand = args[0].toLowerCase();
+            switch (subCommand) {
+                case "load":
+                    completions.addAll(getUnloadedWorlds());
+                    break;
+                case "unload":
+                case "delete", "teleport", "tp":
+                    for (World world : Bukkit.getWorlds()) {
+                        completions.add(world.getName());
                     }
-                }
+                    break;
+                default:
+                    break;
             }
         } else if (args.length == 3) {
-            if (args[0].equalsIgnoreCase("load")) {
-                for (World.Environment env : World.Environment.values()) {
-                    completions.add(env.name().toLowerCase());
-                    completions.remove("custom");
-                }
-                return completions;
-            }
-            String partialName = args[2].toLowerCase();
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player.getName().toLowerCase().contains(partialName)) {
-                    completions.add(player.getName());
-                }
+            String subCommand = args[0].toLowerCase();
+            switch (subCommand) {
+                case "load":
+                    for (World.Environment env : World.Environment.values()) {
+                        if (!env.equals(World.Environment.CUSTOM)) {
+                            completions.add(env.name().toLowerCase());
+                        }
+                    }
+                    break;
+                case "teleport":
+                    String partialName = args[2].toLowerCase();
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        if (player.getName().toLowerCase().startsWith(partialName)) {
+                            completions.add(player.getName());
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 
         return completions;
     }
 
-    private boolean containsLevelDat(File folder) {
-        File[] files = folder.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.getName().equalsIgnoreCase("level.dat")) {
-                    return true;
+    private List<String> getUnloadedWorlds() {
+        List<String> unloadedWorlds = new ArrayList<>();
+        List<String> loadedWorldNames = new ArrayList<>();
+        for (World world : Bukkit.getWorlds()) {
+            loadedWorldNames.add(world.getName());
+        }
+
+        File[] worldFolders = Bukkit.getServer().getWorldContainer().listFiles();
+        if (worldFolders != null) {
+            for (File worldFolder : worldFolders) {
+                if (worldFolder.isDirectory() && containsLevelDat(worldFolder) && !loadedWorldNames.contains(worldFolder.getName())) {
+                    unloadedWorlds.add(worldFolder.getName());
                 }
             }
         }
-        return false;
+
+        return unloadedWorlds;
+    }
+
+    private boolean containsLevelDat(File folder) {
+        File levelDat = new File(folder,  "level.dat");
+        return levelDat.exists();
     }
 
 

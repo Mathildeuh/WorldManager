@@ -1,5 +1,6 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
+import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -27,7 +28,7 @@ public class Unload {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getWorld().equals(world)) {
                 player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
-                new MessageManager(player).parse("<color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been deleted.</color>");
+                new MessageManager(player).parse("<color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been unloaded.</color>");
             }
         }
         // Décharger le monde
@@ -36,6 +37,7 @@ public class Unload {
         // Vérifier si le monde a été déchargé correctement
         if (unloaded) {
             message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow>Success, world \"" + worldName + "\" successfully unloaded !</yellow>");
+            WorldManager.removeWorld(worldName);
         } else {
             message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Failed to unload work \"" + worldName + "\".</color>");
 

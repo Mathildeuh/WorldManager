@@ -47,9 +47,7 @@ public class MessageManager {
     public void parse(String data) {
         if (sender instanceof Player player) {
             WorldManager.adventure().player(player).sendMessage(MiniMessage.miniMessage().deserialize(data));
-            return;
         }
-        sender.sendMessage(data);
     }
 
 

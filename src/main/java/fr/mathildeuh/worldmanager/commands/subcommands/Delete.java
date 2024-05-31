@@ -40,6 +40,7 @@ public class Delete {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getWorld().equals(targetWorld)) {
                 player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+                new MessageManager(player).parse("<color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been deleted.</color>");
             }
         }
 
@@ -53,6 +54,8 @@ public class Delete {
         try {
             FileUtils.deleteDirectory(worldFolder);
             message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow>Success !</yellow>");
+            WorldManager.removeWorld(targetWorld.getName());
+
         } catch (IOException e) {
             message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Failed to delete world folder for \"" + name + "\".</color>");
             e.printStackTrace();

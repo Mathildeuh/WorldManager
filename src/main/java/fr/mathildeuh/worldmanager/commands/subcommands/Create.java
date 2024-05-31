@@ -1,17 +1,23 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
+import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
 public class Create {
+    JavaPlugin plugin = JavaPlugin.getPlugin(WorldManager.class);
     private final MessageManager message;
 
     public Create(CommandSender sender) {
@@ -54,7 +60,7 @@ public class Create {
 
     public void sendStarting(String type, String name, String seed, String generator){
         message.parse("<gold>⌛</gold> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <gray>Starting world creation...</gray>");
-        message.parse("<color:#19cdff> <color:#7471b0>➥</color> Seed: <yellow>" + name + " </yellow></color>");
+        message.parse("<color:#19cdff> <color:#7471b0>➥</color> Name: <yellow>" + name + " </yellow></color>");
 
         String t = (type != null && !type.isEmpty()) ? type : "default";
         message.parse("<color:#19cdff> <color:#7471b0>➥</color> Type: <yellow>" + t + " </yellow></color>");
@@ -109,6 +115,7 @@ public class Create {
         } else {
             message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow>World \"" + name + "\" created successfully!</yellow>");
             world.save();
+            WorldManager.addWorld(creator.name(), creator.type().name(), creator.environment(), creator.generator());
         }
     }
 
@@ -123,13 +130,41 @@ public class Create {
             return;
         }
 
+        if (getUnloadedWorlds().contains(name)) {
+            message.parse("<click:suggest_command:'/wm load " + name + " (type)'><color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>This world already exist, click on this message to load it.</color></click>");
+            return;
+        }
+
         if (type == null) {
             run(name, null, null, null);
         } else if (seed == null) {
             run(name, type, null, null);
         } else {
-            run(name, type, seed, generator); // Appeler run3 au lieu de run
+            run(name, type, seed, generator);
         }
     }
 
+    private List<String> getUnloadedWorlds() {
+        List<String> unloadedWorlds = new ArrayList<>();
+        List<String> loadedWorldNames = new ArrayList<>();
+        for (World world : Bukkit.getWorlds()) {
+            loadedWorldNames.add(world.getName());
+        }
+
+        File[] worldFolders = Bukkit.getServer().getWorldContainer().listFiles();
+        if (worldFolders != null) {
+            for (File worldFolder : worldFolders) {
+                if (worldFolder.isDirectory() && containsLevelDat(worldFolder) && !loadedWorldNames.contains(worldFolder.getName())) {
+                    unloadedWorlds.add(worldFolder.getName());
+                }
+            }
+        }
+
+        return unloadedWorlds;
+    }
+
+    private boolean containsLevelDat(File folder) {
+        File levelDat = new File(folder,  "level.dat");
+        return levelDat.exists();
+    }
 }

@@ -1,5 +1,6 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
+import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -35,6 +36,7 @@ public class Load {
 
         // Spécifier le type de dimension
         Environment env = getEnvironment(dimension);
+        System.out.println(dimension);
         if (env == null) {
             message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Invalid dimension types !</color>");
             message.parse("<color:#19cdff>Available dimension types:</color>");
@@ -54,6 +56,8 @@ public class Load {
         if (world != null) {
             message.parse(worldName);
             message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow>World \"" + worldName + "\" loaded successfully!</yellow>");
+            WorldManager.addWorld(worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), worldCreator.generator());
+
         } else {
             message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Failed loading world \"" + worldName + "\".</color>");
         }
@@ -64,7 +68,7 @@ public class Load {
         return switch (dimension.toLowerCase()) {
             case "normal" -> Environment.NORMAL;
             case "nether" -> Environment.NETHER;
-            case "end" -> Environment.THE_END;
+            case "the_end","end" -> Environment.THE_END;
             default -> null;
         };
     }
