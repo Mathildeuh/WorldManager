@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly "org.spigotmc:spigot:1.20.4-R0.1-SNAPSHOT:remapped-mojang"
+    compileOnly "org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT"
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
     implementation "net.kyori:adventure-platform-bukkit:4.3.2"
@@ -57,8 +57,6 @@ processResources {
 
 compileJava.options.encoding("UTF-8")
 
-
-libsDirectory = file("E:\\Servers\\1.20.4\\plugins")
 shadowJar {
     archiveClassifier.set('')
     relocate 'org.bstats', 'fr.mathildeuh.utils'
