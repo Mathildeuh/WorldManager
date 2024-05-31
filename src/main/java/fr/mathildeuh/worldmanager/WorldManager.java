@@ -1,6 +1,9 @@
 package fr.mathildeuh.worldmanager;
 
 import fr.mathildeuh.worldmanager.commands.WorldManagerCommand;
+import fr.mathildeuh.worldmanager.events.JoinListener;
+import fr.mathildeuh.worldmanager.util.ComparableVersion;
+import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -19,6 +22,7 @@ public final class WorldManager extends JavaPlugin {
 
     private File configFile;
     private FileConfiguration config;
+    private boolean updated = true;
 
     public static BukkitAudiences adventure;
 
@@ -39,6 +43,8 @@ public final class WorldManager extends JavaPlugin {
         getCommand("worldmanager").setExecutor(new WorldManagerCommand(this));
         getCommand("worldmanager").setTabCompleter(new WorldManagerCommand(this));
 
+        getServer().getPluginManager().registerEvents(new JoinListener(), this);
+
         configFile = new File(getDataFolder(), "worlds.yml");
         config = YamlConfiguration.loadConfiguration(configFile);
         try {
@@ -47,6 +53,14 @@ public final class WorldManager extends JavaPlugin {
             throw new RuntimeException(e);
         }
         loadWorlds();
+        UpdateChecker.getVersion(version -> {
+            final ComparableVersion current = new ComparableVersion(this.getDescription().getVersion());
+            final ComparableVersion resource = new ComparableVersion(version);
+            final int compared = current.compareTo(resource);
+
+            this.updated = compared > 0 || compared == 0;
+        });
+
 
     }
 
@@ -155,6 +169,10 @@ public final class WorldManager extends JavaPlugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean isUpdated() {
+        return this.updated;
     }
 
 }
