@@ -29,5 +29,5 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: SkyLobby
+          name: WorldManager
           path: ./out/WorldManager-0.jar
