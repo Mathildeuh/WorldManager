@@ -1,75 +1,33 @@
 name: Java CI with Gradle
-permissions: write-all
+
 on:
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@v3
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # Extract version from build.gradle
-      - name: Get tag name from build.gradle
-        id: get_tag_name
-        run: echo ::set-output name=tag_name::"V$(grep -oP 'version\s*=\s*"\K[^"]+' build.gradle)"
-
-      # Extract name from settings.gradle
-      - name: Get name from settings.gradle
-        id: get_name
-        run: echo ::set-output name=name::$(grep -oP 'rootProject.name\s*=\s*"\K[^"]+' settings.gradle)
-
-      # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
-
-      # Build with Gradle Wrapper
-      - name: Build with Gradle Wrapper
-        run: ./gradlew clean shadowJar -b alt.gradle
-      - name: Build with Gradle Wrapper
-        run: ls ./out
-
-
-      # Create Draft Release
-      - name: Create Draft Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
         with:
-          tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
-          release_name: ${{ steps.get_tag_name.outputs.tag_name }} - ${{ steps.get_name.outputs.name }}
-          draft: false
-          prerelease: false
+          arguments: shadowJar
 
-      # Upload Release Asset
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./out/WorldManager-0.jar
-
-
-      # Publish Release
-      - name: Publish Release
-        uses: eregon/publish-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          release_id: ${{ steps.create_release.outputs.id }}
+          name: SkyLobby
+          path: ./out/WorldManager-0.jar
