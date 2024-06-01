@@ -60,7 +60,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./out/WorldManager-0.jar  # Replace with the path to your artifact
+          asset_path: ./out/WorldManager-0.jar
+        run: ls ./out
 
       # Publish Release
       - name: Publish Release
