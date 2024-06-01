@@ -37,6 +37,7 @@ public class JoinListener implements Listener {
         new MessageManager(event.getPlayer()).parse("<gray>Patch note: </gray> <green>"  + getLatestReleaseNote() + "</green>");
         new MessageManager(event.getPlayer()).parse("<color:#7d66ff>{</color><color:#6258a6>--------------------------</color><color:#7d66ff>}</color>");
         this.updateInfoSent.add(name);
+        //
     }
 
     private static final String GITHUB_API_URL = "https://api.github.com/repos/%s/%s/releases/latest";
