@@ -32,6 +32,12 @@ jobs:
           version=$(grep '^version' build.gradle | awk -F'=' '{ print $2 }' | xargs)
           echo "::set-output name=VERSION::$version"
 
+      - name: Get last commit message
+        id: get_commit_message
+        run: |
+          commit_message=$(git log -1 --pretty=%B)
+          echo "::set-output name=COMMIT_MESSAGE::$commit_message"
+
       - name: Rename JAR file with version
         run: |
           version=${{ steps.extract_version.outputs.VERSION }}
@@ -45,6 +51,7 @@ jobs:
         with:
           tag_name: ${{ steps.extract_version.outputs.VERSION }}
           release_name: V${{ steps.extract_version.outputs.VERSION }}
+          body: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
           draft: false
           prerelease: false
 
