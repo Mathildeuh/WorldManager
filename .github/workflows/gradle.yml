@@ -23,9 +23,9 @@ jobs:
         distribution: 'temurin'
 
     # Extract version from build.gradle
-    - name: Get version from build.gradle
-      id: get_version
-      run: echo ::set-output name=version::$(grep -oP 'version\s*=\s*"\K[^"]+' build.gradle)
+    - name: Get tag name from build.gradle
+      id: get_tag_name
+      run: echo ::set-output name=tag_name::"V$(grep -oP 'version\s*=\s*"\K[^"]+' build.gradle)"
 
     # Extract name from settings.gradle
     - name: Get name from settings.gradle
@@ -48,8 +48,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.get_version.outputs.version }}
-        release_name: ${{ steps.get_name.outputs.name }}
+        tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
+        release_name: ${{ steps.get_name.outputs.name }} - ${{ steps.get_version.outputs.version }}
         draft: true
         prerelease: false
 
