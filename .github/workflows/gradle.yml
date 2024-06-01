@@ -26,14 +26,20 @@ jobs:
       - name: Build project with alt.gradle
         run: ./gradlew -b alt.gradle shadowJar  # Utilisation de alt.gradle pour construire le projet
 
+      - name: Extract version from build.gradle
+        id: extract_version
+        run: |
+          version=$(grep '^version' build.gradle | awk -F'=' '{ print $2 }' | xargs)
+          echo "::set-output name=VERSION::$version"
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ steps.extract_version.outputs.VERSION }}
+          release_name: Release ${{ steps.extract_version.outputs.VERSION }}
           draft: false
           prerelease: false
 
