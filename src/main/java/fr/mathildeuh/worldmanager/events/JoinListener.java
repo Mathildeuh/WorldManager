@@ -33,12 +33,11 @@ public class JoinListener implements Listener {
         new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<color:#7d66ff>{</color><color:#6258a6>------</color> <color:#02a876>World Manager</color> <color:#6258a6>------</color><color:#7d66ff>}</color>\n");
         new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "");
         new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<dark_red> ⚠</dark_red><color:#ffa1f9> A new update is available !</color> <dark_red>⚠</dark_red>");
-        new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<click:open_url:' " + UpdateChecker.RESOURCE_URL + "'>   <color:#7471b0>➥</color> <color:#ff9900>Click here to download</color></click>");
+        new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<click:open_url:' " + UpdateChecker.getURL() + "'>   <color:#7471b0>➥</color> <color:#ff9900>Click here to download</color></click>");
         new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "");
         new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<gray>Patch note: </gray> <green>" + getLatestReleaseNote() + "</green>");
         new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<color:#7d66ff>{</color><color:#6258a6>--------------------------</color><color:#7d66ff>}</color>");
         this.updateInfoSent.add(name);
-        //
     }
 
     public String getLatestReleaseNote() {

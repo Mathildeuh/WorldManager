@@ -1,6 +1,5 @@
 package fr.mathildeuh.worldmanager.util;
 
-import fr.mathildeuh.worldmanager.WorldManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -11,19 +10,36 @@ import java.util.Scanner;
 import java.util.function.Consumer;
 
 public class UpdateChecker {
+    private final JavaPlugin plugin;
+    private final int resourceId;
+    public static String RESOURCE_URL = "";
 
-    private static final int RESOURCE_ID = 117043;
-    public static final String RESOURCE_URL = "https://www.spigotmc.org/resources/worldmanager." + RESOURCE_ID + "/";
+    public UpdateChecker(JavaPlugin plugin, int resourceId) {
+        this.plugin = plugin;
+        this.resourceId = resourceId;
+        RESOURCE_URL = "https://www.spigotmc.org/resources/worldmanager." + resourceId + "/";
+    }
 
-    public static void getVersion(final Consumer<String> consumer) {
-        Bukkit.getScheduler().runTaskAsynchronously(JavaPlugin.getPlugin(WorldManager.class), () -> {
-            try (final InputStream is = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + RESOURCE_ID + "/~").openStream(); Scanner scanner = new Scanner(is)) {
-                if (scanner.hasNext()) {
-                    consumer.accept(scanner.next());
+    public static String getURL() {
+        return RESOURCE_URL;
+    }
+
+    public void getVersion(final Consumer<String> consumer) {
+        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+            try {
+                long timestamp = System.currentTimeMillis(); // Obtenez le timestamp actuel
+                String urlWithTimestamp = "https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId + "/~&timestamp=" + timestamp;
+                InputStream is = new URL(urlWithTimestamp).openStream();
+                try (Scanner scann = new Scanner(is)) {
+                    if (scann.hasNext()) {
+                        consumer.accept(scann.next());
+                    }
                 }
-            } catch (final IOException ignored) {
+            } catch (IOException e) {
+                plugin.getLogger().info("Unable to check for updates: " + e.getMessage());
             }
         });
     }
+
 }
 

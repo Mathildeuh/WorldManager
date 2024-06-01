@@ -3,7 +3,6 @@ package fr.mathildeuh.worldmanager;
 import com.samjakob.spigui.SpiGUI;
 import fr.mathildeuh.worldmanager.commands.WorldManagerCommand;
 import fr.mathildeuh.worldmanager.events.JoinListener;
-import fr.mathildeuh.worldmanager.util.ComparableVersion;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
@@ -25,6 +24,7 @@ public final class WorldManager extends JavaPlugin {
     private File configFile;
     private FileConfiguration config;
     private boolean updated = true;
+    private static String newVersion;
 
     public static SpiGUI getSpiGUI() {
         return spiGUI;
@@ -50,6 +50,8 @@ public final class WorldManager extends JavaPlugin {
     @Override
     public void onEnable() {
 
+
+
         spiGUI = new SpiGUI(this);
 
         new Metrics(this, 22073);
@@ -70,15 +72,23 @@ public final class WorldManager extends JavaPlugin {
 
         loadWorlds();
 
-        UpdateChecker.getVersion(version -> {
-            final ComparableVersion current = new ComparableVersion(this.getDescription().getVersion());
-            final ComparableVersion resource = new ComparableVersion(version);
-            final int compared = current.compareTo(resource);
+        update();
 
-            this.updated = compared > 0 || compared == 0;
+
+    }
+
+    private void update() {
+        new UpdateChecker(this, 117043).getVersion(version -> {
+            if (this.getDescription().getVersion().equals(version.replace("V", ""))) {
+                updated = true;
+                getLogger().info("No update available.");
+            } else {
+                updated = false;
+                System.out.println("An update is available for WorldManager.");
+                System.out.println("New version: " + version);
+                System.out.println("Download it here: " + UpdateChecker.RESOURCE_URL);
+            }
         });
-
-
     }
 
     private void loadWorlds() {

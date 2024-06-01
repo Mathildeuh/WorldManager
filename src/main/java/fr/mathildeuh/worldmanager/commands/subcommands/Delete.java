@@ -51,14 +51,16 @@ public class Delete {
         }
 
         File worldFolder = targetWorld.getWorldFolder();
-        try {
-            FileUtils.deleteDirectory(worldFolder);
-            message.parse(MessageManager.MessageType.SUCCESS, "Success !");
-            WorldManager.removeWorld(targetWorld.getName());
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                FileUtils.deleteDirectory(worldFolder);
 
-        } catch (IOException e) {
-            message.parse(MessageManager.MessageType.ERROR, "Failed to delete world folder for \"" + name + "\".");
-            e.printStackTrace();
-        }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        message.parse(MessageManager.MessageType.SUCCESS, "Success !");
+        WorldManager.removeWorld(targetWorld.getName());
+
     }
 }
