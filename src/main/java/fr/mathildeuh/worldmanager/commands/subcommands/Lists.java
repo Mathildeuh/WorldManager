@@ -20,10 +20,10 @@ public class Lists {
 
     public void execute() {
 
-        message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow>Worlds list:</yellow>");
+        message.parse(MessageManager.MessageType.SUCCESS, "Worlds list:");
         for (World world : Bukkit.getWorlds()) {
 
-            message.parse("<color:#19cdff> <color:#7471b0>➥</color> " + world.getName() + "</color>");
+            message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> " + world.getName() + "</color>");
         }
     }
 

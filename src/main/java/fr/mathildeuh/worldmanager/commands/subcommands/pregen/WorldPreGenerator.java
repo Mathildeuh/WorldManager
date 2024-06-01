@@ -1,5 +1,6 @@
-package fr.mathildeuh.worldmanager;
+package fr.mathildeuh.worldmanager.commands.subcommands.pregen;
 
+import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -9,6 +10,10 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class WorldPreGenerator extends BukkitRunnable {
 
@@ -21,10 +26,11 @@ public class WorldPreGenerator extends BukkitRunnable {
     private int currentZ;
     private int totalChunks;
     private int processedChunks = 0;
-    private boolean paused = false;
     private BossBar bossBar;
+    private MessageManager message;
+    Player player;
 
-    public WorldPreGenerator(JavaPlugin plugin, World world, int centerX, int centerZ, int radius) {
+    public WorldPreGenerator(JavaPlugin plugin, Player player, World world, int centerX, int centerZ, int radius) {
         this.plugin = plugin;
         this.world = world;
         this.centerX = centerX;
@@ -33,13 +39,13 @@ public class WorldPreGenerator extends BukkitRunnable {
         this.currentX = centerX - radius;
         this.currentZ = centerZ - radius;
         this.totalChunks = (radius * 2 + 1) * (radius * 2 + 1);
+        this.message = new MessageManager(player);
+        this.player = player;
         createBossBar();
     }
 
     @Override
     public void run() {
-        if (paused) return;
-
         if (processedChunks >= totalChunks) {
             completeGeneration();
             return;
@@ -60,8 +66,13 @@ public class WorldPreGenerator extends BukkitRunnable {
         processedChunks++;
         currentZ++;
 
-        if (processedChunks % 100 == 0) {
-            plugin.getLogger().info("Pre-generated " + processedChunks + " / " + totalChunks + " chunks for world: " + world.getName());
+        if (processedChunks % 50 == 0 || processedChunks == totalChunks) {
+
+                message.parse(MessageManager.MessageType.WAITING, processedChunks + " chunks have been pre-generated for world: " + world.getName());
+        }
+
+        if (processedChunks == totalChunks) {
+            plugin.getLogger().info("Pre-generated " + processedChunks + " chunks for world: " + world.getName());
         }
 
         updateBossBar();
@@ -71,28 +82,10 @@ public class WorldPreGenerator extends BukkitRunnable {
         this.runTaskTimer(plugin, 0, 1); // Runs every tick
     }
 
-    public void pause() {
-        paused = true;
-        plugin.getLogger().info("World pre-generation paused for world: " + world.getName());
-    }
-
-    public void resume() {
-        paused = false;
-        plugin.getLogger().info("World pre-generation resumed for world: " + world.getName());
-    }
-
-    public void cancelGeneration() {
-        cancel();
-        removeBossBar();
-        plugin.getLogger().info("World pre-generation canceled for world: " + world.getName());
-    }
-
     private void createBossBar() {
         bossBar = Bukkit.createBossBar("Pre-generation progress", BarColor.BLUE, BarStyle.SOLID);
         bossBar.setProgress(0.0);
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            bossBar.addPlayer(player);
-        }
+        bossBar.addPlayer(player);
     }
 
     private void updateBossBar() {
@@ -102,9 +95,7 @@ public class WorldPreGenerator extends BukkitRunnable {
     }
 
     private void removeBossBar() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            bossBar.removePlayer(player);
-        }
+        bossBar.removePlayer(player);
         bossBar.removeAll();
     }
 
@@ -113,7 +104,7 @@ public class WorldPreGenerator extends BukkitRunnable {
         bossBar.setProgress(1.0);
         bossBar.setTitle("World pre-generation completed for world: " + world.getName());
         plugin.getLogger().info("World pre-generation completed for world: " + world.getName());
-        Bukkit.broadcastMessage("World pre-generation completed for world: " + world.getName());
+        message.parse(MessageManager.MessageType.SUCCESS, "World pre-generation completed for world: " + world.getName());
         removeBossBar();
     }
 }

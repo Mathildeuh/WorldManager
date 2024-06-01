@@ -21,7 +21,8 @@ public class UpdateChecker {
                 if (scanner.hasNext()) {
                     consumer.accept(scanner.next());
                 }
-            } catch (final IOException ignored) {}
+            } catch (final IOException ignored) {
+            }
         });
     }
 }

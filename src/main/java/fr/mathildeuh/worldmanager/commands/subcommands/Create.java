@@ -17,8 +17,8 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 
 public class Create {
-    JavaPlugin plugin = JavaPlugin.getPlugin(WorldManager.class);
     private final MessageManager message;
+    JavaPlugin plugin = JavaPlugin.getPlugin(WorldManager.class);
 
     public Create(CommandSender sender) {
         this.message = new MessageManager(sender);
@@ -29,7 +29,7 @@ public class Create {
         if (seed != null && seed.matches("\\d+")) {
             seedValue = Long.parseLong(seed);
         } else if (seed != null && !seed.isEmpty()) {
-            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Seed must be a number!</color>");
+            message.parse(MessageManager.MessageType.ERROR, "Seed must be a number!");
             return;
         }
 
@@ -44,32 +44,32 @@ public class Create {
             createWorld(name, (World.Environment) worldTypeOrEnvironment, WorldType.NORMAL, seedValue, generator);
 
         } else {
-            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Invalid dimension types !</color>");
-            message.parse("<color:#19cdff>Available dimension types:</color>");
+            message.parse(MessageManager.MessageType.ERROR, "Invalid dimension types !");
+            message.parse(MessageManager.MessageType.CUSTOM,"<color:#19cdff>Available dimension types:</color>");
             for (World.Environment env : World.Environment.values()) {
                 if (env != World.Environment.CUSTOM && env != World.Environment.NORMAL)
-                    message.parse("<color:#19cdff> <color:#7471b0>➥</color> " + env.toString().toLowerCase() + "</color>");
+                    message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> " + env.toString().toLowerCase() + "</color>");
             }
             for (WorldType worldType : WorldType.values()) {
-                message.parse("<color:#19cdff> <color:#7471b0>➥</color> " + worldType.name().toLowerCase() + "</color>");
+                message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> " + worldType.name().toLowerCase() + "</color>");
             }
         }
 
 
     }
 
-    public void sendStarting(String type, String name, String seed, String generator){
-        message.parse("<gold>⌛</gold> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <gray>Starting world creation...</gray>");
-        message.parse("<color:#19cdff> <color:#7471b0>➥</color> Name: <yellow>" + name + " </yellow></color>");
+    public void sendStarting(String type, String name, String seed, String generator) {
+        message.parse(MessageManager.MessageType.WAITING, "Starting world creation...");
+        message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> Name: <yellow>" + name + " </yellow></color>");
 
         String t = (type != null && !type.isEmpty()) ? type : "default";
-        message.parse("<color:#19cdff> <color:#7471b0>➥</color> Type: <yellow>" + t + " </yellow></color>");
+        message.parse(MessageManager.MessageType.CUSTOM,"<color:#19cdff> <color:#7471b0>➥</color> Type: <yellow>" + t + " </yellow></color>");
 
         String s = (seed != null && !seed.isEmpty()) ? seed : "random";
-        message.parse("<color:#19cdff> <color:#7471b0>➥</color> Seed: <yellow>" + s + " </yellow></color>");
+        message.parse(MessageManager.MessageType.CUSTOM,"<color:#19cdff> <color:#7471b0>➥</color> Seed: <yellow>" + s + " </yellow></color>");
 
         String g = (generator != null && !generator.isEmpty()) ? generator : "default";
-        message.parse("<color:#19cdff> <color:#7471b0>➥</color> Generator: <yellow>" + g + "</yellow></color>");
+        message.parse(MessageManager.MessageType.CUSTOM,"<color:#19cdff> <color:#7471b0>➥</color> Generator: <yellow>" + g + "</yellow></color>");
     }
 
     private Object getWorldType(String type) {
@@ -104,16 +104,16 @@ public class Create {
             try {
                 creator.generator(generator);
             } catch (NoSuchElementException e) {
-                message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>World generator \"" + generator + "\" not found.</color>");
+                message.parse(MessageManager.MessageType.ERROR, "World generator \"" + generator + "\" not found.");
                 return;
             }
         }
 
         World world = creator.createWorld();
         if (world == null) {
-            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>World creation failed for \"" + name + "\".</color>");
+            message.parse(MessageManager.MessageType.ERROR, "World creation failed for \"" + name + "\".");
         } else {
-            message.parse("<dark_green>✔</dark_green> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <yellow>World \"" + name + "\" created successfully!</yellow>");
+            message.parse(MessageManager.MessageType.SUCCESS, "World \"" + name + "\" created successfully!");
             world.save();
             WorldManager.addWorld(creator.name(), creator.type().name(), creator.environment(), generator);
         }
@@ -121,17 +121,17 @@ public class Create {
 
     public void execute(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
         if (Bukkit.getWorld(name) != null) {
-            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>This world already exists.</color>");
+            message.parse(MessageManager.MessageType.ERROR, "This world already exists.");
             return;
         }
 
         if (name.equalsIgnoreCase("plugins") || name.equalsIgnoreCase("logs") || name.equalsIgnoreCase("libraries") || name.equalsIgnoreCase("versions") || name.equalsIgnoreCase("config") || name.equalsIgnoreCase("cache")) {
-            message.parse("<color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>This world name can't be used.</color>");
+            message.parse(MessageManager.MessageType.ERROR, "This world name can't be used.");
             return;
         }
 
         if (getUnloadedWorlds().contains(name)) {
-            message.parse("<click:suggest_command:'/wm load " + name + " (type)'><color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>This world already exist, click on this message to load it.</color></click>");
+            message.parse(MessageManager.MessageType.CUSTOM, "<click:suggest_command:'/wm load " + name + " (type)'><color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>This world already exist, click on this message to load it.</color></click>");
             return;
         }
 
@@ -164,7 +164,7 @@ public class Create {
     }
 
     private boolean containsLevelDat(File folder) {
-        File levelDat = new File(folder,  "level.dat");
+        File levelDat = new File(folder, "level.dat");
         return levelDat.exists();
     }
 }

@@ -17,10 +17,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class JoinListener implements Listener {
+    private static final String GITHUB_API_URL = "https://api.github.com/repos/%s/%s/releases/latest";
     private final Set<String> updateInfoSent = new HashSet<>();
+
     @EventHandler
     private void onJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
@@ -29,18 +30,16 @@ public class JoinListener implements Listener {
         final String name = player.getName();
         if (this.updateInfoSent.contains(name)) return;
 
-        new MessageManager(event.getPlayer()).parse("<color:#7d66ff>{</color><color:#6258a6>------</color> <color:#02a876>World Manager</color> <color:#6258a6>------</color><color:#7d66ff>}</color>\n");
-        new MessageManager(event.getPlayer()).parse("");
-        new MessageManager(event.getPlayer()).parse("<dark_red> ⚠</dark_red><color:#ffa1f9> A new update is available !</color> <dark_red>⚠</dark_red>");
-        new MessageManager(event.getPlayer()).parse("<click:open_url:' " + UpdateChecker.RESOURCE_URL + "'>   <color:#7471b0>➥</color> <color:#ff9900>Click here to download</color></click>");
-        new MessageManager(event.getPlayer()).parse("");
-        new MessageManager(event.getPlayer()).parse("<gray>Patch note: </gray> <green>"  + getLatestReleaseNote() + "</green>");
-        new MessageManager(event.getPlayer()).parse("<color:#7d66ff>{</color><color:#6258a6>--------------------------</color><color:#7d66ff>}</color>");
+        new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<color:#7d66ff>{</color><color:#6258a6>------</color> <color:#02a876>World Manager</color> <color:#6258a6>------</color><color:#7d66ff>}</color>\n");
+        new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "");
+        new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<dark_red> ⚠</dark_red><color:#ffa1f9> A new update is available !</color> <dark_red>⚠</dark_red>");
+        new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<click:open_url:' " + UpdateChecker.RESOURCE_URL + "'>   <color:#7471b0>➥</color> <color:#ff9900>Click here to download</color></click>");
+        new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "");
+        new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<gray>Patch note: </gray> <green>" + getLatestReleaseNote() + "</green>");
+        new MessageManager(event.getPlayer()).parse(MessageManager.MessageType.CUSTOM, "<color:#7d66ff>{</color><color:#6258a6>--------------------------</color><color:#7d66ff>}</color>");
         this.updateInfoSent.add(name);
         //
     }
-
-    private static final String GITHUB_API_URL = "https://api.github.com/repos/%s/%s/releases/latest";
 
     public String getLatestReleaseNote() {
         String owner = "Mathildeuh";

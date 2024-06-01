@@ -1,12 +1,12 @@
 package fr.mathildeuh.worldmanager;
 
+import com.samjakob.spigui.SpiGUI;
 import fr.mathildeuh.worldmanager.commands.WorldManagerCommand;
 import fr.mathildeuh.worldmanager.events.JoinListener;
 import fr.mathildeuh.worldmanager.util.ComparableVersion;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
@@ -20,11 +20,15 @@ import java.util.Locale;
 
 public final class WorldManager extends JavaPlugin {
 
+    public static BukkitAudiences adventure;
+    private static SpiGUI spiGUI;
     private File configFile;
     private FileConfiguration config;
     private boolean updated = true;
 
-    public static BukkitAudiences adventure;
+    public static SpiGUI getSpiGUI() {
+        return spiGUI;
+    }
 
     public static BukkitAudiences adventure() {
         if (adventure == null) {
@@ -33,9 +37,20 @@ public final class WorldManager extends JavaPlugin {
         return adventure;
     }
 
+    public static void addWorld(String name, String type, World.Environment environement, String generator) {
+        WorldManager plugin = WorldManager.getPlugin(WorldManager.class);
+        plugin.addWorld1(name, type, environement, generator);
+    }
+
+    public static void removeWorld(String name) {
+        WorldManager plugin = WorldManager.getPlugin(WorldManager.class);
+        plugin.removeWorld1(name);
+    }
+
     @Override
     public void onEnable() {
 
+        spiGUI = new SpiGUI(this);
 
         new Metrics(this, 22073);
         adventure = BukkitAudiences.create(this);
@@ -52,7 +67,9 @@ public final class WorldManager extends JavaPlugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
         loadWorlds();
+
         UpdateChecker.getVersion(version -> {
             final ComparableVersion current = new ComparableVersion(this.getDescription().getVersion());
             final ComparableVersion resource = new ComparableVersion(version);
@@ -124,11 +141,6 @@ public final class WorldManager extends JavaPlugin {
         }
     }
 
-    public static void addWorld(String name, String type, World.Environment environement, String generator) {
-        WorldManager plugin = WorldManager.getPlugin(WorldManager.class);
-        plugin.addWorld1(name, type, environement, generator);
-    }
-
     // Méthode pour ajouter un monde au fichier de configuration
     public void addWorld1(String name, String type, World.Environment environement, String generator) {
         config.set("worlds." + name + ".type", type);
@@ -139,11 +151,6 @@ public final class WorldManager extends JavaPlugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void removeWorld(String name) {
-        WorldManager plugin = WorldManager.getPlugin(WorldManager.class);
-        plugin.removeWorld1(name);
     }
 
     public void removeWorld1(String name) {
