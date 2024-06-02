@@ -10,9 +10,9 @@ import java.util.Scanner;
 import java.util.function.Consumer;
 
 public class UpdateChecker {
+    public static String RESOURCE_URL = "";
     private final JavaPlugin plugin;
     private final int resourceId;
-    public static String RESOURCE_URL = "";
 
     public UpdateChecker(JavaPlugin plugin, int resourceId) {
         this.plugin = plugin;

@@ -6,21 +6,14 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MessageManager {
 
-    public enum MessageType {
-        ERROR,
-        SUCCESS,
-        WAITING,
-        CUSTOM
-    }
-
     private final CommandSender sender;
     private final List<String> helpMessage = new ArrayList<>();
+    private final String SOURCE = "World Manager";
 
     public MessageManager(CommandSender receivedSender) {
         this.sender = receivedSender;
@@ -72,8 +65,6 @@ public class MessageManager {
 
     }
 
-    private  final String SOURCE = "World Manager";
-
     public FormattedMessage formatError(String message) {
         Component formattedMessage = MiniMessage.miniMessage().deserialize("<color:#aa3e00>☠</color> <color:#7d66ff>{" + SOURCE + "}</color> <color:#ff2e1f>" + message + "</color>");
         return new FormattedMessage(sender, formattedMessage);
@@ -87,5 +78,12 @@ public class MessageManager {
     public FormattedMessage formatWaiting(String message) {
         Component formattedMessage = MiniMessage.miniMessage().deserialize("<gold>⌛</gold> <color:#7d66ff>{" + SOURCE + "}</color> <gray>" + message + "</gray>");
         return new FormattedMessage(sender, formattedMessage);
+    }
+
+    public enum MessageType {
+        ERROR,
+        SUCCESS,
+        WAITING,
+        CUSTOM
     }
 }

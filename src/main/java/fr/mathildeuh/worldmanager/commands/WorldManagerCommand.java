@@ -100,7 +100,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            String[] commands = {"create", "delete", "list", "load", "teleport", "unload", "pregen", "gui", "open", "help"};
+            String[] commands = {"create", "delete", "list", "load", "teleport", "unload", "pregen", "gui", "open", "help", "open", "gui"};
             Arrays.sort(commands);
             String partialName = args[0].toLowerCase();
 
@@ -151,7 +151,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 default:
                     break;
             }
-        }else if (args.length == 4 && args[0].equalsIgnoreCase("pregen") && args[1].equalsIgnoreCase("start")) {
+        } else if (args.length == 4 && args[0].equalsIgnoreCase("pregen") && args[1].equalsIgnoreCase("start")) {
             String partialName = args[2].toLowerCase();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.getName().toLowerCase().startsWith(partialName)) {

@@ -18,7 +18,6 @@ import java.util.NoSuchElementException;
 
 public class Create {
     private final MessageManager message;
-    JavaPlugin plugin = JavaPlugin.getPlugin(WorldManager.class);
 
     public Create(CommandSender sender) {
         this.message = new MessageManager(sender);
@@ -45,7 +44,7 @@ public class Create {
 
         } else {
             message.parse(MessageManager.MessageType.ERROR, "Invalid dimension types !");
-            message.parse(MessageManager.MessageType.CUSTOM,"<color:#19cdff>Available dimension types:</color>");
+            message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff>Available dimension types:</color>");
             for (World.Environment env : World.Environment.values()) {
                 if (env != World.Environment.CUSTOM && env != World.Environment.NORMAL)
                     message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> " + env.toString().toLowerCase() + "</color>");
@@ -63,13 +62,13 @@ public class Create {
         message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> Name: <yellow>" + name + " </yellow></color>");
 
         String t = (type != null && !type.isEmpty()) ? type : "default";
-        message.parse(MessageManager.MessageType.CUSTOM,"<color:#19cdff> <color:#7471b0>➥</color> Type: <yellow>" + t + " </yellow></color>");
+        message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> Type: <yellow>" + t + " </yellow></color>");
 
         String s = (seed != null && !seed.isEmpty()) ? seed : "random";
-        message.parse(MessageManager.MessageType.CUSTOM,"<color:#19cdff> <color:#7471b0>➥</color> Seed: <yellow>" + s + " </yellow></color>");
+        message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> Seed: <yellow>" + s + " </yellow></color>");
 
         String g = (generator != null && !generator.isEmpty()) ? generator : "default";
-        message.parse(MessageManager.MessageType.CUSTOM,"<color:#19cdff> <color:#7471b0>➥</color> Generator: <yellow>" + g + "</yellow></color>");
+        message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> Generator: <yellow>" + g + "</yellow></color>");
     }
 
     private Object getWorldType(String type) {

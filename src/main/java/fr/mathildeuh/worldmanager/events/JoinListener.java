@@ -43,7 +43,6 @@ public class JoinListener implements Listener {
     public String getLatestReleaseNote() {
         String owner = "Mathildeuh";
         String repo = "WorldManager";
-
         try {
             String apiUrl = String.format(GITHUB_API_URL, owner, repo);
             HttpClient client = HttpClient.newHttpClient();
@@ -53,7 +52,6 @@ public class JoinListener implements Listener {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
             if (response.statusCode() == 200) {
                 JSONObject json = new JSONObject(response.body());
                 String body = json.getString("body");

@@ -18,7 +18,6 @@ public class Unload {
     }
 
     public void execute(String worldName) {
-        // Vérifier si le monde est déjà chargé
         World world = Bukkit.getWorld(worldName);
         if (world == null) {
             message.parse(MessageManager.MessageType.ERROR, "The world \"" + worldName + "\" is not loaded.");
@@ -28,13 +27,11 @@ public class Unload {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getWorld().equals(world)) {
                 player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
-                new MessageManager(player).parse(MessageManager.MessageType.CUSTOM,"<color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been unloaded.</color>");
+                new MessageManager(player).parse(MessageManager.MessageType.CUSTOM, "<color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been unloaded.</color>");
             }
         }
-        // Décharger le monde
         boolean unloaded = Bukkit.unloadWorld(world, false);
 
-        // Vérifier si le monde a été déchargé correctement
         if (unloaded) {
             message.parse(MessageManager.MessageType.SUCCESS, "Success, world \"" + worldName + "\" successfully unloaded !");
             WorldManager.removeWorld(worldName);

@@ -9,32 +9,26 @@ import org.bukkit.WorldCreator;
 import org.bukkit.command.CommandSender;
 
 public class Load {
-    private final CommandSender sender;
     private final MessageManager message;
 
     public Load(CommandSender sender) {
-        this.sender = sender;
         this.message = new MessageManager(sender);
     }
 
     public void execute(String worldName, String dimension, String generator) {
-        // Vérifier si le monde est déjà chargé
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
             message.parse(MessageManager.MessageType.ERROR, "The world \"" + worldName + "\" is already loaded.");
             return;
         }
 
-        // Si aucun type de dimension n'est fourni, afficher l'aide
         if (dimension == null || dimension.isEmpty()) {
             message.help();
             return;
         }
 
-        // Créer un WorldCreator pour le monde
         WorldCreator worldCreator = new WorldCreator(worldName);
 
-        // Spécifier le type de dimension
         Environment env = getEnvironment(dimension);
         if (env == null) {
             message.parse(MessageManager.MessageType.ERROR, "Invalid dimension types !");
@@ -48,10 +42,8 @@ public class Load {
             worldCreator.environment(env);
         }
 
-        // Charger le monde
         world = Bukkit.createWorld(worldCreator);
 
-        // Vérifier si le monde a été chargé correctement
         if (world != null) {
             message.parse(MessageManager.MessageType.SUCCESS, "World \"" + worldName + "\" loaded successfully!");
             WorldManager.addWorld(worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);

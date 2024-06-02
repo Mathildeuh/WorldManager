@@ -111,19 +111,16 @@ public class GUIPregen implements Listener {
         Player player = event.getPlayer();
         if (playerWorldSelections.containsKey(player)) {
             String message = event.getMessage().trim();
-            if (message.matches("-?\\d+(,\\d+)?")) { // Vérifie si le message est un nombre ou un nombre suivi d'une virgule et d'un autre nombre
+            if (message.matches("-?\\d+(,\\d+)?")) {
                 if (!playerRadiusInput.containsKey(player)) {
                     playerRadiusInput.put(player, message);
                     this.message.parse(MessageManager.MessageType.CUSTOM, "<color:#7471b0>➥</color> <yellow>Enter the center in chat (e.g., 100,100)<color:#7471b0>⬇ </color></yellow>");
                 } else if (!playerCenterInput.containsKey(player)) {
                     playerCenterInput.put(player, message);
-                    // Lancer la génération avec les paramètres fournis
                     String worldName = playerWorldSelections.get(player);
                     String radius = playerRadiusInput.get(player);
                     String center = playerCenterInput.get(player);
                     new Pregen(player).execute(new String[]{"pregen", "start", worldName, radius, center});
-
-                    // Supprimer les entrées des joueurs après avoir lancé la génération
                     playerRadiusInput.remove(player);
                     playerCenterInput.remove(player);
                 }

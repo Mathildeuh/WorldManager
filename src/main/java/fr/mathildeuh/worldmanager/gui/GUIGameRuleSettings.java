@@ -24,10 +24,11 @@ public class GUIGameRuleSettings implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
+    @SuppressWarnings("deprecation")
     public void open(Player player) {
         List<String> gameRules = Arrays.stream(world.getGameRules())
                 .sorted(String::compareToIgnoreCase) // Trier les game rules par ordre alphabétique
-                .collect(Collectors.toList());
+                .toList();
 
         int menuSize = ((gameRules.size() + 8) / 9) * 9;
         if (menuSize > 54) menuSize = 54;

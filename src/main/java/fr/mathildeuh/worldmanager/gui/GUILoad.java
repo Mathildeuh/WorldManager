@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class GUILoad implements Listener {
     public GUILoad(WorldManager plugin) {
@@ -23,7 +24,7 @@ public class GUILoad implements Listener {
     public void open(Player player) {
         SGMenu menu = WorldManager.getSpiGUI().create("&aLoad a world", 6);
 
-        List<File> worldFolders = Arrays.stream(Bukkit.getWorldContainer().listFiles())
+        List<File> worldFolders = Arrays.stream(Objects.requireNonNull(Bukkit.getWorldContainer().listFiles()))
                 .filter(File::isDirectory)
                 .filter(folder -> new File(folder, "level.dat").exists())
                 .sorted(Comparator.comparing(File::getName))
@@ -41,7 +42,7 @@ public class GUILoad implements Listener {
                     .lore("§7Click to load this world")
                     .build()
             ).withListener(event -> {
-                new Load(player).execute(worldName, "normal", null); // You can change the dimension and generator parameters if needed
+                new Load(player).execute(worldName, "normal", null);
                 open(player);
             }));
             id++;
@@ -58,7 +59,7 @@ public class GUILoad implements Listener {
                 .lore("§7Click to open main menu")
                 .build()
         ).withListener(event -> {
-            new GUIMain(player); // Open the main menu
+            new GUIMain(player);
         }));
 
         if (menu.getButton(0) == null) {
