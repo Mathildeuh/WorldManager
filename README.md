@@ -10,7 +10,7 @@ Easily create worlds and manage it !
 
 [Spigot](https://www.spigotmc.org/resources/worldmanager.117043/)
 
-Help menu
+Help message
 
 ![image](https://github.com/Mathildeuh/WorldManager/assets/76065396/69381812-8de4-4715-8165-ebdeb06df574)
 
