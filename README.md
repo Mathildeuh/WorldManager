@@ -2,6 +2,11 @@ First release, create issue for suggestions or bug reports
 
 Easily create worlds and manage it !
 
+[Paper Hangar](https://hangar.papermc.io/Mathildeuh/Easy-WorldManager)
+[Modrinth]([https://hangar.papermc.io/Mathildeuh/Easy-WorldManager](https://modrinth.com/plugin/easy-worldmanager))
+[CurseForge](https://www.curseforge.com/minecraft/bukkit-plugins/easy-worldmanager)
+[Spigot]([https://hangar.papermc.io/Mathildeuh/Easy-WorldManager](https://www.spigotmc.org/resources/worldmanager.117043/))
+
 Help menu
 
 ![image](https://github.com/Mathildeuh/WorldManager/assets/76065396/69381812-8de4-4715-8165-ebdeb06df574)
