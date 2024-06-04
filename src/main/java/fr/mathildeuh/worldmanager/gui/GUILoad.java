@@ -16,10 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedMainHandEvent;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GUILoad implements Listener {
@@ -102,6 +99,7 @@ public class GUILoad implements Listener {
 
         player.openInventory(menu.getInventory());
     }
+
 
     private void openWorldLoad(Player player) {
 

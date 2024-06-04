@@ -12,7 +12,11 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class GUIBackups implements Listener  {
@@ -21,6 +25,21 @@ public class GUIBackups implements Listener  {
     }
     SGMenu menu ;
 
+
+    private List<String> getBackupFiles() {
+        File backupDirectory = new File(Bukkit.getServer().getWorldContainer(), "backups/WorldManager");
+
+        if (!backupDirectory.exists() || !backupDirectory.isDirectory()) {
+            return new ArrayList<>();
+        }
+
+        return Arrays.stream(Objects.requireNonNull(backupDirectory.listFiles()))
+                .filter(File::isFile)
+                .map(File::getName)
+                .filter(name -> name.endsWith(".zip"))
+                .sorted()
+                .collect(Collectors.toList());
+    }
 
     public void open(Player player) {
         List<World> sortedWorlds = Bukkit.getWorlds().stream()
@@ -32,10 +51,15 @@ public class GUIBackups implements Listener  {
         if (menuSize <= 9) {
             menuSize = 18;
         }
-        menu = WorldManager.getSpiGUI().create("&6Backup/Restore a world", menuSize/9);
+        menu = WorldManager.getSpiGUI().create("&6Select world", menuSize/9);
 
         int id = 0;
+
+
         for (World world : sortedWorlds) {
+
+
+
             menu.setButton(id, new SGButton(new ItemBuilder(Material.GRASS_BLOCK)
                     .name("§a" + world.getName())
                     .lore("§7Click to backup or restore this world")
@@ -64,7 +88,7 @@ public class GUIBackups implements Listener  {
     }
 
     private void openChoose(Player player, World world) {
-        menu = WorldManager.getSpiGUI().create("&6Choose an option", 1);
+        menu = WorldManager.getSpiGUI().create("&6Choose an option for " + world.getName(), 1);
 
         menu.setButton(3, new SGButton(new ItemBuilder(Material.GREEN_WOOL)
                 .name("§aBackup")
@@ -76,9 +100,15 @@ public class GUIBackups implements Listener  {
             new Backup(player).execute(world.getName());
         }));
 
+        System.out.println(world.getName());
+        System.out.println(getBackupFiles());
+        boolean isBackup = getBackupFiles().contains(world.getName() + ".zip");
+        String name = isBackup ? "§aRestore" : "§cNo backup found";
+        String lore = isBackup ? "§7Backup found, you can restore this world" : "§cUse §e\"Backup\" §cbutton to create one";
+
         menu.setButton(5, new SGButton(new ItemBuilder(Material.RED_WOOL)
-                .name("§cRestore")
-                .lore("§7Restore this world")
+                .name(name)
+                .lore(lore)
                 .build()
         ).withListener(event -> {
             player.closeInventory();

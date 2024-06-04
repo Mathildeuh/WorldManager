@@ -5,6 +5,7 @@ import com.samjakob.spigui.buttons.SGButtonListener;
 import com.samjakob.spigui.item.ItemBuilder;
 import com.samjakob.spigui.menu.SGMenu;
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.commands.subcommands.Create;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -89,7 +90,6 @@ public class GUICreate implements Listener {
         }));
 
         menu.setButton(8, createButton(Material.BARRIER, "§cCancel", "§7Click to close this inventory", event -> {
-            message.parse(MessageManager.MessageType.ERROR, "Operation canceled");
             new GUIMain(player);
         }));
 
@@ -100,7 +100,7 @@ public class GUICreate implements Listener {
         } else {
             menu.setButton(0, createButton(Material.GREEN_WOOL, "§aCreate", "§7Click to create this world", event -> {
                 player.closeInventory();
-                new fr.mathildeuh.worldmanager.commands.subcommands.Create(player).run(worldName, worldTypesAndEnvironments.get(currentTypeIndex).split(" ")[1].toLowerCase(), worldSeed, generator);
+                new Create(player).run(worldName, worldTypesAndEnvironments.get(currentTypeIndex).split(" ")[1].toLowerCase(), worldSeed, generator);
             }));
         }
 

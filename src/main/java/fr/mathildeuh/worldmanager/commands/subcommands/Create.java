@@ -7,6 +7,7 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -17,6 +18,7 @@ import java.util.NoSuchElementException;
 
 public class Create {
     private final MessageManager message;
+    private final JavaPlugin plugin = JavaPlugin.getPlugin(WorldManager.class);
 
     public Create(CommandSender sender) {
         this.message = new MessageManager(sender);
@@ -35,14 +37,12 @@ public class Create {
 
         if (worldTypeOrEnvironment instanceof WorldType) {
             sendStarting(type, name, seed, generator);
-
             createWorld(name, World.Environment.NORMAL, (WorldType) worldTypeOrEnvironment, seedValue, generator);
         } else if (worldTypeOrEnvironment instanceof World.Environment) {
             sendStarting(type, name, seed, generator);
             createWorld(name, (World.Environment) worldTypeOrEnvironment, WorldType.NORMAL, seedValue, generator);
-
         } else {
-            message.parse(MessageManager.MessageType.ERROR, "Invalid dimension types !");
+            message.parse(MessageManager.MessageType.ERROR, "Invalid dimension types!");
             message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff>Available dimension types:</color>");
             for (World.Environment env : World.Environment.values()) {
                 if (env != World.Environment.CUSTOM && env != World.Environment.NORMAL)
@@ -52,8 +52,6 @@ public class Create {
                 message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> " + worldType.name().toLowerCase() + "</color>");
             }
         }
-
-
     }
 
     public void sendStarting(String type, String name, String seed, String generator) {
@@ -94,6 +92,8 @@ public class Create {
     }
 
     public void createWorld(String name, @Nullable World.Environment environment, WorldType type, @Nullable Long seed, @Nullable String generator) {
+        // Run the world creation in a synchronous task
+
         WorldCreator creator = new WorldCreator(name).environment(environment).type(type);
         if (seed != null) {
             creator.seed(seed);
@@ -116,6 +116,7 @@ public class Create {
             WorldManager.addWorld(creator.name(), creator.type().name(), creator.environment(), generator);
         }
     }
+
 
     public void execute(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
         if (Bukkit.getWorld(name) != null) {
