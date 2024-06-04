@@ -6,7 +6,7 @@ plugins {
 }
 
 hangarPublish {
-    publications.register("Easy-WorldManager") {
+    publications.register("WorldManager") {
         version.set(project.version as String)
         channel.set("PreRelease") // We're using the 'Snapshot' channel
         // TODO: Edit the project name to match your Hangar project
