@@ -31,7 +31,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String arg, String[] args) {
         MessageManager message = new MessageManager(sender);
         if (args.length == 0) {
-            message.help();
+            new Gui(sender).execute();
             return true;
         }
         if (args.length == 1) {
