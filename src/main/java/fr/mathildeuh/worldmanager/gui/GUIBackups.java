@@ -4,7 +4,8 @@ import com.samjakob.spigui.buttons.SGButton;
 import com.samjakob.spigui.item.ItemBuilder;
 import com.samjakob.spigui.menu.SGMenu;
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.commands.subcommands.Delete;
+import fr.mathildeuh.worldmanager.commands.subcommands.Backup;
+import fr.mathildeuh.worldmanager.commands.subcommands.Restore;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -14,31 +15,33 @@ import org.bukkit.event.Listener;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GUIDelete implements Listener {
-    public GUIDelete(WorldManager plugin) {
+public class GUIBackups implements Listener  {
+    public GUIBackups(WorldManager plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
-
     }
+    SGMenu menu ;
+
 
     public void open(Player player) {
-        List<String> worldNames = Bukkit.getWorlds().stream().map(org.bukkit.World::getName).collect(Collectors.toList());
-        int menuSize = Math.min((worldNames.size() + 8) / 9 * 9, 54); // Taille dynamique en fonction du nombre de mondes, avec une limite de 54
-        if (menuSize <= 9) {
-            menuSize = 18;
-        }
-        SGMenu menu = WorldManager.getSpiGUI().create("&cDelete a world", menuSize/9);
         List<World> sortedWorlds = Bukkit.getWorlds().stream()
                 .filter(world -> !world.equals(Bukkit.getWorlds().get(0)))
                 .sorted((world1, world2) -> world1.getName().compareToIgnoreCase(world2.getName()))
                 .toList();
+
+        int menuSize = Math.min((sortedWorlds.size() + 8) / 9 * 9, 54);
+        if (menuSize <= 9) {
+            menuSize = 18;
+        }
+        menu = WorldManager.getSpiGUI().create("&6Backup/Restore a world", menuSize/9);
+
         int id = 0;
         for (World world : sortedWorlds) {
             menu.setButton(id, new SGButton(new ItemBuilder(Material.GRASS_BLOCK)
                     .name("§a" + world.getName())
-                    .lore("§7Click to delete this world")
+                    .lore("§7Click to backup or restore this world")
                     .build()
             ).withListener(event -> {
-                confirmDelete(player, world);
+                openChoose(player, world);
             }));
             id++;
         }
@@ -60,24 +63,38 @@ public class GUIDelete implements Listener {
         player.openInventory(menu.getInventory());
     }
 
-    private void confirmDelete(Player player, World world) {
-        SGMenu menu = WorldManager.getSpiGUI().create("&cDelete " + world.getName() + " ?", 1);
-        menu.setButton(3, new SGButton(new ItemBuilder(Material.RED_WOOL)
-                .name("§c§lConfirm")
-                .lore("§c§l⚠ THIS ACTION CAN NOT BE UNDONE ⚠")
+    private void openChoose(Player player, World world) {
+        menu = WorldManager.getSpiGUI().create("&6Choose an option", 1);
+
+        menu.setButton(3, new SGButton(new ItemBuilder(Material.GREEN_WOOL)
+                .name("§aBackup")
+                .lore("§7Backup this world")
                 .build()
         ).withListener(event -> {
-            new Delete(player).execute(world.getName());
-            new GUIMain(player);
+            player.closeInventory();
+
+            new Backup(player).execute(world.getName());
         }));
-        menu.setButton(5, new SGButton(new ItemBuilder(Material.GREEN_WOOL)
-                .name("§aCancel")
-                .lore("§7Click to cancel deletion")
+
+        menu.setButton(5, new SGButton(new ItemBuilder(Material.RED_WOOL)
+                .name("§cRestore")
+                .lore("§7Restore this world")
+                .build()
+        ).withListener(event -> {
+            player.closeInventory();
+
+            new Restore(player).execute(world.getName());
+        }));
+
+        menu.setButton(8, new SGButton(new ItemBuilder(Material.BARRIER)
+                .name("§cBack")
+                .lore("§7Click to go back")
                 .build()
         ).withListener(event -> {
             open(player);
         }));
-        player.openInventory(menu.getInventory());
-    }
 
+        player.openInventory(menu.getInventory());
+
+    }
 }

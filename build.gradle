@@ -4,7 +4,6 @@ plugins {
 }
 
 
-
 group = 'fr.Mathildeuh'
 version = '1.2.3-b'
 

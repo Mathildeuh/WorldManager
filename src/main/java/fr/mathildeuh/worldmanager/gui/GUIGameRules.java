@@ -26,12 +26,13 @@ public class GUIGameRules implements Listener {
 
         int menuSize = ((worlds.size() + 8) / 9) * 9; // Calculer la taille du menu en arrondissant vers le haut au prochain multiple de 9
         if (menuSize > 54) menuSize = 54; // Limiter la taille maximale à 54 (6 lignes)
+        if (menuSize <= 9) menuSize = 18; // Limiter la taille minimale à 18 (2 lignes
 
-        SGMenu mainMenu = WorldManager.getSpiGUI().create("&aGame rules", menuSize / 9);
+        SGMenu menu = WorldManager.getSpiGUI().create("&aGame rules", menuSize / 9);
 
         for (int i = 0; i < worlds.size(); i++) {
             World world = worlds.get(i);
-            mainMenu.setButton(i, new SGButton(new ItemBuilder(Material.GRASS_BLOCK)
+            menu.setButton(i, new SGButton(new ItemBuilder(Material.GRASS_BLOCK)
                     .name("§a" + world.getName())
                     .lore("§7Click to manage game rules")
                     .build()
@@ -40,6 +41,20 @@ public class GUIGameRules implements Listener {
             }));
         }
 
-        player.openInventory(mainMenu.getInventory());
+        int backButtonSlot = menuSize - 1;
+        if (menu.getButton(backButtonSlot) != null) {
+            menuSize += 9;
+            menu.setRowsPerPage(menuSize / 9);
+        }
+
+        menu.setButton(menuSize- 1, new SGButton(new ItemBuilder(Material.BARRIER)
+                .name("§cBack")
+                .lore("§7Click to open main menu")
+                .build()
+        ).withListener(event -> {
+            new GUIMain(player);
+        }));
+
+        player.openInventory(menu.getInventory());
     }
 }

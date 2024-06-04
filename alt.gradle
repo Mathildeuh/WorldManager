@@ -1,46 +1,45 @@
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id 'io.papermc.hangar-publish-plugin' version '0.1.0'
-
+//    id 'io.papermc.hangar-publish-plugin' version '0.1.0'
 }
 
-hangarPublish {
-    publications.register("WorldManager") {
-        version.set(project.version as String)
-        channel.set("PreRelease") // We're using the 'Snapshot' channel
-        // TODO: Edit the project name to match your Hangar project
-        id.set("Easy-WorldManager")
-        apiKey.set(System.getenv("HANGAR_API_TOKEN"))
-        platforms {
-            // TODO: Use the correct platform(s) for your plugin
-            register(Platforms.PAPER) {
-                // TODO: If you're using ShadowJar, replace the jar lines with the appropriate task:
-                //   jar.set(tasks.shadowJar.flatMap { it.archiveFile })
-                // Set the JAR file to upload
-                jar.set(tasks.jar.flatMap { it.archiveFile })
-
-                // Set platform versions from gradle.properties file
-                val versions: List<String> = (property("paperVersion") as String)
-                        .split(",")
-                        .map { it.trim() }
-                platformVersions.set(versions)
-
-                // TODO: Configure your plugin dependencies, if any
-                dependencies {
-                    // Example for a dependency found on Hangar
-                    hangar("Maintenance") {
-                        required.set(false)
-                    }
-                    // Example for an external dependency
-                    url("Debuggery", "https://github.com/PaperMC/Debuggery") {
-                        required.set(true)
-                    }
-                }
-            }
-        }
-    }
-}
+//hangarPublish {
+//    publications.register("WorldManager") {
+//        version.set(project.version as String)
+//        channel.set("PreRelease") // We're using the 'Snapshot' channel
+//
+//        id.set("Easy-WorldManager")
+//        apiKey.set(System.getenv("HANGAR_API_TOKEN"))
+//        platforms {
+//
+//            register(Platforms.PAPER) {
+//
+//                //   jar.set(tasks.shadowJar.flatMap { it.archiveFile })
+//                // Set the JAR file to upload
+//                jar.set(tasks.jar.flatMap { it.archiveFile })
+//
+//                // Set platform versions from gradle.properties file
+//                val versions: List<String> = (property("paperVersion") as String)
+//                        .split(",")
+//                        .map { it.trim() }
+//                platformVersions.set(versions)
+//
+//
+//                dependencies {
+//                    // Example for a dependency found on Hangar
+//                    hangar("Maintenance") {
+//                        required.set(false)
+//                    }
+//                    // Example for an external dependency
+//                    url("Debuggery", "https://github.com/PaperMC/Debuggery") {
+//                        required.set(true)
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 group = 'fr.Mathildeuh'
 version = '0'

@@ -1,12 +1,8 @@
 package fr.mathildeuh.worldmanager.commands.subcommands.pregen;
 
 import fr.mathildeuh.worldmanager.messages.MessageManager;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -15,6 +11,8 @@ import static fr.mathildeuh.worldmanager.commands.subcommands.pregen.Bossbar.*;
 
 public class WorldPreGenerator extends BukkitRunnable {
 
+    public static int totalChunks;
+    public static int processedChunks = 0;
     private final JavaPlugin plugin;
     private final World world;
     private final int centerX;
@@ -23,8 +21,6 @@ public class WorldPreGenerator extends BukkitRunnable {
     Player player;
     private int currentX;
     private int currentZ;
-    public static int totalChunks;
-    public static int processedChunks = 0;
     private MessageManager message;
 
     public WorldPreGenerator(JavaPlugin plugin, Player player, World world, int centerX, int centerZ, int radius) {
@@ -78,7 +74,6 @@ public class WorldPreGenerator extends BukkitRunnable {
     public void start() {
         this.runTaskTimer(plugin, 0, 1); // Runs every tick
     }
-
 
 
     private void completeGeneration() {

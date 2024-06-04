@@ -6,10 +6,7 @@ import com.samjakob.spigui.item.ItemBuilder;
 import com.samjakob.spigui.menu.SGMenu;
 import fr.mathildeuh.worldmanager.WorldManager;
 import org.bukkit.Material;
-import org.bukkit.block.data.Levelled;
-import org.bukkit.block.data.type.Light;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class GUIMain {
@@ -25,7 +22,7 @@ public class GUIMain {
     }
 
     private void openMainMenu() {
-        SGMenu mainMenu = WorldManager.getSpiGUI().create("&9{------ World Manager -----}", 2);
+        SGMenu mainMenu = WorldManager.getSpiGUI().create("&9{------ World Manager -----}", 1);
 
         mainMenu.setButton(0, createButton(Material.GREEN_WOOL, "§aCreate a world", "§7Create a new world", event -> {
             new GUICreate(plugin).open(player);
@@ -43,20 +40,12 @@ public class GUIMain {
             new GUIGameRules(plugin).open(player);
         }));
 
-        mainMenu.setButton(7, createButton(Material.EMERALD_BLOCK, "§bLoad a world", "§7Import a new world", event -> {
+        mainMenu.setButton(7, createButton(Material.JIGSAW, "§6Backup/Restore a world", "§7Backup/Restore an existing world", event -> {
+            new GUIBackups(plugin).open(player);
+        }));
+
+        mainMenu.setButton(8, createButton(Material.STRUCTURE_BLOCK, "§bLoad/Unload a world", "§7ILoad/Unload a new world", event -> {
             new GUILoad(plugin).open(player);
-        }));
-
-        mainMenu.setButton(8, createButton(Material.REDSTONE_BLOCK, "§6Unload a world", "§7Unload an existing world", event -> {
-            new GUIUnload(plugin).open(player);
-        }));
-
-        mainMenu.setButton(16, createButton(Material.LIGHT, "§6Backup a world", "§7Backup an existing world", event -> {
-            new GUIUnload(plugin).open(player);
-        }));
-
-        mainMenu.setButton(17, createButton(Material.JIGSAW, "§6Restore a world", "§7Restore an existing world", event -> {
-            new GUIUnload(plugin).open(player);
         }));
 
         player.openInventory(mainMenu.getInventory());

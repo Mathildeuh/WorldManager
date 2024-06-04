@@ -52,18 +52,32 @@ public class GUIPregen implements Listener {
 
         for (String worldName : worldNames) {
             SGButton worldButton = new SGButton(new ItemBuilder(Material.GRASS_BLOCK)
-                    .name(worldName)
+                    .name("§a" + worldName)
                     .build());
             worldButton.withListener(event -> openOptionsMenu(player, worldName));
             worldMenu.addButton(worldButton);
         }
+
+        int backButtonSlot = menuSize - 1;
+        if (worldMenu.getButton(backButtonSlot) != null) {
+            menuSize += 9;
+            worldMenu.setRowsPerPage(menuSize / 9);
+        }
+
+        worldMenu.setButton(menuSize- 1, new SGButton(new ItemBuilder(Material.BARRIER)
+                .name("§cBack")
+                .lore("§7Click to open main menu")
+                .build()
+        ).withListener(event -> {
+            new GUIMain(player);
+        }));
 
         player.openInventory(worldMenu.getInventory());
     }
 
     private void openOptionsMenu(Player player, String worldName) {
 
-        optionsMenu.setName("&aOptions for " + worldName);
+        optionsMenu.setName("&aConfirm pregen for " + worldName);
 
 
         SGButton startButton = new SGButton(new ItemBuilder(Material.GREEN_CONCRETE)

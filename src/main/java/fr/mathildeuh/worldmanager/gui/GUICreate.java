@@ -65,40 +65,40 @@ public class GUICreate implements Listener {
             }
         }
 
-        menu.setButton(0, createButton(Material.ANVIL, "§3" + name + " §cRequired !", "§7Click to set world name", event -> {
+        menu.setButton(2, createButton(Material.ANVIL, "§3" + name + " §cRequired !", "§7Click to set world name", event -> {
             message.parse(MessageManager.MessageType.CUSTOM, "<dark_gray>></dark_gray> <green><b>Write world name in chat</b></green>");
             playersInEditor.put(player, "name");
             player.closeInventory();
         }));
 
-        menu.setButton(3, createButton(Material.GRASS_BLOCK, "§aClick to switch world type §5Optional", lore, event -> {
+        menu.setButton(4, createButton(Material.GRASS_BLOCK, "§aClick to switch world type §5Optional", lore, event -> {
             currentTypeIndex = (currentTypeIndex + 1) % worldTypesAndEnvironments.size();
             open(player);
         }));
 
-        menu.setButton(4, createButton(Material.STRUCTURE_BLOCK, "§3" + seed + " §5Optional", "§7Click to set world seed", event -> {
+        menu.setButton(5, createButton(Material.STRUCTURE_BLOCK, "§3" + seed + " §5Optional", "§7Click to set world seed", event -> {
             message.parse(MessageManager.MessageType.CUSTOM, "<dark_gray>></dark_gray> <green><b>Write world seed in chat</b></green>");
             playersInEditor.put(player, "seed");
             player.closeInventory();
         }));
 
-        menu.setButton(5, createButton(Material.BOOK, "§3" + gen + " §5Optional", "§7Click to add a custom generator", event -> {
+        menu.setButton(6, createButton(Material.BOOK, "§3" + gen + " §5Optional", "§7Click to add a custom generator", event -> {
             message.parse(MessageManager.MessageType.CUSTOM, "<dark_gray>></dark_gray> <green><b>Write custom generator in chat</b></green>");
             playersInEditor.put(player, "generator");
             player.closeInventory();
         }));
 
-        menu.setButton(7, createButton(Material.BARRIER, "§cCancel", "§7Click to close this inventory", event -> {
+        menu.setButton(8, createButton(Material.BARRIER, "§cCancel", "§7Click to close this inventory", event -> {
             message.parse(MessageManager.MessageType.ERROR, "Operation canceled");
             new GUIMain(player);
         }));
 
         if (worldName == null) {
-            menu.setButton(8, createButton(Material.RED_WOOL, "§5Create", "§7You must set a world name", event -> {
+            menu.setButton(0, createButton(Material.RED_WOOL, "§5Create", "§7You must set a world name", event -> {
                 message.parse(MessageManager.MessageType.ERROR, "You must set a world name");
             }));
         } else {
-            menu.setButton(8, createButton(Material.GREEN_WOOL, "§aCreate", "§7Click to create this world", event -> {
+            menu.setButton(0, createButton(Material.GREEN_WOOL, "§aCreate", "§7Click to create this world", event -> {
                 player.closeInventory();
                 new fr.mathildeuh.worldmanager.commands.subcommands.Create(player).run(worldName, worldTypesAndEnvironments.get(currentTypeIndex).split(" ")[1].toLowerCase(), worldSeed, generator);
             }));

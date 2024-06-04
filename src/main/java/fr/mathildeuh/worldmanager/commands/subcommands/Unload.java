@@ -30,7 +30,7 @@ public class Unload {
                 new MessageManager(player).parse(MessageManager.MessageType.CUSTOM, "<color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been unloaded.</color>");
             }
         }
-        boolean unloaded = Bukkit.unloadWorld(world, false);
+        boolean unloaded = Bukkit.unloadWorld(world, true);
 
         if (unloaded) {
             message.parse(MessageManager.MessageType.SUCCESS, "Success, world \"" + worldName + "\" successfully unloaded !");

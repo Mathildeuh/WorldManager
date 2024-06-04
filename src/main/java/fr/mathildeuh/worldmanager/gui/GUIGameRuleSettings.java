@@ -12,7 +12,6 @@ import org.bukkit.event.Listener;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GUIGameRuleSettings implements Listener {
     private final WorldManager plugin;
