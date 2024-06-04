@@ -24,7 +24,10 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build project with alt.gradle
-        run: ./gradlew -b alt.gradle shadowJar  # Utilisation de alt.gradle pour construire le projet
+        env:
+          # Make sure you have added a repository secret in the repository's settings
+          HANGAR_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}
+        run: ./gradlew -b alt.gradle shadowJar publishPluginPublicationToHangar --stacktrace # Utilisation de alt.gradle pour construire le projet
 
       - name: Extract version from build.gradle
         id: extract_version

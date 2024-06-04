@@ -1,8 +1,9 @@
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
-
 }
+
+
 
 group = 'fr.Mathildeuh'
 version = '1.2.3-b'
