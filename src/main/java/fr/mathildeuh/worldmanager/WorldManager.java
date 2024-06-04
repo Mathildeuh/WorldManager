@@ -3,10 +3,12 @@ package fr.mathildeuh.worldmanager;
 import com.samjakob.spigui.SpiGUI;
 import fr.mathildeuh.worldmanager.commands.WorldManagerCommand;
 import fr.mathildeuh.worldmanager.events.JoinListener;
+import fr.mathildeuh.worldmanager.manager.BackupConfig;
 import fr.mathildeuh.worldmanager.manager.WorldsConfig;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -22,6 +24,7 @@ public final class WorldManager extends JavaPlugin {
     public static FileConfiguration config;
     private static SpiGUI spiGUI;
     private boolean updated = true;
+    public static BackupConfig backupConfig;
 
     public static SpiGUI getSpiGUI() {
         return spiGUI;
@@ -56,9 +59,22 @@ public final class WorldManager extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
 
+        configFile = new File( "backups/WorldManager/backups.yml");
+        config = YamlConfiguration.loadConfiguration(configFile);
+        try {
+            if (config.getString("backups") == null)
+                config.set("backups", "");
+            config.save(configFile);
+            backupConfig = new BackupConfig(configFile, config);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         configFile = new File(getDataFolder(), "worlds.yml");
         config = YamlConfiguration.loadConfiguration(configFile);
         try {
+            if (config.getString("worlds") == null)
+                config.set("worlds", "");
             config.save(configFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -91,11 +107,7 @@ public final class WorldManager extends JavaPlugin {
             adventure.close();
             adventure = null;
         }
-        try {
-            config.save(configFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     public boolean isUpdated() {

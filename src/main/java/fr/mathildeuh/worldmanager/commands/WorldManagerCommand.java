@@ -56,6 +56,12 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
         String type;
         String gen;
         switch (args[0].toLowerCase()) {
+            case "backup":
+                new Backup(sender).execute(name);
+                break;
+            case "restore":
+                new Restore(sender).execute(name);
+                break;
             case "c":
             case "create":
                 type = (args.length >= 3) ? args[2] : null;
@@ -100,7 +106,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            String[] commands = {"create", "delete", "list", "load", "teleport", "unload", "pregen", "gui", "open", "help", "open", "gui"};
+            String[] commands = {"create", "delete", "list", "load", "teleport", "unload", "pregen", "gui", "open", "help", "open", "gui", "restore", "backup"};
             Arrays.sort(commands);
             String partialName = args[0].toLowerCase();
 
@@ -116,7 +122,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     completions.addAll(getUnloadedWorlds());
                     break;
 
-                case "delete", "teleport", "tp", "unload", "del", "u":
+                case "delete", "teleport", "tp", "unload", "del", "u", "backup", "restore":
                     for (World world : Bukkit.getWorlds()) {
                         completions.add(world.getName());
                     }

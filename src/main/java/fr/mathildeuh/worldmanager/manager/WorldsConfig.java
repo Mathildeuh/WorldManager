@@ -1,15 +1,21 @@
 package fr.mathildeuh.worldmanager.manager;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.zeroturnaround.zip.ZipUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
 public class WorldsConfig {
+
 
 
     public static void loadWorlds() {
@@ -62,8 +68,7 @@ public class WorldsConfig {
         if (generator != null) {
             worldCreator.generator(generator);
         }
-
-        World world = worldCreator.createWorld();
+        Bukkit.getScheduler().runTaskAsynchronously(JavaPlugin.getPlugin(WorldManager.class), worldCreator::createWorld);
     }
 
     // Méthode pour ajouter un monde au fichier de configuration
@@ -86,5 +91,7 @@ public class WorldsConfig {
             throw new RuntimeException(e);
         }
     }
+
+
 
 }
