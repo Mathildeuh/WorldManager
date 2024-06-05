@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class Pregen {
     private final JavaPlugin plugin = JavaPlugin.getPlugin(WorldManager.class);
-    private final Map<String, WorldPreGenerator> generators = new HashMap<>();
+    public static final Map<String, WorldPreGenerator> generators = new HashMap<>();
     private final MessageManager message;
     private final CommandSender sender;
     Player player;

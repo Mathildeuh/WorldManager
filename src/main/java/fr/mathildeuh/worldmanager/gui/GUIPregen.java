@@ -16,66 +16,30 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class GUIPregen implements Listener {
 
-    private final Plugin plugin;
+    private final Plugin plugin = JavaPlugin.getPlugin(WorldManager.class);
     private final Map<Player, String> playerWorldSelections;
     private final Map<Player, String> playerRadiusInput;
     private final Map<Player, String> playerCenterInput;
     SGMenu optionsMenu = WorldManager.getSpiGUI().create(" az ", 1);
     private MessageManager message;
 
-    public GUIPregen(Plugin plugin) {
-        this.plugin = plugin;
+    public GUIPregen() {
         this.playerWorldSelections = new HashMap<>();
         this.playerRadiusInput = new HashMap<>();
         this.playerCenterInput = new HashMap<>();
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    public void open(Player player) {
-        this.message = new MessageManager(player);
 
-        List<String> worldNames = Bukkit.getWorlds().stream().map(org.bukkit.World::getName).collect(Collectors.toList());
-        int menuSize = Math.min((worldNames.size() + 8) / 9 * 9, 54); // Taille dynamique en fonction du nombre de mondes, avec une limite de 54
-        if (menuSize <= 9) {
-            menuSize = 18;
-        }
-
-        SGMenu worldMenu = WorldManager.getSpiGUI().create("&aSelect a World", menuSize / 9);
-
-        for (String worldName : worldNames) {
-            SGButton worldButton = new SGButton(new ItemBuilder(Material.GRASS_BLOCK)
-                    .name("§a" + worldName)
-                    .build());
-            worldButton.withListener(event -> openOptionsMenu(player, worldName));
-            worldMenu.addButton(worldButton);
-        }
-
-        int backButtonSlot = menuSize - 1;
-        if (worldMenu.getButton(backButtonSlot) != null) {
-            menuSize += 9;
-            worldMenu.setRowsPerPage(menuSize / 9);
-        }
-
-        worldMenu.setButton(menuSize- 1, new SGButton(new ItemBuilder(Material.BARRIER)
-                .name("§cBack")
-                .lore("§7Click to open main menu")
-                .build()
-        ).withListener(event -> {
-            new GUIMain(player);
-        }));
-
-        player.openInventory(worldMenu.getInventory());
-    }
-
-    private void openOptionsMenu(Player player, String worldName) {
+    public void open(Player player, String worldName) {
+        message = new MessageManager(player);
 
         optionsMenu.setName("&aConfirm pregen for " + worldName);
 
@@ -85,10 +49,12 @@ public class GUIPregen implements Listener {
                 .lore("&7Start pregenerating the world", "&7Click for enter parameters and start pregenerating.")
                 .build());
         startButton.withListener(event -> {
+            player.closeInventory();
+
             playerWorldSelections.put(player, worldName);
+
             message.parse(MessageManager.MessageType.CUSTOM, "<color:#7471b0>➥</color> <yellow>Enter the radius in chat (e.g., 20) <color:#7471b0>⬇ </color></yellow> \n" +
                     "<dark_red>⚠ Too high number can cause crashes ⚠</dark_red>");
-            player.closeInventory();
         });
         optionsMenu.setButton(3, startButton);
 
@@ -96,7 +62,7 @@ public class GUIPregen implements Listener {
                 .name("&cCancel")
                 .lore("&7Cancel pregeneration")
                 .build());
-        cancelButton.withListener(event -> player.closeInventory());
+        cancelButton.withListener(event -> new GUIManage(player, Bukkit.getWorld(worldName)).open());
         optionsMenu.setButton(5, cancelButton);
 
         player.openInventory(optionsMenu.getInventory());
@@ -108,7 +74,7 @@ public class GUIPregen implements Listener {
             Player player = (Player) event.getWhoClicked();
             if (event.getView().getTitle().equals("&aSelect a World")) {
                 event.setCancelled(true);
-                Bukkit.getScheduler().runTask(plugin, () -> openOptionsMenu(player, event.getCurrentItem().getItemMeta().getDisplayName()));
+                Bukkit.getScheduler().runTask(plugin, () -> open(player, event.getCurrentItem().getItemMeta().getDisplayName()));
             }
         }
     }
@@ -137,6 +103,7 @@ public class GUIPregen implements Listener {
                     new Pregen(player).execute(new String[]{"pregen", "start", worldName, radius, center});
                     playerRadiusInput.remove(player);
                     playerCenterInput.remove(player);
+                    playerWorldSelections.remove(player);
                 }
                 event.setCancelled(true);
             } else {

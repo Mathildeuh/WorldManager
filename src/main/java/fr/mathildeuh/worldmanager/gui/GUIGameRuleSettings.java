@@ -56,7 +56,7 @@ public class GUIGameRuleSettings implements Listener {
                     .lore("§7Click to open main menu")
                     .build()
             ).withListener(event -> {
-                new GUIGameRules(plugin).open(player); // Open the main menu
+                new GUIManage(player, world).open();
             }));
         }
 

@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.commands.subcommands.pregen.Pregen;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -30,6 +31,12 @@ public class Unload {
                 new MessageManager(player).parse(MessageManager.MessageType.CUSTOM, "<color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been unloaded.</color>");
             }
         }
+
+        if (Pregen.generators.containsKey(worldName)) {
+            Pregen.generators.get(worldName).cancel();
+            Pregen.generators.remove(worldName);
+        }
+
         boolean unloaded = Bukkit.unloadWorld(world, true);
 
         if (unloaded) {

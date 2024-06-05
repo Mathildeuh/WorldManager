@@ -5,9 +5,14 @@ import com.samjakob.spigui.buttons.SGButtonListener;
 import com.samjakob.spigui.item.ItemBuilder;
 import com.samjakob.spigui.menu.SGMenu;
 import fr.mathildeuh.worldmanager.WorldManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GUIMain {
 
@@ -20,35 +25,66 @@ public class GUIMain {
 
         openMainMenu();
     }
+    static SGMenu menu;
 
     private void openMainMenu() {
-        SGMenu mainMenu = WorldManager.getSpiGUI().create("&9{------ World Manager -----}", 1);
+        menu = WorldManager.getSpiGUI().create("&9{------ World Manager -----}", 3);
 
-        mainMenu.setButton(0, createButton(Material.GREEN_WOOL, "§aCreate a world", "§7Create a new world", event -> {
+        menu.setButton(11, createButton(Material.TARGET, "§aCreate a world", "§7World creator options", event -> {
             new GUICreate(plugin).open(player);
         }));
 
-        mainMenu.setButton(1, createButton(Material.RED_WOOL, "§cDelete a world", "§7Delete an existing world", event -> {
-            new GUIDelete(plugin).open(player);
+        menu.setButton(13, createButton(Material.GRASS_BLOCK, "§aManage your worlds", "§7World manager options", event -> {
+            openWorldChoose(player);
         }));
 
-        mainMenu.setButton(3, createButton(Material.OAK_SAPLING, "§aPregen", "§7Pregen a world", event -> {
-            new GUIPregen(plugin).open(player);
-        }));
-
-        mainMenu.setButton(5, createButton(Material.COMMAND_BLOCK, "§aManage game rules", "§7Manage world game rules", event -> {
-            new GUIGameRules(plugin).open(player);
-        }));
-
-        mainMenu.setButton(7, createButton(Material.JIGSAW, "§6Backup/Restore a world", "§7Backup/Restore an existing world", event -> {
-            new GUIBackups(plugin).open(player);
-        }));
-
-        mainMenu.setButton(8, createButton(Material.STRUCTURE_BLOCK, "§bLoad/Unload a world", "§7ILoad/Unload a new world", event -> {
+        menu.setButton(15, createButton(Material.DEBUG_STICK, "§aLoad a world", "§7World loader option", event -> {
             new GUILoad(plugin).open(player);
         }));
 
-        player.openInventory(mainMenu.getInventory());
+        player.openInventory(menu.getInventory());
+    }
+
+    public static void openWorldChoose(Player player) {
+        List<String> worldNames = Bukkit.getWorlds().stream().map(org.bukkit.World::getName).collect(Collectors.toList());
+        int menuSize = Math.min((worldNames.size() + 8) / 9 * 9, 54);
+        if (menuSize <= 9) {
+            menuSize = 27;
+        }
+        menu = WorldManager.getSpiGUI().create("&aChoose a world to manage", menuSize/9);
+
+        List<World> sortedWorlds = Bukkit.getWorlds().stream()
+                .filter(world -> !world.equals(Bukkit.getWorlds().get(0)))
+                .sorted((world1, world2) -> world1.getName().compareToIgnoreCase(world2.getName()))
+                .toList();
+        int id = 0;
+        for (World world : sortedWorlds) {
+            menu.setButton(id, new SGButton(new ItemBuilder(Material.GRASS_BLOCK)
+                    .name("§a" + world.getName())
+                    .lore("§7Click to manage this world")
+                    .build()
+            ).withListener(event -> {
+                new GUIManage(player, world).open();
+            }));
+            id++;
+        }
+
+
+        int backButtonSlot = menuSize - 1;
+        if (menu.getButton(backButtonSlot) != null) {
+            menuSize += 9;
+            menu.setRowsPerPage(menuSize / 9);
+        }
+
+        menu.setButton(menuSize - 1, new SGButton(new ItemBuilder(Material.BARRIER)
+                .name("§cBack")
+                .lore("§7Click to open main menu")
+                .build()
+        ).withListener(event -> {
+            new GUIMain(player);
+        }));
+        player.openInventory(menu.getInventory());
+
     }
 
     private SGButton createButton(Material material, String name, String lore, SGButtonListener listener) {

@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.manager;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.commands.subcommands.pregen.Pregen;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -32,7 +33,7 @@ public class BackupConfig {
 
             File worldFolder = world.getWorldFolder();
             File backupDir = new File(worldFolder.getParentFile(), "backups/WorldManager");
-            File backupFile = new File(backupDir, name + ".zip");
+            File backupFile = new File(backupDir, name.toLowerCase() + ".zip");
 
             // Create the backup directory if it doesn't exist
             if (!backupDir.exists()) {
@@ -50,7 +51,7 @@ public class BackupConfig {
 
                     // Save the backup details to the config
                     config.set("backups." + name + ".env", world.getEnvironment().name());
-                    config.set("backups." + name + ".type", world.getWorldType().getName());
+                    config.set("backups." + name + ".type", world.getWorldType().getName().equalsIgnoreCase("DEFAULT") ? "NORMAL" : world.getWorldType().getName());
                     config.set("backups." + name + ".generator", world.getGenerator());
                     config.save(configFile);
 
@@ -72,6 +73,8 @@ public class BackupConfig {
         List<Player> worldPlayers = new ArrayList<>();
 
         File backupFile = new File(worldFolder.getParentFile(), "backups/WorldManager/" + name.toLowerCase() + ".zip");
+        System.out.println(backupFile.getAbsolutePath());
+
         if (backupFile.exists()) {
             World world = Bukkit.getWorld(name);
             if (world != null) {
@@ -86,6 +89,10 @@ public class BackupConfig {
 
             if (worldFolder.exists()) {
                 deleteFolder(worldFolder);
+            }
+            if (Pregen.generators.containsKey(name)) {
+                Pregen.generators.get(name).cancel();
+                Pregen.generators.remove(name);
             }
 
             List<Player> finalWorldPlayers = worldPlayers;
@@ -102,6 +109,7 @@ public class BackupConfig {
                 }
 
                 Bukkit.createWorld(worldCreator);
+
 
                 Bukkit.getScheduler().runTaskLater(JavaPlugin.getPlugin(WorldManager.class), () -> {
                     World restoredWorld = Bukkit.getWorld(name);
