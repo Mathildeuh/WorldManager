@@ -68,8 +68,8 @@ processResources {
 compileJava.options.encoding("UTF-8")
 
 
-//libsDirectory = file("E:\\Plugins\\Spigot")
-libsDirectory = file("E:\\Servers\\1.20.6\\plugins")
+libsDirectory = file("E:\\Plugins\\Spigot")
+//libsDirectory = file("E:\\Servers\\1.20.6\\plugins")
 shadowJar {
     archiveClassifier.set('')
     relocate 'org.bstats', 'fr.mathildeuh.utils'
