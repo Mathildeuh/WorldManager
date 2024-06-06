@@ -4,27 +4,24 @@ import com.samjakob.spigui.buttons.SGButton;
 import com.samjakob.spigui.item.ItemBuilder;
 import com.samjakob.spigui.menu.SGMenu;
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.commands.subcommands.Backup;
 import fr.mathildeuh.worldmanager.commands.subcommands.Load;
-import fr.mathildeuh.worldmanager.commands.subcommands.Restore;
-import fr.mathildeuh.worldmanager.commands.subcommands.Unload;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChangedMainHandEvent;
 
 import java.io.File;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 public class GUILoad implements Listener {
+    SGMenu menu;
+
     public GUILoad(WorldManager plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
-
-    SGMenu menu;
 
     public void open(Player player) {
 
@@ -40,7 +37,7 @@ public class GUILoad implements Listener {
             menuSize = 27;
         }
 
-        menu = WorldManager.getSpiGUI().create("&aChoose a world", menuSize/9);
+        menu = WorldManager.getSpiGUI().create("&aChoose a world", menuSize / 9);
 
         int id = 0;
         for (File worldFolder : worldFolders) {
@@ -81,14 +78,13 @@ public class GUILoad implements Listener {
             menu.setRowsPerPage(menuSize / 9);
         }
 
-        menu.setButton(menuSize- 1, new SGButton(new ItemBuilder(Material.BARRIER)
+        menu.setButton(menuSize - 1, new SGButton(new ItemBuilder(Material.BARRIER)
                 .name("§cBack")
                 .lore("§7Click to open main menu")
                 .build()
         ).withListener(event -> {
             new GUIMain(player);
         }));
-
 
 
         player.openInventory(menu.getInventory());

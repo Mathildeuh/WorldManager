@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -15,24 +16,25 @@ public class WorldsConfig {
 
     public static void loadWorlds() {
         if (!WorldManager.configFile.exists()) {
-            WorldManager.config.set("worlds", null);
+            WorldManager.worldsConfig.set("worlds", null);
             try {
-                WorldManager.config.save(WorldManager.configFile);
+                WorldManager.worldsConfig.save(WorldManager.configFile);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
             return;
         }
 
-        if (WorldManager.config.getConfigurationSection("worlds") == null) {
-            Bukkit.getLogger().info("No worlds in configuration.");
+        ConfigurationSection worlds = WorldManager.worldsConfig.getConfigurationSection("worlds");
+
+        if (worlds == null) {
             return;
         }
 
-        for (String worldName : WorldManager.config.getConfigurationSection("worlds").getKeys(false)) {
-            String type = WorldManager.config.getString("worlds." + worldName + ".type");
-            String generator = WorldManager.config.getString("worlds." + worldName + ".generator");
-            String environment = WorldManager.config.getString("worlds." + worldName + ".environment");
+        for (String worldName : worlds.getKeys(false)) {
+            String type = WorldManager.worldsConfig.getString("worlds." + worldName + ".type");
+            String generator = WorldManager.worldsConfig.getString("worlds." + worldName + ".generator");
+            String environment = WorldManager.worldsConfig.getString("worlds." + worldName + ".environment");
             createWorld(worldName, type, environment, generator);
         }
     }
@@ -63,25 +65,25 @@ public class WorldsConfig {
         if (generator != null) {
             worldCreator.generator(generator);
         }
-        Bukkit.getScheduler().runTaskAsynchronously(JavaPlugin.getPlugin(WorldManager.class), worldCreator::createWorld);
+        Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), worldCreator::createWorld);
     }
 
     // Méthode pour ajouter un monde au fichier de configuration
     public static void addWorld(String name, String type, World.Environment environement, String generator) {
-        WorldManager.config.set("worlds." + name + ".type", type);
-        WorldManager.config.set("worlds." + name + ".environment", environement.name());
-        WorldManager.config.set("worlds." + name + ".generator", generator);
+        WorldManager.worldsConfig.set("worlds." + name + ".type", type);
+        WorldManager.worldsConfig.set("worlds." + name + ".environment", environement.name());
+        WorldManager.worldsConfig.set("worlds." + name + ".generator", generator);
         try {
-            WorldManager.config.save(WorldManager.configFile);
+            WorldManager.worldsConfig.save(WorldManager.configFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static void removeWorld(String name) {
-        WorldManager.config.set("worlds." + name, null);
+        WorldManager.worldsConfig.set("worlds." + name, null);
         try {
-            WorldManager.config.save(WorldManager.configFile);
+            WorldManager.worldsConfig.save(WorldManager.configFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

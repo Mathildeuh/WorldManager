@@ -5,7 +5,6 @@ import com.samjakob.spigui.item.ItemBuilder;
 import com.samjakob.spigui.menu.SGMenu;
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.commands.subcommands.Backup;
-import fr.mathildeuh.worldmanager.commands.subcommands.Delete;
 import fr.mathildeuh.worldmanager.commands.subcommands.Restore;
 import fr.mathildeuh.worldmanager.commands.subcommands.Unload;
 import org.bukkit.Material;
@@ -17,12 +16,12 @@ public class GUIManage {
 
     Player player;
     World world;
+    SGMenu menu;
+
     public GUIManage(Player player, World world) {
         this.player = player;
         this.world = world;
     }
-
-    SGMenu menu;
 
     public void open() {
         menu = WorldManager.getSpiGUI().create("&cManage " + world.getName(), 3);

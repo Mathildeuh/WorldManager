@@ -8,6 +8,7 @@ import fr.mathildeuh.worldmanager.manager.WorldsConfig;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -15,12 +16,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 
 public final class WorldManager extends JavaPlugin {
 
     public static BukkitAudiences adventure;
     public static File configFile;
-    public static FileConfiguration config;
+    public static FileConfiguration worldsConfig;
     public static BackupConfig backupConfig;
     private static SpiGUI spiGUI;
     private boolean updated = true;
@@ -50,6 +52,8 @@ public final class WorldManager extends JavaPlugin {
 
         spiGUI = new SpiGUI(this);
 
+        saveDefaultConfig();
+
         new Metrics(this, 22073);
         adventure = BukkitAudiences.create(this);
 
@@ -59,29 +63,30 @@ public final class WorldManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
 
         configFile = new File("backups/WorldManager/backups.yml");
-        config = YamlConfiguration.loadConfiguration(configFile);
+        worldsConfig = YamlConfiguration.loadConfiguration(configFile);
         try {
-            if (config.getString("backups") == null)
-                config.set("backups", "");
-            config.save(configFile);
-            backupConfig = new BackupConfig(configFile, config);
+            if (worldsConfig.getString("backups") == null)
+                worldsConfig.set("backups", "");
+            worldsConfig.save(configFile);
+            backupConfig = new BackupConfig(configFile, worldsConfig);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         configFile = new File(getDataFolder(), "worlds.yml");
-        config = YamlConfiguration.loadConfiguration(configFile);
+        worldsConfig = YamlConfiguration.loadConfiguration(configFile);
         try {
-            if (config.getString("worlds") == null)
-                config.set("worlds", "");
-            config.save(configFile);
+            if (worldsConfig.getString("worlds") == null)
+                worldsConfig.set("worlds", "");
+            worldsConfig.save(configFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         WorldsConfig.loadWorlds();
 
-        update();
+        if (getConfig().getBoolean("update-checker"))
+            update();
 
 
     }
@@ -90,12 +95,11 @@ public final class WorldManager extends JavaPlugin {
         new UpdateChecker(this, 117043).getVersion(version -> {
             if (this.getDescription().getVersion().equals(version.replace("V", ""))) {
                 updated = true;
-                getLogger().info("No update available.");
             } else {
                 updated = false;
-                System.out.println("An update is available for WorldManager.");
-                System.out.println("New version: " + version);
-                System.out.println("Download it here: " + UpdateChecker.RESOURCE_URL);
+                Bukkit.getLogger().log(Level.INFO, "An update is available for WorldManager.");
+                Bukkit.getLogger().log(Level.INFO, "New version: " + version.replace("V", "") + " | Current version: " + this.getDescription().getVersion());
+                Bukkit.getLogger().log(Level.INFO, "Download it here: " + UpdateChecker.RESOURCE_URL);
             }
         });
     }

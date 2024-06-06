@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class GUIBackups implements Listener  {
+public class GUIBackups implements Listener {
+    SGMenu menu;
+
     public GUIBackups(WorldManager plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
-    SGMenu menu ;
-
 
     private List<String> getBackupFiles() {
         File backupDirectory = new File(Bukkit.getServer().getWorldContainer(), "backups/WorldManager");
@@ -51,13 +51,12 @@ public class GUIBackups implements Listener  {
         if (menuSize <= 9) {
             menuSize = 18;
         }
-        menu = WorldManager.getSpiGUI().create("&6Select world", menuSize/9);
+        menu = WorldManager.getSpiGUI().create("&6Select world", menuSize / 9);
 
         int id = 0;
 
 
         for (World world : sortedWorlds) {
-
 
 
             menu.setButton(id, new SGButton(new ItemBuilder(Material.GRASS_BLOCK)
@@ -100,8 +99,6 @@ public class GUIBackups implements Listener  {
             new Backup(player).execute(world.getName());
         }));
 
-        System.out.println(world.getName());
-        System.out.println(getBackupFiles());
         boolean isBackup = getBackupFiles().contains(world.getName() + ".zip");
         String name = isBackup ? "§aRestore" : "§cNo backup found";
         String lore = isBackup ? "§7Backup found, you can restore this world" : "§cUse §e\"Backup\" §cbutton to create one";

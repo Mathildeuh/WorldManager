@@ -73,7 +73,6 @@ public class BackupConfig {
         List<Player> worldPlayers = new ArrayList<>();
 
         File backupFile = new File(worldFolder.getParentFile(), "backups/WorldManager/" + name.toLowerCase() + ".zip");
-        System.out.println(backupFile.getAbsolutePath());
 
         if (backupFile.exists()) {
             World world = Bukkit.getWorld(name);
@@ -82,7 +81,6 @@ public class BackupConfig {
                 for (Player players : worldPlayers) {
                     players.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
                 }
-                System.out.println("World unloading started");
                 Bukkit.unloadWorld(world, false);
 
             }

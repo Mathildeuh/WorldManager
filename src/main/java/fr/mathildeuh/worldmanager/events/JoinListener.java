@@ -3,6 +3,7 @@ package fr.mathildeuh.worldmanager.events;
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,6 +18,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 
 public class JoinListener implements Listener {
     private static final String GITHUB_API_URL = "https://api.github.com/repos/%s/%s/releases/latest";
@@ -61,12 +63,12 @@ public class JoinListener implements Listener {
                 }
                 return body;
             } else {
-                System.out.println("Could not fetch the latest release note. Status code: " + response.statusCode());
+                Bukkit.getLogger().log(Level.INFO, "Could not fetch the latest release note. Status code: " + response.statusCode());
                 return "";
             }
 
         } catch (IOException | InterruptedException e) {
-            System.out.println("Could not fetch the latest release note.");
+            Bukkit.getLogger().log(Level.INFO, "Could not fetch the latest release note.");
             return "";
         }
     }

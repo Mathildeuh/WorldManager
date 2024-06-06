@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Pregen {
-    private final JavaPlugin plugin = JavaPlugin.getPlugin(WorldManager.class);
     public static final Map<String, WorldPreGenerator> generators = new HashMap<>();
+    private final JavaPlugin plugin = JavaPlugin.getPlugin(WorldManager.class);
     private final MessageManager message;
     private final CommandSender sender;
     Player player;

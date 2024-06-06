@@ -11,9 +11,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class GUIDelete implements Listener {
     public GUIDelete() {
         Bukkit.getPluginManager().registerEvents(this, WorldManager.getPlugin(WorldManager.class));

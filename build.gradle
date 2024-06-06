@@ -5,7 +5,7 @@ plugins {
 
 
 group = 'fr.Mathildeuh'
-version = '1.3.1'
+version = '1.3.2'
 
 repositories {
     mavenCentral()
@@ -68,7 +68,8 @@ processResources {
 compileJava.options.encoding("UTF-8")
 
 
-libsDirectory = file("E:\\Plugins\\Spigot")
+//libsDirectory = file("E:\\Plugins\\Spigot")
+libsDirectory = file("E:\\Servers\\1.20.6\\plugins")
 shadowJar {
     archiveClassifier.set('')
     relocate 'org.bstats', 'fr.mathildeuh.utils'

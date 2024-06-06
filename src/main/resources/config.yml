@@ -1,0 +1,5 @@
+#
+# This feature is just an update checker, not an updater.
+#
+
+update-checker: true
