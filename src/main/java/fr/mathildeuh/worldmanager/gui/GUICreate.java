@@ -67,7 +67,7 @@ public class GUICreate implements Listener {
         }
 
         menu.setButton(5, createButton(Material.ANVIL, "§3" + name + " §cRequired !", "§7Click to set world name", event -> {
-            message.parse(MessageManager.MessageType.CUSTOM, "<dark_gray>></dark_gray> <green><b>Write world name in chat</b></green>");
+            message.parse("<dark_gray>></dark_gray> <green><b>Write world name in chat</b></green>");
             playersInEditor.put(player, "name");
             player.closeInventory();
         }));
@@ -78,13 +78,13 @@ public class GUICreate implements Listener {
         }));
 
         menu.setButton(22, createButton(Material.STRUCTURE_BLOCK, "§3" + seed + " §5Optional", "§7Click to set world seed", event -> {
-            message.parse(MessageManager.MessageType.CUSTOM, "<dark_gray>></dark_gray> <green><b>Write world seed in chat</b></green>");
+            message.parse("<dark_gray>></dark_gray> <green><b>Write world seed in chat</b></green>");
             playersInEditor.put(player, "seed");
             player.closeInventory();
         }));
 
         menu.setButton(23, createButton(Material.BOOK, "§3" + gen + " §5Optional", "§7Click to add a custom generator", event -> {
-            message.parse(MessageManager.MessageType.CUSTOM, "<dark_gray>></dark_gray> <green><b>Write custom generator in chat</b></green>");
+            message.parse("<dark_gray>></dark_gray> <green><b>Write custom generator in chat</b></green>");
             playersInEditor.put(player, "generator");
             player.closeInventory();
         }));
@@ -95,7 +95,7 @@ public class GUICreate implements Listener {
 
         if (worldName == null) {
             menu.setButton(3, createButton(Material.RED_WOOL, "§5Create", "§7You must set a world name", event -> {
-                message.parse(MessageManager.MessageType.ERROR, "You must set a world name");
+                message.parse("You must set a world name");
             }));
         } else {
             menu.setButton(3, createButton(Material.GREEN_WOOL, "§aCreate", "§7Click to create this world", event -> {
@@ -139,19 +139,19 @@ public class GUICreate implements Listener {
             switch (type) {
                 case "name":
                     Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), () -> {
-                        message.parse(MessageManager.MessageType.SUCCESS, "World name set to: \"" + firstWord + "\"");
+                        message.parse("World name set to: \"" + firstWord + "\"");
                         worldName = firstWord;
                     });
                     break;
                 case "seed":
                     Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), () -> {
-                        message.parse(MessageManager.MessageType.SUCCESS, "World seed set to: \"" + firstWord + "\"");
+                        message.parse("World seed set to: \"" + firstWord + "\"");
                         worldSeed = firstWord;
                     });
                     break;
                 case "generator":
                     Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), () -> {
-                        message.parse(MessageManager.MessageType.SUCCESS, "Custom generator added: \"" + firstWord + "\"");
+                        message.parse("Custom generator added: \"" + firstWord + "\"");
                         generator = firstWord;
                     });
                     break;

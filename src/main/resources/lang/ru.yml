@@ -1,0 +1,72 @@
+help:
+  - "<color:#7d66ff>{</color><color:#6258a6>-----</color> <color:#02a876>Менеджер миров - Подкоманды</color> <color:#6258a6>-----</color><color:#7d66ff>}</color>"
+  - ""
+  - "<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>создать</color> <dark_green>[название]</dark_green> <dark_aqua><тип> <семя> <генератор></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Создать новый мир</color></click>"
+  - "<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>удалить</color> <dark_green>[название]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Удалить мир =(</color></click>"
+  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start</color> <dark_green> [мир]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Предварительно сгенерировать мир</color></click>"
+  - "<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>загрузить</color> <dark_green>[название] [тип] <dark_aqua><генератор></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Загрузить мир</color></click>"
+  - "<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>выгрузить</color> <dark_green>[название]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Выгрузить мир</color></click>"
+  - "<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>телепорт</color> <dark_green>[мир]</dark_green> <dark_aqua><игрок></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Телепортировать себя/игрока в мир</color></click>"
+  - "<click:suggest_command:'/wm list '><color:#7471b0>➥</color> <color:#ff9900>список</color> <dark_gray>-</dark_gray> <color:#ffa1f9>Просмотреть список загруженных миров</color></click>"
+
+create:
+  invalidSeed: "(ERROR) Семя должно быть числом!"
+  invalidDimensionType: "(ERROR) Недопустимый тип измерения!"
+  availableDimensions: "(CUSTOM) <color:#19cdff>Доступные типы измерений:</color>"
+  dimensionList: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> {0} </color>"
+  startingWorldCreation: "(WAITING) Начало создания мира..."
+  worldRecap:
+    name: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Название: <yellow> {0} </yellow></color>"
+    type: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Тип: <yellow> {0} </yellow></color>"
+    seed: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Семя: <yellow> {0} </yellow></color>"
+    generator: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Генератор: <yellow> {0} </yellow></color>"
+  generatorNotFound: "(ERROR) Генератор не найден: {0}"
+  worldCreationError: "(ERROR) При создании мира произошла ERROR: {0}"
+  worldCreationSuccess: "(SUCCESS) Мир {0} успешно создан!"
+  worldAlreadyExists: "(ERROR) Этот мир уже существует!"
+  worldNameCantBeUsed: "(ERROR) Это название мира нельзя использовать!"
+  worldExistButNotLoaded: "(CUSTOM) <click:suggest_command:'/wm load {0} (тип)'><color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>Менеджер миров</color><color:#7d66ff>}</color> <color:#ff2e1f>Этот мир уже существует, нажмите на это сообщение, чтобы его загрузить.</color></click>"
+
+delete:
+  worldNotFound: "(ERROR) Указанный мир не существует."
+  defaultWorld: "(ERROR) Вы не можете удалить мир по умолчанию."
+  warning: "(WAITING) Мир {0} и его папка будут стерты."
+  kickedPlayers: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Мир, в котором вы находились, был удален.</color>"
+  failedToDelete: "(ERROR) Не удалось удалить мир {0}."
+  success: "(SUCCESS) Успешно!"
+
+list:
+  worldList: "(SUCCESS) Список миров: \n<color:#19cdff>Нажмите для телепортации\n</color>"
+  worlds: "(CUSTOM) <hover:show_text:'<blue>Телепортироваться в</blue> <yellow> {0} </yellow>'><click:run_command:'/wm tp {0} '><color:#19cdff> <color:#7471b0>➥</color> {0} </color></click></hover>"
+
+backup:
+  backupStarted: "(WAITING) Начался процесс резервного копирования..."
+  backupFinished: "(SUCCESS) Резервное копирование успешно завершено!"
+  backupFailed: "(ERROR) ERROR резервного копирования!"
+  worldNotFound: "(ERROR) Указанный мир не существует."
+
+restore:
+  playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Ваш мир был восстановлен.</color>"
+  restoreStarted: "(WAITING) Начался процесс восстановления..."
+  restoreFinished: "(SUCCESS) Восстановление успешно завершено!"
+  worldNotFound: "(ERROR) Указанный мир не существует."
+
+load:
+  worldAlreadyLoaded: "(ERROR) Мир {0} уже загружен."
+  invalidDimension: "(ERROR) Недопустимый тип измерения!"
+  availableDimensions: "(CUSTOM) <color:#19cdff>Доступные типы измерений:</color>"
+  dimensionList: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> {0} </color>"
+  loadSuccess: "(SUCCESS) Мир {0} успешно загружен!"
+  failedLoadingWorld: "(ERROR) При загрузке мира произошла ERROR: {0}"
+
+unload:
+  worldNotLoaded: "(ERROR) Мир {0} не загружен."
+  playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Ваш мир был выгружен.</color>"
+  unloadSuccess: "(SUCCESS) Мир {0} успешно выгружен!"
+  failedUnloadingWorld: "(ERROR) При выгрузке мира произошла ERROR: {0}"
+
+teleport:
+  playerNotFound: "(ERROR) Игрок не найден."
+  worldNotFound: "(ERROR) Указанный мир не существует."
+  teleportSuccess: "(SUCCESS) {0} телепортирован в мир {1}."
+  errorFromConsole: "(CUSTOM) Вы должны указать игрока при выполнении из консоли."

@@ -1,5 +1,6 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
+import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -26,7 +27,8 @@ public class Teleport {
         World targetWorld = Bukkit.getWorld(worldName);
 
         if (targetWorld == null) {
-            message.parse(MessageManager.MessageType.ERROR, "The specified world does not exist.");
+            WorldManager.langConfig.sendFormat(sender, "teleport.worldNotFound", worldName);
+            message.parse("The specified world does not exist.");
             return;
         }
 
@@ -35,18 +37,19 @@ public class Teleport {
             String playerName = args[2];
             targetPlayer = Bukkit.getPlayer(playerName);
             if (targetPlayer == null || !targetPlayer.isOnline()) {
-                message.parse(MessageManager.MessageType.ERROR, "The specified player is not online.");
+                WorldManager.langConfig.sendFormat(sender, "teleport.playerNotFound");
                 return;
             }
         } else {
             if (!(sender instanceof Player)) {
-                message.parse(MessageManager.MessageType.ERROR, "You must specify a player when executing from the console.");
+                WorldManager.langConfig.sendFormat(sender, "teleport.errorFromConsole");
                 return;
             }
             targetPlayer = (Player) sender;
         }
 
         targetPlayer.teleport(targetWorld.getSpawnLocation());
-        message.parse(MessageManager.MessageType.SUCCESS, "Teleported " + targetPlayer.getName() + " to \"" + targetWorld.getName() + "\".");
+        WorldManager.langConfig.sendFormat(sender, "teleport.errorFromConsole", targetPlayer.getName(), targetWorld.getName());
+
     }
 }

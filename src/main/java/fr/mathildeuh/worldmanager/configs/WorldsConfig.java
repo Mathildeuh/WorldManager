@@ -1,4 +1,4 @@
-package fr.mathildeuh.worldmanager.manager;
+package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import org.bukkit.Bukkit;

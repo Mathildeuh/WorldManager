@@ -61,7 +61,7 @@ public class WorldPreGenerator extends BukkitRunnable {
 
         if (processedChunks % 50 == 0 || processedChunks == totalChunks) {
 
-            message.parse(MessageManager.MessageType.WAITING, processedChunks + " chunks have been pre-generated for world: " + world.getName());
+            message.parse(processedChunks + " chunks have been pre-generated for world: " + world.getName());
         }
 
         if (processedChunks == totalChunks) {
@@ -81,7 +81,7 @@ public class WorldPreGenerator extends BukkitRunnable {
         bossBar.setProgress(1.0);
         bossBar.setTitle("World pre-generation completed for world: " + world.getName());
         plugin.getLogger().info("World pre-generation completed for world: " + world.getName());
-        message.parse(MessageManager.MessageType.SUCCESS, "World pre-generation completed for world: " + world.getName());
+        message.parse("World pre-generation completed for world: " + world.getName());
         removeBossBar(player);
     }
 }

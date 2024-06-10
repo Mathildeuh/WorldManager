@@ -53,7 +53,7 @@ public class GUIPregen implements Listener {
 
             playerWorldSelections.put(player, worldName);
 
-            message.parse(MessageManager.MessageType.CUSTOM, "<color:#7471b0>➥</color> <yellow>Enter the radius in chat (e.g., 20) <color:#7471b0>⬇ </color></yellow> \n" +
+            message.parse("<color:#7471b0>➥</color> <yellow>Enter the radius in chat (e.g., 20) <color:#7471b0>⬇ </color></yellow> \n" +
                     "<dark_red>⚠ Too high number can cause crashes ⚠</dark_red>");
         });
         optionsMenu.setButton(3, startButton);
@@ -94,7 +94,7 @@ public class GUIPregen implements Listener {
             if (message.matches("-?\\d+(,\\d+)?")) {
                 if (!playerRadiusInput.containsKey(player)) {
                     playerRadiusInput.put(player, message);
-                    this.message.parse(MessageManager.MessageType.CUSTOM, "<color:#7471b0>➥</color> <yellow>Enter the center in chat (e.g., 100,100)<color:#7471b0>⬇ </color></yellow>");
+                    this.message.parse("<color:#7471b0>➥</color> <yellow>Enter the center in chat (e.g., 100,100)<color:#7471b0>⬇ </color></yellow>");
                 } else if (!playerCenterInput.containsKey(player)) {
                     playerCenterInput.put(player, message);
                     String worldName = playerWorldSelections.get(player);
@@ -107,7 +107,7 @@ public class GUIPregen implements Listener {
                 }
                 event.setCancelled(true);
             } else {
-                this.message.parse(MessageManager.MessageType.ERROR, "Invalid input. Please enter a number or a number followed by a comma and another number.");
+                this.message.parse("Invalid input. Please enter a number or a number followed by a comma and another number.");
             }
         }
     }

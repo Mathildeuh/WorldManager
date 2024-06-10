@@ -21,23 +21,8 @@ public class MessageManager {
     }
 
     private void initializeHelpMessage() {
-        helpMessage.add("");
-        helpMessage.add("");
-        helpMessage.add("");
-        helpMessage.add("");
-        helpMessage.add("");
-        helpMessage.add("");
-        helpMessage.add("");
-        helpMessage.add("<color:#7d66ff>{</color><color:#6258a6>-----</color> <color:#02a876>World Manager - SubCommands</color> <color:#6258a6>-----</color><color:#7d66ff>}</color>");
-        helpMessage.add("");
-        helpMessage.add("<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>create</color> <dark_green>[name]</dark_green> <dark_aqua><type> <seed> <generator></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Create a new world</color></click>");
-        helpMessage.add("<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>delete</color> <dark_green>[name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Remove a world =(</color></click>");
-        helpMessage.add("<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start</color> <dark_green> [world]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Pre-generate a world</color></click>");
-        helpMessage.add("<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>load</color> <dark_green>[name] [type] <dark_aqua><generator></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Load a world</color></click>");
-        helpMessage.add("<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>unload</color> <dark_green>[name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Unload a world</color></click>");
-        helpMessage.add("<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teleport</color> <dark_green>[world]</dark_green> <dark_aqua><player></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Teleport you/player to world</color></click>");
-        helpMessage.add("<click:suggest_command:'/wm list '><color:#7471b0>➥</color> <color:#ff9900>list</color> <dark_gray>-</dark_gray> <color:#ffa1f9>See loaded worlds list</color></click>");
-
+        List<String> helpConfig = WorldManager.langConfig.getStringList("help");
+        helpMessage.addAll(helpConfig);
     }
 
     public void help() {
@@ -47,7 +32,25 @@ public class MessageManager {
         }
     }
 
-    public FormattedMessage parse(MessageType type, String message) {
+    public void parse(String message) {
+        MessageType type;
+        if (message.startsWith("(ERROR) ")) {
+            message = message.replace("(ERROR) ", "");
+            type = MessageType.ERROR;
+        } else if (message.startsWith("(SUCCESS) ")) {
+            message = message.replace("(SUCCESS) ", "");
+            type = MessageType.SUCCESS;
+        } else if (message.startsWith("(WAITING) ")) {
+            message = message.replace("(WAITING) ", "");
+            type = MessageType.WAITING;
+        } else if (message.startsWith("(CUSTOM) ")) {
+            message = message.replace("(CUSTOM) ", "");
+            type = MessageType.CUSTOM;
+        } else {
+            // TODO: MissConfigured message type
+            type = MessageType.CUSTOM;
+        }
+
         switch (type) {
             case ERROR -> formatError(message).send();
             case SUCCESS -> formatSuccess(message).send();
@@ -56,13 +59,7 @@ public class MessageManager {
                 Component formattedMessage = MiniMessage.miniMessage().deserialize(message);
                 new FormattedMessage(sender, formattedMessage).send();
             }
-            default -> {
-                return null;
-            }
-
         }
-        return null;
-
     }
 
     public FormattedMessage formatError(String message) {

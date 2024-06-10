@@ -1,0 +1,72 @@
+help:
+  - "<color:#7d66ff>{</color><color:#6258a6>-----</color> <color:#02a876>Zarządzanie Światem - Podkomendy</color> <color:#6258a6>-----</color><color:#7d66ff>}</color>"
+  - ""
+  - "<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>stwórz</color> <dark_green>[nazwa]</dark_green> <dark_aqua><typ> <ziarno> <generator></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Stwórz nowy świat</color></click>"
+  - "<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>usuń</color> <dark_green>[nazwa]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Usuń świat =(</color></click>"
+  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start</color> <dark_green> [świat]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Wstępnie wygeneruj świat</color></click>"
+  - "<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>załaduj</color> <dark_green>[nazwa] [typ] <dark_aqua><generator></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Załaduj świat</color></click>"
+  - "<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>wyładuj</color> <dark_green>[nazwa]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Wyładuj świat</color></click>"
+  - "<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teleport</color> <dark_green>[świat]</dark_green> <dark_aqua><gracz></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Teleportuj się/gracza do świata</color></click>"
+  - "<click:suggest_command:'/wm list '><color:#7471b0>➥</color> <color:#ff9900>lista</color> <dark_gray>-</dark_gray> <color:#ffa1f9>Zobacz listę załadowanych światów</color></click>"
+
+create:
+  invalidSeed: "(ERROR) Ziarno musi być liczbą!"
+  invalidDimensionType: "(ERROR) Nieprawidłowy typ wymiaru!"
+  availableDimensions: "(CUSTOM) <color:#19cdff>Dostępne typy wymiarów:</color>"
+  dimensionList: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> {0} </color>"
+  startingWorldCreation: "(WAITING) Rozpoczęcie tworzenia świata..."
+  worldRecap:
+    name: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Nazwa: <yellow> {0} </yellow></color>"
+    type: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Typ: <yellow> {0} </yellow></color>"
+    seed: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Ziarno: <yellow> {0} </yellow></color>"
+    generator: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Generator: <yellow> {0} </yellow></color>"
+  generatorNotFound: "(ERROR) Nie znaleziono generatora: {0}"
+  worldCreationError: "(ERROR) Wystąpił ERROR podczas tworzenia świata: {0}"
+  worldCreationSuccess: "(SUCCESS) Świat {0} został pomyślnie utworzony!"
+  worldAlreadyExists: "(ERROR) Ten świat już istnieje!"
+  worldNameCantBeUsed: "(ERROR) Ta nazwa świata nie może być używana!"
+  worldExistButNotLoaded: "(CUSTOM) <click:suggest_command:'/wm load {0} (typ)'><color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>Zarządzanie Światem</color><color:#7d66ff>}</color> <color:#ff2e1f>Ten świat już istnieje, kliknij tę wiadomość, aby go załadować.</color></click>"
+
+delete:
+  worldNotFound: "(ERROR) Podany świat nie istnieje."
+  defaultWorld: "(ERROR) Nie możesz usunąć domyślnego świata."
+  warning: "(WAITING) Świat {0} i jego folder zostaną usunięte."
+  kickedPlayers: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Świat, w którym byłeś, został usunięty.</color>"
+  failedToDelete: "(ERROR) Nie udało się usunąć świata {0}."
+  success: "(SUCCESS) SUCCESS!"
+
+list:
+  worldList: "(SUCCESS) Lista światów: \n<color:#19cdff>Kliknij, aby się teleportować\n</color>"
+  worlds: "(CUSTOM) <hover:show_text:'<blue>Teleportuj się do</blue> <yellow> {0} </yellow>'><click:run_command:'/wm tp {0} '><color:#19cdff> <color:#7471b0>➥</color> {0} </color></click></hover>"
+
+backup:
+  backupStarted: "(WAITING) Rozpoczęcie tworzenia kopii zapasowej..."
+  backupFinished: "(SUCCESS) Tworzenie kopii zapasowej zakończone pomyślnie!"
+  backupFailed: "(ERROR) Tworzenie kopii zapasowej nie powiodło się!"
+  worldNotFound: "(ERROR) Określony świat nie istnieje."
+
+restore:
+  playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Świat, w którym byłeś, został przywrócony.</color>"
+  restoreStarted: "(WAITING) Rozpoczęcie przywracania..."
+  restoreFinished: "(SUCCESS) Przywracanie zakończone pomyślnie!"
+  worldNotFound: "(ERROR) Określony świat nie istnieje."
+
+load:
+  worldAlreadyLoaded: "(ERROR) Świat {0} jest już załadowany."
+  invalidDimension: "(ERROR) Nieprawidłowy typ wymiaru!"
+  availableDimensions: "(CUSTOM) <color:#19cdff>Dostępne typy wymiarów:</color>"
+  dimensionList: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> {0} </color>"
+  loadSuccess: "(SUCCESS) Świat {0} został pomyślnie załadowany!"
+  failedLoadingWorld: "(ERROR) Wystąpił błąd podczas ładowania świata: {0}"
+
+unload:
+  worldNotLoaded: "(ERROR) Świat {0} nie jest załadowany."
+  playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Świat, w którym byłeś, został wyładowany.</color>"
+  unloadSuccess: "(SUCCESS) Świat {0} został pomyślnie wyładowany!"
+  failedUnloadingWorld: "(SUCCESS) Wystąpił błąd podczas wyładowywania świata: {0}"
+
+teleport:
+  playerNotFound: "(ERROR) Gracz nie został znaleziony."
+  worldNotFound: "(ERROR) Określony świat nie istnieje."
+  teleportSuccess: "(SUCCESS) Teleportowano {0} do świata {1}."
+  errorFromConsole: "(CUSTOM) Musisz określić gracza podczas wykonywania z konsoli."

@@ -1,6 +1,6 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
-import fr.mathildeuh.worldmanager.manager.BackupConfig;
+import fr.mathildeuh.worldmanager.configs.BackupConfig;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 

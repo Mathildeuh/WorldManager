@@ -1,13 +1,11 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -17,11 +15,10 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 
 public class Create {
-    private final MessageManager message;
-    private final JavaPlugin plugin = JavaPlugin.getPlugin(WorldManager.class);
+    CommandSender sender;
 
     public Create(CommandSender sender) {
-        this.message = new MessageManager(sender);
+        this.sender = sender;
     }
 
     public void run(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
@@ -29,7 +26,8 @@ public class Create {
         if (seed != null && seed.matches("\\d+")) {
             seedValue = Long.parseLong(seed);
         } else if (seed != null && !seed.isEmpty()) {
-            message.parse(MessageManager.MessageType.ERROR, "Seed must be a number!");
+            WorldManager.langConfig.sendFormat(sender, "create.invalidSeed");
+
             return;
         }
 
@@ -42,30 +40,36 @@ public class Create {
             sendStarting(type, name, seed, generator);
             createWorld(name, (World.Environment) worldTypeOrEnvironment, WorldType.NORMAL, seedValue, generator);
         } else {
-            message.parse(MessageManager.MessageType.ERROR, "Invalid dimension types!");
-            message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff>Available dimension types:</color>");
+            WorldManager.langConfig.sendFormat(sender, "create.invalidDimensionType");
+
+            WorldManager.langConfig.sendFormat(sender, "create.availableDimensions");
+
             for (World.Environment env : World.Environment.values()) {
-                if (env != World.Environment.CUSTOM && env != World.Environment.NORMAL)
-                    message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> " + env.toString().toLowerCase() + "</color>");
+                if (env != World.Environment.CUSTOM && env != World.Environment.NORMAL) {
+                    WorldManager.langConfig.sendFormat(sender, "create.dimensionList", env.name().toLowerCase());
+                }
             }
+
             for (WorldType worldType : WorldType.values()) {
-                message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> " + worldType.name().toLowerCase() + "</color>");
+                WorldManager.langConfig.sendFormat(sender, "create.dimensionList", worldType.name().toLowerCase());
             }
         }
+
     }
 
     public void sendStarting(String type, String name, String seed, String generator) {
-        message.parse(MessageManager.MessageType.WAITING, "Starting world creation...");
-        message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> Name: <yellow>" + name + " </yellow></color>");
+        WorldManager.langConfig.sendFormat(sender, "create.startingWorldCreation");
+        WorldManager.langConfig.sendFormat(sender, "create.worldRecap.name", name);
+
 
         String t = (type != null && !type.isEmpty()) ? type : "default";
-        message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> Type: <yellow>" + t + " </yellow></color>");
+        WorldManager.langConfig.sendFormat(sender, "create.worldRecap.type", t);
 
         String s = (seed != null && !seed.isEmpty()) ? seed : "random";
-        message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> Seed: <yellow>" + s + " </yellow></color>");
+        WorldManager.langConfig.sendFormat(sender, "create.worldRecap.seed", s);
 
         String g = (generator != null && !generator.isEmpty()) ? generator : "default";
-        message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> Generator: <yellow>" + g + "</yellow></color>");
+        WorldManager.langConfig.sendFormat(sender, "create.worldRecap.generator", g);
     }
 
     private Object getWorldType(String type) {
@@ -92,8 +96,7 @@ public class Create {
     }
 
     public void createWorld(String name, @Nullable World.Environment environment, WorldType type, @Nullable Long seed, @Nullable String generator) {
-        // Run the world creation in a synchronous task
-
+        assert environment != null;
         WorldCreator creator = new WorldCreator(name).environment(environment).type(type);
         if (seed != null) {
             creator.seed(seed);
@@ -102,16 +105,16 @@ public class Create {
             try {
                 creator.generator(generator);
             } catch (NoSuchElementException e) {
-                message.parse(MessageManager.MessageType.ERROR, "World generator \"" + generator + "\" not found.");
+                WorldManager.langConfig.sendFormat(sender, "create.generatorNotFound", generator);
                 return;
             }
         }
 
         World world = creator.createWorld();
         if (world == null) {
-            message.parse(MessageManager.MessageType.ERROR, "World creation failed for \"" + name + "\".");
+            WorldManager.langConfig.sendFormat(sender, "create.worldCreationError", name);
         } else {
-            message.parse(MessageManager.MessageType.SUCCESS, "World \"" + name + "\" created successfully!");
+            WorldManager.langConfig.sendFormat(sender, "create.worldCreationSuccess", name);
             world.save();
             WorldManager.addWorld(creator.name(), creator.type().name(), creator.environment(), generator);
         }
@@ -120,17 +123,17 @@ public class Create {
 
     public void execute(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
         if (Bukkit.getWorld(name) != null) {
-            message.parse(MessageManager.MessageType.ERROR, "This world already exists.");
+            WorldManager.langConfig.sendFormat(sender, "create.worldAlreadyExists");
             return;
         }
 
         if (name.equalsIgnoreCase("plugins") || name.equalsIgnoreCase("logs") || name.equalsIgnoreCase("libraries") || name.equalsIgnoreCase("versions") || name.equalsIgnoreCase("config") || name.equalsIgnoreCase("cache")) {
-            message.parse(MessageManager.MessageType.ERROR, "This world name can't be used.");
+            WorldManager.langConfig.sendFormat(sender, "create.worldNameCantBeUsed");
             return;
         }
 
         if (getUnloadedWorlds().contains(name)) {
-            message.parse(MessageManager.MessageType.CUSTOM, "<click:suggest_command:'/wm load " + name + " (type)'><color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>This world already exist, click on this message to load it.</color></click>");
+            WorldManager.langConfig.sendFormat(sender, "create.worldExistButNotLoaded", name);
             return;
         }
 

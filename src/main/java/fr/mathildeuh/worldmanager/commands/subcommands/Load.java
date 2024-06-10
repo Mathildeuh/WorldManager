@@ -9,21 +9,21 @@ import org.bukkit.WorldCreator;
 import org.bukkit.command.CommandSender;
 
 public class Load {
-    private final MessageManager message;
+    CommandSender sender;
 
     public Load(CommandSender sender) {
-        this.message = new MessageManager(sender);
+        this.sender = sender;
     }
 
     public void execute(String worldName, String dimension, String generator) {
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
-            message.parse(MessageManager.MessageType.ERROR, "The world \"" + worldName + "\" is already loaded.");
+            WorldManager.langConfig.sendFormat(sender, "load.worldAlreadyLoaded", worldName);
             return;
         }
 
         if (dimension == null || dimension.isEmpty()) {
-            message.help();
+            new MessageManager(sender).help(); // TODO: Help message configurable
             return;
         }
 
@@ -31,11 +31,11 @@ public class Load {
 
         Environment env = getEnvironment(dimension);
         if (env == null) {
-            message.parse(MessageManager.MessageType.ERROR, "Invalid dimension types !");
-            message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff>Available dimension types:</color>");
+            WorldManager.langConfig.sendFormat(sender, "load.invalidDimension");
+            WorldManager.langConfig.sendFormat(sender, "load.availableDimensions");
             for (Environment env2 : Environment.values()) {
                 if (env2 != Environment.CUSTOM)
-                    message.parse(MessageManager.MessageType.CUSTOM, "<color:#19cdff> <color:#7471b0>➥</color> " + env2.toString().toLowerCase() + "</color>");
+                    WorldManager.langConfig.sendFormat(sender, "load.dimensionList", env2.toString().toLowerCase());
             }
             return;
         } else {
@@ -45,11 +45,12 @@ public class Load {
         world = Bukkit.createWorld(worldCreator);
 
         if (world != null) {
-            message.parse(MessageManager.MessageType.SUCCESS, "World \"" + worldName + "\" loaded successfully!");
+
+            WorldManager.langConfig.sendFormat(sender, "load.loadSuccess", worldName);
             WorldManager.addWorld(worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);
 
         } else {
-            message.parse(MessageManager.MessageType.ERROR, "Failed loading world \"" + worldName + "\".");
+            WorldManager.langConfig.sendFormat(sender, "load.failedLoadingWorld", worldName);
         }
     }
 

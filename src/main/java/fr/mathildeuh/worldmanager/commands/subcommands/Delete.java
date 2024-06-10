@@ -2,7 +2,6 @@ package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.commands.subcommands.pregen.Pregen;
-import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -16,38 +15,38 @@ import java.io.IOException;
 public class Delete {
 
     private final JavaPlugin plugin;
-    private final MessageManager message;
+    CommandSender sender;
 
     public Delete(CommandSender sender) {
         this.plugin = JavaPlugin.getPlugin(WorldManager.class);
-        this.message = new MessageManager(sender);
+        this.sender = sender;
     }
 
     public void execute(String name) {
         World targetWorld = Bukkit.getWorld(name);
 
         if (targetWorld == null) {
-            message.parse(MessageManager.MessageType.ERROR, "The specified world does not exist.");
+            WorldManager.langConfig.sendFormat(sender, "delete.worldNotFound");
             return;
         }
 
         if (targetWorld.equals(Bukkit.getWorlds().get(0))) {
-            message.parse(MessageManager.MessageType.ERROR, "You can't delete the default world.");
+            WorldManager.langConfig.sendFormat(sender, "delete.defaultWorld");
             return;
         }
 
-        message.parse(MessageManager.MessageType.WAITING, "World \"" + name + "\" and it's folder will be erased.");
+        WorldManager.langConfig.sendFormat(sender, "delete.warning", name);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getWorld().equals(targetWorld)) {
                 player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
-                new MessageManager(player).parse(MessageManager.MessageType.CUSTOM, "<color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been deleted.</color>");
+                WorldManager.langConfig.sendFormat(player, "delete.kickedPlayers");
             }
         }
 
         boolean unloadSuccess = plugin.getServer().unloadWorld(targetWorld, false);
         if (!unloadSuccess) {
-            message.parse(MessageManager.MessageType.ERROR, "Failed to delete the world \"" + name + "\".");
+            WorldManager.langConfig.sendFormat(sender, "delete.failedToDelete");
             return;
         }
         if (Pregen.generators.containsKey(name)) {
@@ -64,7 +63,7 @@ public class Delete {
                 throw new RuntimeException(e);
             }
         });
-        message.parse(MessageManager.MessageType.SUCCESS, "Success !");
+        WorldManager.langConfig.sendFormat(sender, "delete.success");
         WorldManager.removeWorld(targetWorld.getName());
 
     }

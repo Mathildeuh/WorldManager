@@ -28,7 +28,7 @@ public class Pregen {
 
     public void execute(String[] args) {
         if (args.length < 3) {
-            message.parse(MessageManager.MessageType.ERROR, "Invalid number of arguments.");
+            message.parse("Invalid number of arguments.");
             return;
         }
 
@@ -37,14 +37,14 @@ public class Pregen {
         World world = Bukkit.getWorld(worldName);
 
         if (world == null) {
-            message.parse(MessageManager.MessageType.ERROR, "World \"" + worldName + "\" does not exist.");
+            message.parse("World \"" + worldName + "\" does not exist.");
             return;
         }
 
         if (action.equals("start")) {
             handleStart(args, player, world);
         } else {
-            message.parse(MessageManager.MessageType.ERROR, "Unknown action: " + action);
+            message.parse("Unknown action: " + action);
         }
     }
 
@@ -54,7 +54,7 @@ public class Pregen {
         int radius = 20;
 
         if (generators.containsKey(world.getName())) {
-            message.parse(MessageManager.MessageType.ERROR, "Pre-generation is already running for world \"" + world.getName() + "\".");
+            message.parse("Pre-generation is already running for world \"" + world.getName() + "\".");
             return;
         }
 
@@ -62,21 +62,21 @@ public class Pregen {
             if (args[i].startsWith("center:")) {
                 String[] centerCoords = args[i].substring("center:".length()).split(",");
                 if (centerCoords.length != 2) {
-                    message.parse(MessageManager.MessageType.ERROR, "Invalid center coordinates format.");
+                    message.parse("Invalid center coordinates format.");
                     return;
                 }
                 try {
                     centerX = Integer.parseInt(centerCoords[0]);
                     centerZ = Integer.parseInt(centerCoords[1]);
                 } catch (NumberFormatException e) {
-                    message.parse(MessageManager.MessageType.ERROR, "Invalid center coordinates values.");
+                    message.parse("Invalid center coordinates values.");
                     return;
                 }
             } else if (args[i].startsWith("radius:")) {
                 try {
                     radius = Integer.parseInt(args[i].substring("radius:".length()));
                 } catch (NumberFormatException e) {
-                    message.parse(MessageManager.MessageType.ERROR, "Invalid radius value.");
+                    message.parse("Invalid radius value.");
                     return;
                 }
             }
@@ -87,19 +87,19 @@ public class Pregen {
 
     private void startPregen(World world, Player player, int centerX, int centerZ, int radius) {
         if (generators.containsKey(world.getName())) {
-            message.parse(MessageManager.MessageType.ERROR, "Pre-generation is already running for world \"" + world.getName() + "\".");
+            message.parse("Pre-generation is already running for world \"" + world.getName() + "\".");
             return;
         }
 
         if (!(sender instanceof Player)) {
-            message.parse(MessageManager.MessageType.ERROR, "Only players can start pre-generation.");
+            message.parse("Only players can start pre-generation.");
             return;
         }
 
         WorldPreGenerator generator = new WorldPreGenerator(plugin, player, world, centerX, centerZ, radius);
         generators.put(world.getName(), generator);
         generator.start();
-        message.parse(MessageManager.MessageType.SUCCESS, "Started pre-generation for world \"" + world.getName() + "\" with center (" + centerX + "," + centerZ + ") and radius " + radius + ".");
+        message.parse("Started pre-generation for world \"" + world.getName() + "\" with center (" + centerX + "," + centerZ + ") and radius " + radius + ".");
     }
 
 }

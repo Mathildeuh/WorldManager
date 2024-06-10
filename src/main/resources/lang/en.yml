@@ -1,0 +1,72 @@
+help:
+  - "<color:#7d66ff>{</color><color:#6258a6>-----</color> <color:#02a876>World Manager - SubCommands</color> <color:#6258a6>-----</color><color:#7d66ff>}</color>"
+  - ""
+  - "<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>create</color> <dark_green>[name]</dark_green> <dark_aqua><type> <seed> <generator></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Create a new world</color></click>"
+  - "<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>delete</color> <dark_green>[name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Remove a world =(</color></click>"
+  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start</color> <dark_green> [world]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Pre-generate a world</color></click>"
+  - "<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>load</color> <dark_green>[name] [type] <dark_aqua><generator></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Load a world</color></click>"
+  - "<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>unload</color> <dark_green>[name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Unload a world</color></click>"
+  - "<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teleport</color> <dark_green>[world]</dark_green> <dark_aqua><player></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Teleport you/player to world</color></click>"
+  - "<click:suggest_command:'/wm list '><color:#7471b0>➥</color> <color:#ff9900>list</color> <dark_gray>-</dark_gray> <color:#ffa1f9>See loaded worlds list</color></click>"
+
+create:
+  invalidSeed: "(ERROR) Seed must be a number!"
+  invalidDimensionType: "(ERROR) Invalid dimension type!"
+  availableDimensions: "(CUSTOM) <color:#19cdff>Available dimension types:</color>"
+  dimensionList: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> {0} </color>"
+  startingWorldCreation: "(WAITING) Starting world creation..."
+  worldRecap:
+    name: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Name: <yellow> {0} </yellow></color>"
+    type: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Type: <yellow> {0} </yellow></color>"
+    seed: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Seed: <yellow> {0} </yellow></color>"
+    generator: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Generator: <yellow> {0} </yellow></color>"
+  generatorNotFound: "(ERROR) Generator not found: {0}"
+  worldCreationError: "(ERROR) An error occurred while creating the world: {0}"
+  worldCreationSuccess: "(SUCCESS) World {0} created successfully!"
+  worldAlreadyExists: "(ERROR) This world already exists!"
+  worldNameCantBeUsed: "(ERROR) This world name can't be used!"
+  worldExistButNotLoaded: "(CUSTOM) <click:suggest_command:'/wm load {0} (type)'><color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>This world already exist, click on this message to load it.</color></click>"
+
+delete:
+  worldNotFound: "(ERROR) The specified world does not exist."
+  defaultWorld: "(ERROR) You can't delete the default world."
+  warning: "(WAITING) World {0} and it's folder will be erased."
+  kickedPlayers: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been deleted.</color>"
+  failedToDelete: "(ERROR) Failed to delete the world {0}."
+  success: "(SUCCESS) Success !"
+
+list:
+  worldList: "(SUCCESS) Worlds list: \n<color:#19cdff>Click to teleport\n</color>"
+  worlds: "(CUSTOM) <hover:show_text:'<blue>Teleport to</blue> <yellow> {0} </yellow>'><click:run_command:'/wm tp {0} '><color:#19cdff> <color:#7471b0>➥</color> {0} </color></click></hover>"
+
+backup:
+  backupStarted: "(WAITING) Backup started..."
+  backupFinished: "(SUCCESS) Backup finished successfully!"
+  backupFailed: "(ERROR) Backup failed!"
+  worldNotFound: "(ERROR) The specified world does not exist."
+
+restore:
+  playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been restored.</color>"
+  restoreStarted: "(WAITING) Restore started..."
+  restoreFinished: "(SUCCESS) Restore finished successfully!"
+  worldNotFound: "(ERROR) The specified world does not exist."
+
+load:
+  worldAlreadyLoaded: "(ERROR) The world {0} is already loaded."
+  invalidDimension: "(ERROR) Invalid dimension type!"
+  availableDimensions: "(CUSTOM) <color:#19cdff>Available dimension types:</color>"
+  dimensionList: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> {0} </color>"
+  loadSuccess: "(SUCCESS) World {0} loaded successfully!"
+  failedLoadingWorld: "(ERROR) An error occurred while loading the world: {0}"
+
+unload:
+  worldNotLoaded: "(ERROR) The world {0} is not loaded."
+  playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been unloaded.</color>"
+  unloadSuccess: "(SUCCESS) World {0} unloaded successfully!"
+  failedUnloadingWorld: "(ERROR) An error occurred while unloading the world: {0}"
+
+teleport:
+  playerNotFound: "(ERROR) Player not found."
+  worldNotFound: "(ERROR) The specified world does not exist."
+  teleportSuccess: "(SUCCESS) Teleported {0} to world {1}."
+  errorFromConsole: "(CUSTOM) You must specify a player when executing from the console."

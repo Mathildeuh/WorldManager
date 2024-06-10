@@ -1,8 +1,7 @@
-package fr.mathildeuh.worldmanager.manager;
+package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.commands.subcommands.pregen.Pregen;
-import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -30,6 +29,8 @@ public class BackupConfig {
         World world = Bukkit.getWorld(name);
         if (world != null) {
             Bukkit.getLogger().info("Backing up world " + name);
+            WorldManager.langConfig.sendFormat(player, "backup.backupStarted");
+
 
             File worldFolder = world.getWorldFolder();
             File backupDir = new File(worldFolder.getParentFile(), "backups/WorldManager");
@@ -49,29 +50,26 @@ public class BackupConfig {
                     ZipUtil.pack(worldFolder, backupFile);
                     Bukkit.getLogger().info("World " + name + " has been backed up to " + backupFile.getAbsolutePath());
 
-                    // Save the backup details to the config
                     config.set("backups." + name + ".env", world.getEnvironment().name());
                     config.set("backups." + name + ".type", world.getWorldType().getName().equalsIgnoreCase("DEFAULT") ? "NORMAL" : world.getWorldType().getName());
                     config.set("backups." + name + ".generator", world.getGenerator());
                     config.save(configFile);
 
-                    new MessageManager(player).parse(MessageManager.MessageType.SUCCESS, "World " + name + " has been backed up");
+                    WorldManager.langConfig.sendFormat(player, "backup.backupFinished");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    new MessageManager(player).parse(MessageManager.MessageType.ERROR, "Failed to backup world " + name);
+                    WorldManager.langConfig.sendFormat(player, "backup.backupFailed");
                 }
             });
 
         } else {
-            new MessageManager(player).parse(MessageManager.MessageType.ERROR, "World " + name + " does not exist.");
+            WorldManager.langConfig.sendFormat(player, "backup.worldNotFound");
         }
     }
 
     public static void restoreWorld(Player player, String name) {
         File worldFolder = new File(Bukkit.getWorldContainer(), name);
-
         List<Player> worldPlayers = new ArrayList<>();
-
         File backupFile = new File(worldFolder.getParentFile(), "backups/WorldManager/" + name.toLowerCase() + ".zip");
 
         if (backupFile.exists()) {
@@ -80,10 +78,12 @@ public class BackupConfig {
                 worldPlayers = new ArrayList<>(world.getPlayers());
                 for (Player players : worldPlayers) {
                     players.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+                    WorldManager.langConfig.sendFormat(players, "restore.restoreFinished");
                 }
                 Bukkit.unloadWorld(world, false);
-
             }
+
+            WorldManager.langConfig.sendFormat(player, "restore.restoreStarted");
 
             if (worldFolder.exists()) {
                 deleteFolder(worldFolder);
@@ -108,23 +108,22 @@ public class BackupConfig {
 
                 Bukkit.createWorld(worldCreator);
 
-
                 Bukkit.getScheduler().runTaskLater(JavaPlugin.getPlugin(WorldManager.class), () -> {
                     World restoredWorld = Bukkit.getWorld(name);
                     if (restoredWorld != null) {
                         for (Player players : finalWorldPlayers) {
                             players.teleport(restoredWorld.getSpawnLocation());
-                            new MessageManager(players).parse(MessageManager.MessageType.CUSTOM, "<color:#aa3e00>☠</color> <color:#ff2e1f>The world you were in has been restored.</color>");
                         }
                     }
                 }, 20L * 2L);
             }, 20L * 2L);
 
-            new MessageManager(player).parse(MessageManager.MessageType.SUCCESS, "World " + name + " has been restored.");
+            WorldManager.langConfig.sendFormat(player, "restore.restoreStarted");
         } else {
-            new MessageManager(player).parse(MessageManager.MessageType.ERROR, "Backup for world " + name + " does not exist.");
+            WorldManager.langConfig.sendFormat(player, "restore.worldNotFound");
         }
     }
+
 
     private static void deleteFolder(File folder) {
         File[] files = folder.listFiles();
