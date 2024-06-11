@@ -3,4 +3,4 @@
 #
 
 update-checker: true
-lang: en # (en, fr, es, de, pl, or custom but you have to do it yourself)
+lang: en # (en, fr, es, de, pl, ru, or custom but you have to do it yourself)

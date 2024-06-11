@@ -21,8 +21,8 @@ create:
     seed: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Graine : <yellow> {0} </yellow></color>"
     generator: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> Générateur : <yellow> {0} </yellow></color>"
   generatorNotFound: "(ERROR) Générateur non trouvé : {0}"
-  worldCreationError: "(ERROR) Une ERROR s'est produite lors de la création du monde : {0}"
-  worldCreationSuccess: "(SUCCESS) Monde {0} créé avec SUCCESS !"
+  worldCreationError: "(ERROR) Une erreur s'est produite lors de la création du monde : {0}"
+  worldCreationSuccess: "(SUCCESS) Monde {0} créé avec succès !"
   worldAlreadyExists: "(ERROR) Ce monde existe déjà !"
   worldNameCantBeUsed: "(ERROR) Ce nom de monde ne peut pas être utilisé !"
   worldExistButNotLoaded: "(CUSTOM) <click:suggest_command:'/wm load {0} (type)'><color:#aa3e00>☠</color> <color:#7d66ff>{</color><color:#02a876>World Manager</color><color:#7d66ff>}</color> <color:#ff2e1f>Ce monde existe déjà, cliquez sur ce message pour le charger.</color></click>"
@@ -33,7 +33,7 @@ delete:
   warning: "(WAITING) Le monde {0} et son dossier seront effacés."
   kickedPlayers: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Le monde dans lequel vous étiez a été supprimé.</color>"
   failedToDelete: "(ERROR) Échec de la suppression du monde {0}."
-  success: "(SUCCESS) SUCCESS !"
+  success: "(SUCCESS) succès !"
 
 list:
   worldList: "(SUCCESS) Liste des mondes : \n<color:#19cdff>Cliquez pour vous téléporter\n</color>"
@@ -41,14 +41,14 @@ list:
 
 backup:
   backupStarted: "(WAITING) Sauvegarde en cours..."
-  backupFinished: "(SUCCESS) Sauvegarde terminée avec SUCCESS !"
+  backupFinished: "(SUCCESS) Sauvegarde terminée avec succès !"
   backupFailed: "(ERROR) Échec de la sauvegarde !"
   worldNotFound: "(ERROR) Le monde spécifié n'existe pas."
 
 restore:
   playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Le monde dans lequel vous étiez a été restauré.</color>"
   restoreStarted: "(WAITING) Restauration en cours..."
-  restoreFinished: "(SUCCESS) Restauration terminée avec SUCCESS !"
+  restoreFinished: "(SUCCESS) Restauration terminée avec succès !"
   worldNotFound: "(ERROR) Le monde spécifié n'existe pas."
 
 load:
@@ -56,14 +56,14 @@ load:
   invalidDimension: "(ERROR) Type de dimension invalide !"
   availableDimensions: "(CUSTOM) <color:#19cdff>Types de dimensions disponibles :</color>"
   dimensionList: "(CUSTOM) <color:#19cdff> <color:#7471b0>➥</color> {0} </color>"
-  loadSuccess: "(SUCCESS) Monde {0} chargé avec SUCCESS !"
-  failedLoadingWorld: "(ERROR) Une ERROR s'est produite lors du chargement du monde : {0}"
+  loadSuccess: "(SUCCESS) Monde {0} chargé avec succès !"
+  failedLoadingWorld: "(ERROR) Une erreur s'est produite lors du chargement du monde : {0}"
 
 unload:
   worldNotLoaded: "(ERROR) Le monde {0} n'est pas chargé."
   playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Le monde dans lequel vous étiez a été déchargé.</color>"
-  unloadSuccess: "(SUCCESS) Monde {0} déchargé avec SUCCESS !"
-  failedUnloadingWorld: "(ERROR) Une ERROR s'est produite lors du déchargement du monde : {0}"
+  unloadSuccess: "(SUCCESS) Monde {0} déchargé avec succès !"
+  failedUnloadingWorld: "(ERROR) Une erreur s'est produite lors du déchargement du monde : {0}"
 
 teleport:
   playerNotFound: "(ERROR) Joueur introuvable."

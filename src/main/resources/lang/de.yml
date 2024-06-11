@@ -60,7 +60,7 @@ load:
   failedLoadingWorld: "(ERROR) Beim Laden der Welt ist ein ERROR aufgetreten: {0}"
 
 unload:
-  worldNotLoaded: "(ERROR) Die Welt {0} ist nicht geladen."
+    worldNotLoaded: "(ERROR) Die Welt {0} ist nicht geladen."
   playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Die Welt, in der du warst, wurde entladen.</color>"
   unloadSuccess: "(SUCCESS) Welt {0} erfolgreich entladen!"
   failedUnloadingWorld: "(ERROR) Beim Entladen der Welt ist ein ERROR aufgetreten: {0}"
