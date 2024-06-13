@@ -41,10 +41,10 @@ jobs:
           commit_message=$(git log -1 --pretty=%B)
           echo "::set-output name=COMMIT_MESSAGE::$commit_message"
 
-      - name: Rename JAR file with version
-        run: |
-          version=${{ steps.extract_version.outputs.VERSION }}
-          mv ./out/WorldManager-${version}.jar ./out/WorldManager-${version}.jar
+      #      - name: Rename JAR file with version
+      #        run: |
+      #          version=${{ steps.extract_version.outputs.VERSION }}
+      #          mv ./out/WorldManager-${version}.jar ./out/WorldManager-${version}.jar
 
       - name: Create Release
         id: create_release
