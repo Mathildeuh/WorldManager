@@ -79,11 +79,7 @@ public class GUIMain {
 
         if (majorVersion < 1) {
             return true;
-        } else if (majorVersion == 1 && minorVersion < 16) {
-            return true;
-        } else {
-            return false;
-        }
+        } else return majorVersion == 1 && minorVersion < 16;
     }
 
     private void openMainMenu() {
