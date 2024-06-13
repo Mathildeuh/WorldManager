@@ -44,7 +44,7 @@ jobs:
       - name: Rename JAR file with version
         run: |
           version=${{ steps.extract_version.outputs.VERSION }}
-          mv ./out/WorldManager-0.jar ./out/WorldManager-${version}.jar
+          mv ./out/WorldManager-${version}.jar ./out/WorldManager-${version}.jar
 
       - name: Create Release
         id: create_release
