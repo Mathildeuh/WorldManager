@@ -42,7 +42,7 @@ jobs:
           echo "::set-output name=COMMIT_MESSAGE::$commit_message"
 
       - name: Rename JAR file with version
-        run: tree
+        run: tree ./out/
 #          version=${{ steps.extract_version.outputs.VERSION }}
 #          mv ./out/WorldManager-0.jar ./out/WorldManager-${version}.jar
 
