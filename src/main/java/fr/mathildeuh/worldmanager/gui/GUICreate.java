@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static fr.mathildeuh.worldmanager.gui.GUIMain.isVersionLowerThan1_16;
+
 public class GUICreate implements Listener {
 
     private final Map<Player, String> playersInEditor;
@@ -34,7 +36,8 @@ public class GUICreate implements Listener {
         this.playersInEditor = new HashMap<>();
         this.worldTypesAndEnvironments = new ArrayList<>();
         for (World.Environment env : World.Environment.values()) {
-            if (env != World.Environment.CUSTOM)
+
+            if (isVersionLowerThan1_16() || env != World.Environment.CUSTOM )
                 this.worldTypesAndEnvironments.add("➥ " + env.name());
         }
 
@@ -72,7 +75,10 @@ public class GUICreate implements Listener {
             player.closeInventory();
         }));
 
-        menu.setButton(21, createButton(Material.GRASS_BLOCK, "§aClick to switch world type §5Optional", lore, event -> {
+        Material targetMaterial = isVersionLowerThan1_16() ? Material.STONE : Material.GRASS_BLOCK;
+
+
+        menu.setButton(21, createButton(targetMaterial, "§aClick to switch world type §5Optional", lore, event -> {
             currentTypeIndex = (currentTypeIndex + 1) % worldTypesAndEnvironments.size();
             open(player);
         }));
@@ -93,12 +99,14 @@ public class GUICreate implements Listener {
             new GUIMain(player);
         }));
 
+        targetMaterial = isVersionLowerThan1_16() ? Material.REDSTONE : Material.RED_WOOL;
+
         if (worldName == null) {
-            menu.setButton(3, createButton(Material.RED_WOOL, "§5Create", "§7You must set a world name", event -> {
-                message.parse("You must set a world name");
-            }));
+            menu.setButton(3, createButton(targetMaterial, "§5Create", "§7You must set a world name", event -> {}));
         } else {
-            menu.setButton(3, createButton(Material.GREEN_WOOL, "§aCreate", "§7Click to create this world", event -> {
+            targetMaterial = isVersionLowerThan1_16() ? Material.EMERALD : Material.GREEN_WOOL;
+
+            menu.setButton(3, createButton(targetMaterial, "§aCreate", "§7Click to create this world", event -> {
                 player.closeInventory();
                 new Create(player).run(worldName, worldTypesAndEnvironments.get(currentTypeIndex).split(" ")[1].toLowerCase(), worldSeed, generator);
             }));

@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GUIMain {
 
@@ -28,7 +27,8 @@ public class GUIMain {
     }
 
     public static void openWorldChoose(Player player) {
-        List<String> worldNames = Bukkit.getWorlds().stream().map(org.bukkit.World::getName).collect(Collectors.toList());
+
+        List<String> worldNames = Bukkit.getWorlds().stream().map(org.bukkit.World::getName).toList();
         int menuSize = Math.min((worldNames.size() + 8) / 9 * 9, 54);
         if (menuSize <= 9) {
             menuSize = 27;
@@ -41,7 +41,9 @@ public class GUIMain {
                 .toList();
         int id = 0;
         for (World world : sortedWorlds) {
-            menu.setButton(id, new SGButton(new ItemBuilder(Material.GRASS_BLOCK)
+            Material targetMaterial = isVersionLowerThan1_16() ? Material.STONE : Material.GRASS_BLOCK;
+
+            menu.setButton(id, new SGButton(new ItemBuilder(targetMaterial)
                     .name("§a" + world.getName())
                     .lore("§7Click to manage this world")
                     .build()
@@ -69,18 +71,40 @@ public class GUIMain {
 
     }
 
+    public static boolean isVersionLowerThan1_16() {
+        String bukkitVersion = Bukkit.getBukkitVersion();
+        String[] versionParts = bukkitVersion.split("\\.");
+        int majorVersion = Integer.parseInt(versionParts[0]);
+        int minorVersion = Integer.parseInt(versionParts[1]);
+
+        if (majorVersion < 1) {
+            return true;
+        } else if (majorVersion == 1 && minorVersion < 16) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private void openMainMenu() {
         menu = WorldManager.getSpiGUI().create("&9{------ World Manager -----}", 3);
 
-        menu.setButton(11, createButton(Material.TARGET, "§aCreate a world", "§7World creator options", event -> {
+        Material targetMaterial = isVersionLowerThan1_16() ? Material.COMPASS : Material.TARGET;
+
+        menu.setButton(11, createButton(targetMaterial, "§aCreate a world", "§7World creator options", event -> {
             new GUICreate(plugin).open(player);
         }));
 
-        menu.setButton(13, createButton(Material.GRASS_BLOCK, "§aManage your worlds", "§7World manager options", event -> {
-            openWorldChoose(player);
+        targetMaterial = isVersionLowerThan1_16() ? Material.STONE : Material.GRASS_BLOCK;
+
+        menu.setButton(13, createButton(targetMaterial, "§aManage your worlds", "§7World manager options", event -> {
+            if (!isVersionLowerThan1_16())
+                openWorldChoose(player);
         }));
 
-        menu.setButton(15, createButton(Material.DEBUG_STICK, "§aLoad a world", "§7World loader option", event -> {
+        targetMaterial = isVersionLowerThan1_16() ? Material.STICK : Material.DEBUG_STICK;
+
+        menu.setButton(15, createButton(targetMaterial, "§aLoad a world", "§7World loader option", event -> {
             new GUILoad(plugin).open(player);
         }));
 

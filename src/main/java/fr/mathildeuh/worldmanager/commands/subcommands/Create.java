@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
+import static fr.mathildeuh.worldmanager.gui.GUIMain.isVersionLowerThan1_16;
+
 public class Create {
     CommandSender sender;
 
@@ -45,7 +47,7 @@ public class Create {
             WorldManager.langConfig.sendFormat(sender, "create.availableDimensions");
 
             for (World.Environment env : World.Environment.values()) {
-                if (env != World.Environment.CUSTOM && env != World.Environment.NORMAL) {
+                if (isVersionLowerThan1_16() || env != World.Environment.CUSTOM && env != World.Environment.NORMAL ) {
                     WorldManager.langConfig.sendFormat(sender, "create.dimensionList", env.name().toLowerCase());
                 }
             }
