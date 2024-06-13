@@ -42,28 +42,28 @@ jobs:
           echo "::set-output name=COMMIT_MESSAGE::$commit_message"
 
       - name: Rename JAR file with version
-        run: tree ./out/
-#          version=${{ steps.extract_version.outputs.VERSION }}
-#          mv ./out/WorldManager-0.jar ./out/WorldManager-${version}.jar
+        run: |
+          version=${{ steps.extract_version.outputs.VERSION }}
+          mv ./out/WorldManager*.jar ./out/WorldManager-${version}.jar
 
-#      - name: Create Release
-#        id: create_release
-#        uses: actions/create-release@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: ${{ steps.extract_version.outputs.VERSION }}
-#          release_name: V${{ steps.extract_version.outputs.VERSION }}
-#          body: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
-#          draft: false
-#          prerelease: false
-#
-#      - name: Upload Release Asset
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./out/WorldManager-${{ steps.extract_version.outputs.VERSION }}.jar  # Chemin vers le fichier .jar généré
-#          asset_name: WorldManager-${{ steps.extract_version.outputs.VERSION }}.jar  # Nom du fichier dans la release
-#          asset_content_type: application/java-archive  # Type de contenu MIME du fichier .jar
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.extract_version.outputs.VERSION }}
+          release_name: V${{ steps.extract_version.outputs.VERSION }}
+          body: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./out/WorldManager-${{ steps.extract_version.outputs.VERSION }}.jar  # Chemin vers le fichier .jar généré
+          asset_name: WorldManager-${{ steps.extract_version.outputs.VERSION }}.jar  # Nom du fichier dans la release
+          asset_content_type: application/java-archive  # Type de contenu MIME du fichier .jar
