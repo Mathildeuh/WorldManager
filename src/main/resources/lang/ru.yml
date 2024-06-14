@@ -70,3 +70,13 @@ teleport:
   worldNotFound: "(ERROR) Указанный мир не существует."
   teleportSuccess: "(SUCCESS) {0} телепортирован в мир {1}."
   errorFromConsole: "(CUSTOM) Вы должны указать игрока при выполнении из консоли."
+
+permission:
+  noPermission: "(ERROR) У вас нет разрешения на использование этой команды."
+  noPermissionToTeleport: "(ERROR) У вас нет разрешения на телепортацию в этот мир."
+  noPermissionToLoad: "(ERROR) У вас нет разрешения на загрузку этого мира."
+  noPermissionToUnload: "(ERROR) У вас нет разрешения на выгрузку этого мира."
+  noPermissionToCreate: "(ERROR) У вас нет разрешения на создание мира."
+  noPermissionToDelete: "(ERROR) У вас нет разрешения на удаление этого мира."
+  noPermissionToBackup: "(ERROR) У вас нет разрешения на создание резервной копии этого мира."
+  noPermissionToRestore: "(ERROR) У вас нет разрешения на восстановление этого мира."

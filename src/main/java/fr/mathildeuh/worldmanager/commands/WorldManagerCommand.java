@@ -20,93 +20,127 @@ import java.util.Arrays;
 import java.util.List;
 
 public class WorldManagerCommand implements CommandExecutor, TabCompleter {
-    WorldManager plugin;
+    private final WorldManager plugin;
 
-    public WorldManagerCommand(WorldManager pluginClass) {
-        plugin = pluginClass;
-
+    public WorldManagerCommand(WorldManager plugin) {
+        this.plugin = plugin;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String arg, String[] args) {
-        MessageManager message = new MessageManager(sender);
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            new Gui(sender).execute();
-            return true;
-        }
-        if (args.length == 1) {
-            switch (args[0].toLowerCase()) {
-                case "list":
-                    new Lists(sender).execute();
-                    return true;
-
-                case "gui":
-                case "open":
-                    new Gui(sender).execute();
-                    break;
-
-                default:
-                    message.help();
-                    break;
+            if (hasPermission(sender, "worldmanager.gui")) {
+                new Gui(sender).execute();
+            } else {
+                WorldManager.langConfig.sendFormat(sender, "permission.noPermission");
             }
-
             return true;
         }
-        String name = args[1];
-        String type;
-        String gen;
-        switch (args[0].toLowerCase()) {
+
+        String subCommand = args[0].toLowerCase();
+        switch (subCommand) {
+            case "list":
+                if (hasPermission(sender, "worldmanager.list")) {
+                    new Lists(sender).execute();
+                } else {
+                    WorldManager.langConfig.sendFormat(sender, "permission.noPermission");
+                }
+                break;
+            case "gui":
+            case "open":
+                if (hasPermission(sender, "worldmanager.gui")) {
+                    new Gui(sender).execute();
+                } else {
+                    WorldManager.langConfig.sendFormat(sender, "permission.noPermission");
+                }
+                break;
             case "backup":
-                new Backup(sender).execute(name);
+                if (args.length > 1 && hasPermission(sender, "worldmanager.backup")) {
+                    new Backup(sender).execute(args[1]);
+                } else {
+                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToBackup");
+                }
                 break;
             case "restore":
-                new Restore(sender).execute(name);
+                if (args.length > 1 && hasPermission(sender, "worldmanager.restore")) {
+                    new Restore(sender).execute(args[1]);
+                } else {
+                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToRestore");
+                }
                 break;
             case "c":
             case "create":
-                type = (args.length >= 3) ? args[2] : null;
-                String seed = (args.length >= 4) ? args[3] : null;
-                gen = (args.length >= 5) ? args[4] : null;
-                new Create(sender).execute(name, type, seed, gen);
+                if (hasPermission(sender, "worldmanager.create")) {
+                    String name = args.length > 1 ? args[1] : null;
+                    String type = args.length > 2 ? args[2] : null;
+                    String seed = args.length > 3 ? args[3] : null;
+                    String gen = args.length > 4 ? args[4] : null;
+                    new Create(sender).execute(name, type, seed, gen);
+                } else {
+                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToCreate");
+                }
                 break;
             case "del":
             case "delete":
-                new Delete(sender).execute(name);
+                if (args.length > 1 && hasPermission(sender, "worldmanager.delete")) {
+                    new Delete(sender).execute(args[1]);
+                } else {
+                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToDelete");
+                }
                 break;
             case "l":
             case "load":
             case "import":
-                type = (args.length >= 3) ? args[2] : null;
-                gen = (args.length >= 4) ? args[3] : null;
-                new Load(sender).execute(name, type, gen);
+                if (hasPermission(sender, "worldmanager.load")) {
+                    String name = args.length > 1 ? args[1] : null;
+                    String type = args.length > 2 ? args[2] : null;
+                    String gen = args.length > 3 ? args[3] : null;
+                    new Load(sender).execute(name, type, gen);
+                } else {
+                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToLoad");
+                }
                 break;
             case "u":
             case "unload":
-                new Unload(sender).execute(name);
+                if (args.length > 1 && hasPermission(sender, "worldmanager.unload")) {
+                    new Unload(sender).execute(args[1]);
+                } else {
+                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToUnload");
+                }
                 break;
             case "tp":
             case "teleport":
-                new Teleport(sender).execute(args);
+                if (hasPermission(sender, "worldmanager.teleport")) {
+                    new Teleport(sender).execute(args);
+                } else {
+                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToTeleport");
+                }
                 break;
             case "pregen":
-                new Pregen(sender).execute(args);
+                if (hasPermission(sender, "worldmanager.pregen")) {
+                    new Pregen(sender).execute(args);
+                } else {
+                    WorldManager.langConfig.sendFormat(sender, "permission.noPermission");
+                }
                 break;
-
             case "help":
             default:
-                message.help();
+                new MessageManager(sender).sendHelp();
                 break;
         }
         return true;
+    }
+
+    private boolean hasPermission(CommandSender sender, String permission) {
+        return sender.hasPermission(permission) || sender.isOp();
     }
 
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         List<String> completions = new ArrayList<>();
-
         if (args.length == 1) {
-            String[] commands = {"create", "delete", "list", "load", "teleport", "unload", "pregen", "gui", "open", "help", "open", "gui", "restore", "backup"};
+            String[] commands = {"create", "delete", "list", "load", "teleport", "unload", "pregen", "gui", "open", "help", "restore", "backup"};
             Arrays.sort(commands);
             String partialName = args[0].toLowerCase();
 
@@ -118,17 +152,26 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
         } else if (args.length == 2) {
             String subCommand = args[0].toLowerCase();
             switch (subCommand) {
-                case "load", "l", "import":
+                case "load":
+                case "l":
+                case "import":
                     completions.addAll(getUnloadedWorlds());
                     break;
-
-                case "delete", "teleport", "tp", "unload", "del", "u", "backup", "restore":
+                case "delete":
+                case "teleport":
+                case "tp":
+                case "unload":
+                case "del":
+                case "u":
+                case "backup":
+                case "restore":
                     for (World world : Bukkit.getWorlds()) {
                         completions.add(world.getName());
                     }
                     break;
                 case "pregen":
                     completions.add("start");
+                    break;
                 default:
                     break;
             }
@@ -154,6 +197,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     for (World world : Bukkit.getWorlds()) {
                         completions.add(world.getName());
                     }
+                    break;
                 default:
                     break;
             }
@@ -169,8 +213,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
         return completions;
     }
 
-
-    public List<String> getUnloadedWorlds() {
+    private List<String> getUnloadedWorlds() {
         List<String> unloadedWorlds = new ArrayList<>();
         List<String> loadedWorldNames = new ArrayList<>();
         for (World world : Bukkit.getWorlds()) {
@@ -189,10 +232,8 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
         return unloadedWorlds;
     }
 
-    public boolean containsLevelDat(File folder) {
+    private boolean containsLevelDat(File folder) {
         File levelDat = new File(folder, "level.dat");
         return levelDat.exists();
     }
-
-
 }

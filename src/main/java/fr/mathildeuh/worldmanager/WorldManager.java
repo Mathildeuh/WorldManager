@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
+// TODO: Permission per world
+
 public final class WorldManager extends JavaPlugin {
 
     public static BukkitAudiences adventure;
@@ -54,7 +56,6 @@ public final class WorldManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
 
 
         spiGUI = new SpiGUI(this);

@@ -70,3 +70,13 @@ teleport:
   worldNotFound: "(ERROR) The specified world does not exist."
   teleportSuccess: "(SUCCESS) Teleported {0} to world {1}."
   errorFromConsole: "(CUSTOM) You must specify a player when executing from the console."
+
+permission:
+  noPermission: "(ERROR) You don't have permission to use this command."
+  noPermissionToTeleport: "(ERROR) You don't have permission to teleport to this world."
+  noPermissionToLoad: "(ERROR) You don't have permission to load this world."
+  noPermissionToUnload: "(ERROR) You don't have permission to unload this world."
+  noPermissionToCreate: "(ERROR) You don't have permission to create a world."
+  noPermissionToDelete: "(ERROR) You don't have permission to delete this world."
+  noPermissionToBackup: "(ERROR) You don't have permission to backup this world."
+  noPermissionToRestore: "(ERROR) You don't have permission to restore this world."

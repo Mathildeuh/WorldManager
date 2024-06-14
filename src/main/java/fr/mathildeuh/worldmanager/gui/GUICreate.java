@@ -37,7 +37,7 @@ public class GUICreate implements Listener {
         this.worldTypesAndEnvironments = new ArrayList<>();
         for (World.Environment env : World.Environment.values()) {
 
-            if (isVersionLowerThan1_16() || env != World.Environment.CUSTOM )
+            if (isVersionLowerThan1_16() || env != World.Environment.CUSTOM)
                 this.worldTypesAndEnvironments.add("➥ " + env.name());
         }
 
@@ -102,7 +102,8 @@ public class GUICreate implements Listener {
         targetMaterial = isVersionLowerThan1_16() ? Material.REDSTONE : Material.RED_WOOL;
 
         if (worldName == null) {
-            menu.setButton(3, createButton(targetMaterial, "§5Create", "§7You must set a world name", event -> {}));
+            menu.setButton(3, createButton(targetMaterial, "§5Create", "§7You must set a world name", event -> {
+            }));
         } else {
             targetMaterial = isVersionLowerThan1_16() ? Material.EMERALD : Material.GREEN_WOOL;
 

@@ -25,7 +25,7 @@ public class MessageManager {
         helpMessage.addAll(helpConfig);
     }
 
-    public void help() {
+    public void sendHelp() {
         if (!(sender instanceof Player player)) return;
         for (String message : helpMessage) {
             WorldManager.adventure().player(player).sendMessage(MiniMessage.miniMessage().deserialize(message));

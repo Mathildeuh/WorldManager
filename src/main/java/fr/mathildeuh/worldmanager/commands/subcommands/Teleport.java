@@ -19,7 +19,7 @@ public class Teleport {
 
     public void execute(String... args) {
         if (args.length < 2) {
-            message.help();
+            message.sendHelp();
             return;
         }
 

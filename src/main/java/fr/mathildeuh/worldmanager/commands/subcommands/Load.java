@@ -23,7 +23,7 @@ public class Load {
         }
 
         if (dimension == null || dimension.isEmpty()) {
-            new MessageManager(sender).help(); // TODO: Help message configurable
+            new MessageManager(sender).sendHelp(); // TODO: Help message configurable
             return;
         }
 

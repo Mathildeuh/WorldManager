@@ -87,22 +87,42 @@ public class GUIMain {
 
         Material targetMaterial = isVersionLowerThan1_16() ? Material.COMPASS : Material.TARGET;
 
-        menu.setButton(11, createButton(targetMaterial, "§aCreate a world", "§7World creator options", event -> {
-            new GUICreate(plugin).open(player);
-        }));
+
+        if (player.hasPermission("worldmanager.gui.create"))
+            menu.setButton(11, createButton(targetMaterial, "§aCreate a world", "§7World creator options", event -> {
+                new GUICreate(plugin).open(player);
+            }));
+        else {
+            menu.setButton(11, createButton(targetMaterial, "§cNo permission to create worlds", "§7World creator options", event -> {
+                player.sendMessage("§cYou don't have the permission to create worlds");
+            }));
+        }
 
         targetMaterial = isVersionLowerThan1_16() ? Material.STONE : Material.GRASS_BLOCK;
 
-        menu.setButton(13, createButton(targetMaterial, "§aManage your worlds", "§7World manager options", event -> {
-            if (!isVersionLowerThan1_16())
-                openWorldChoose(player);
-        }));
+        if (player.hasPermission("worldmanager.gui.manage"))
+
+            menu.setButton(13, createButton(targetMaterial, "§aManage your worlds", "§7World manager options", event -> {
+                if (!isVersionLowerThan1_16())
+                    openWorldChoose(player);
+            }));
+        else {
+            menu.setButton(13, createButton(targetMaterial, "§cNo permission to manage worlds", "§7World manager options", event -> {
+                player.sendMessage("§cYou don't have the permission to manage worlds");
+            }));
+        }
 
         targetMaterial = isVersionLowerThan1_16() ? Material.STICK : Material.DEBUG_STICK;
 
-        menu.setButton(15, createButton(targetMaterial, "§aLoad a world", "§7World loader option", event -> {
-            new GUILoad(plugin).open(player);
-        }));
+        if (player.hasPermission("worldmanager.gui.load"))
+            menu.setButton(15, createButton(targetMaterial, "§aLoad a world", "§7World loader option", event -> {
+                new GUILoad(plugin).open(player);
+            }));
+        else {
+            menu.setButton(15, createButton(targetMaterial, "§cNo permission to load worlds", "§7World loader option", event -> {
+                player.sendMessage("§cYou don't have the permission to load worlds");
+            }));
+        }
 
         player.openInventory(menu.getInventory());
     }

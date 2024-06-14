@@ -70,3 +70,14 @@ teleport:
   worldNotFound: "(ERROR) Le monde spécifié n'existe pas."
   teleportSuccess: "(SUCCESS) {0} téléporté vers le monde {1}."
   errorFromConsole: "(CUSTOM) Vous devez spécifier un joueur lors de l'exécution depuis la console."
+
+permission:
+  noPermission: "(ERROR) Vous n'avez pas la permission d'utiliser cette commande."
+  noPermissionToTeleport: "(ERROR) Vous n'avez pas la permission de vous téléporter dans ce monde."
+  noPermissionToLoad: "(ERROR) Vous n'avez pas la permission de charger ce monde."
+  noPermissionToUnload: "(ERROR) Vous n'avez pas la permission de décharger ce monde."
+  noPermissionToCreate: "(ERROR) Vous n'avez pas la permission de créer un monde."
+  noPermissionToDelete: "(ERROR) Vous n'avez pas la permission de supprimer ce monde."
+  noPermissionToBackup: "(ERROR) Vous n'avez pas la permission de sauvegarder ce monde."
+  noPermissionToRestore: "(ERROR) Vous n'avez pas la permission de restaurer ce monde."
+

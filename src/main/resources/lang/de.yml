@@ -60,7 +60,7 @@ load:
   failedLoadingWorld: "(ERROR) Beim Laden der Welt ist ein ERROR aufgetreten: {0}"
 
 unload:
-    worldNotLoaded: "(ERROR) Die Welt {0} ist nicht geladen."
+  worldNotLoaded: "(ERROR) Die Welt {0} ist nicht geladen."
   playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Die Welt, in der du warst, wurde entladen.</color>"
   unloadSuccess: "(SUCCESS) Welt {0} erfolgreich entladen!"
   failedUnloadingWorld: "(ERROR) Beim Entladen der Welt ist ein ERROR aufgetreten: {0}"
@@ -70,3 +70,13 @@ teleport:
   worldNotFound: "(ERROR) Die angegebene Welt existiert nicht."
   teleportSuccess: "(SUCCESS) {0} wurde zur Welt {1} teleportiert."
   errorFromConsole: "(CUSTOM) Du musst einen Spieler angeben, wenn du es von der Konsole ausführst."
+
+permission:
+  noPermission: "(ERROR) Du hast keine Berechtigung, diesen Befehl zu verwenden."
+  noPermissionToTeleport: "(ERROR) Du hast keine Berechtigung, dich in diese Welt zu teleportieren."
+  noPermissionToLoad: "(ERROR) Du hast keine Berechtigung, diese Welt zu laden."
+  noPermissionToUnload: "(ERROR) Du hast keine Berechtigung, diese Welt zu entladen."
+  noPermissionToCreate: "(ERROR) Du hast keine Berechtigung, eine Welt zu erstellen."
+  noPermissionToDelete: "(ERROR) Du hast keine Berechtigung, diese Welt zu löschen."
+  noPermissionToBackup: "(ERROR) Du hast keine Berechtigung, ein Backup dieser Welt zu erstellen."
+  noPermissionToRestore: "(ERROR) Du hast keine Berechtigung, diese Welt wiederherzustellen."
