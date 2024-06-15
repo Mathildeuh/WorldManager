@@ -36,7 +36,6 @@ public class GUIMain {
         menu = WorldManager.getSpiGUI().create("&aChoose a world to manage", menuSize / 9);
 
         List<World> sortedWorlds = Bukkit.getWorlds().stream()
-                .filter(world -> !world.equals(Bukkit.getWorlds().get(0)))
                 .sorted((world1, world2) -> world1.getName().compareToIgnoreCase(world2.getName()))
                 .toList();
         int id = 0;
@@ -73,7 +72,7 @@ public class GUIMain {
 
     public static boolean isVersionLowerThan1_16() {
         String bukkitVersion = Bukkit.getBukkitVersion();
-        String[] versionParts = bukkitVersion.split("\\.");
+        String[] versionParts = bukkitVersion.split("[.\\-]");
         int majorVersion = Integer.parseInt(versionParts[0]);
         int minorVersion = Integer.parseInt(versionParts[1]);
 
