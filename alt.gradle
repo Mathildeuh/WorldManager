@@ -37,6 +37,8 @@ dependencies {
     implementation 'org.zeroturnaround:zt-zip:1.17'
 
     implementation 'org.json:json:20231013'
+
+    implementation 'commons-io:commons-io:2.11.0'
 }
 
 def targetJavaVersion = 17
@@ -72,6 +74,5 @@ libsDirectory = file("./out")
 shadowJar {
     archiveClassifier.set('')
     relocate 'org.bstats', 'fr.mathildeuh.bstats'
-    relocate 'com.github.stefvanschie.inventoryframework', 'fr.mathildeuh.inventoryframework'
-
+    relocate("dev.triumphteam.gui", "fr.mathildeuh.gui")
 }
