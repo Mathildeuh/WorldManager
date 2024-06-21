@@ -32,12 +32,11 @@ dependencies {
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
     implementation "net.kyori:adventure-platform-bukkit:4.3.2"
-    implementation 'org.json:json:20231013'
+
+    implementation 'com.github.stefvanschie.inventoryframework:IF:0.10.14'
     implementation 'org.zeroturnaround:zt-zip:1.17'
 
-    implementation "dev.triumphteam:triumph-gui:3.1.7"
-
-    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'org.json:json:20231013'
 }
 
 def targetJavaVersion = 17
@@ -73,5 +72,6 @@ libsDirectory = file("./out")
 shadowJar {
     archiveClassifier.set('')
     relocate 'org.bstats', 'fr.mathildeuh.bstats'
-    relocate("dev.triumphteam.gui", "fr.mathildeuh.gui")
+    relocate 'com.github.stefvanschie.inventoryframework', 'fr.mathildeuh.inventoryframework'
+
 }
