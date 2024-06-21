@@ -49,7 +49,7 @@ public class Teleport {
         }
 
         targetPlayer.teleport(targetWorld.getSpawnLocation());
-        WorldManager.langConfig.sendFormat(sender, "teleport.errorFromConsole", targetPlayer.getName(), targetWorld.getName());
+        WorldManager.langConfig.sendFormat(sender, "teleport.teleportSuccess", targetPlayer.getName(), targetWorld.getName());
 
     }
 }

@@ -47,7 +47,6 @@ public class MessageManager {
             message = message.replace("(CUSTOM) ", "");
             type = MessageType.CUSTOM;
         } else {
-            // TODO: MissConfigured message type
             type = MessageType.CUSTOM;
         }
 

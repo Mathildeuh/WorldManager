@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -69,10 +70,11 @@ public class WorldsConfig {
     }
 
     // Méthode pour ajouter un monde au fichier de configuration
-    public static void addWorld(String name, String type, World.Environment environement, String generator) {
+    public static void addWorld(CommandSender player, String name, String type, World.Environment environement, String generator) {
         WorldManager.worldsConfig.set("worlds." + name + ".type", type);
         WorldManager.worldsConfig.set("worlds." + name + ".environment", environement.name());
         WorldManager.worldsConfig.set("worlds." + name + ".generator", generator);
+        WorldManager.worldsConfig.set("worlds." + name + ".createdBy", player.getName());
         try {
             WorldManager.worldsConfig.save(WorldManager.configFile);
         } catch (IOException e) {
@@ -87,6 +89,11 @@ public class WorldsConfig {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String getCreator(String name) {
+        String creator = WorldManager.worldsConfig.getString("worlds." + name + ".createdBy");
+        return creator == null ? "Unknown" : creator;
     }
 
 

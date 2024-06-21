@@ -78,9 +78,9 @@ public class BackupConfig {
                 worldPlayers = new ArrayList<>(world.getPlayers());
                 for (Player players : worldPlayers) {
                     players.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
-                    WorldManager.langConfig.sendFormat(players, "restore.restoreFinished");
                 }
                 Bukkit.unloadWorld(world, false);
+
             }
 
             WorldManager.langConfig.sendFormat(player, "restore.restoreStarted");
@@ -118,7 +118,8 @@ public class BackupConfig {
                 }, 20L * 2L);
             }, 20L * 2L);
 
-            WorldManager.langConfig.sendFormat(player, "restore.restoreStarted");
+            WorldManager.langConfig.sendFormat(player, "restore.restoreFinished");
+
         } else {
             WorldManager.langConfig.sendFormat(player, "restore.worldNotFound");
         }

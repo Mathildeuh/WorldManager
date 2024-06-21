@@ -2,7 +2,6 @@ package fr.mathildeuh.worldmanager.commands.subcommands.pregen;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -27,25 +26,27 @@ public class Pregen {
     }
 
     public void execute(String[] args) {
-        if (args.length < 3) {
-            message.parse("Invalid number of arguments.");
-            return;
-        }
-
-        String action = args[1].toLowerCase();
-        String worldName = args[2];
-        World world = Bukkit.getWorld(worldName);
-
-        if (world == null) {
-            message.parse("World \"" + worldName + "\" does not exist.");
-            return;
-        }
-
-        if (action.equals("start")) {
-            handleStart(args, player, world);
-        } else {
-            message.parse("Unknown action: " + action);
-        }
+        sender.sendMessage("§cThis command is disabled.");
+        sender.sendMessage("§cWill be re-enabled in a future update.");
+//        if (args.length < 3) {
+//            message.parse("Invalid number of arguments.");
+//            return;
+//        }
+//
+//        String action = args[1].toLowerCase();
+//        String worldName = args[2];
+//        World world = Bukkit.getWorld(worldName);
+//
+//        if (world == null) {
+//            message.parse("World \"" + worldName + "\" does not exist.");
+//            return;
+//        }
+//
+//        if (action.equals("start")) {
+//            handleStart(args, player, world);
+//        } else {
+//            message.parse("Unknown action: " + action);
+//        }
     }
 
     private void handleStart(String[] args, Player player, World world) {

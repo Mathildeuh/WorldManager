@@ -1,6 +1,6 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
-import fr.mathildeuh.worldmanager.gui.GUIMain;
+import fr.mathildeuh.worldmanager.guis.GUIList;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -13,6 +13,7 @@ public class Gui {
 
     public void execute() {
         if (!(sender instanceof Player player)) return;
-        new GUIMain(player);
+        GUIList.MAIN.open(player);
+        // TODO: Main GUI
     }
 }

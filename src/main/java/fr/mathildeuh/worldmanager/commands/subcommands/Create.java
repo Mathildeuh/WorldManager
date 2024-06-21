@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
-import static fr.mathildeuh.worldmanager.gui.GUIMain.isVersionLowerThan1_16;
 
 public class Create {
     CommandSender sender;
@@ -37,17 +36,17 @@ public class Create {
 
         if (worldTypeOrEnvironment instanceof WorldType) {
             sendStarting(type, name, seed, generator);
-            createWorld(name, World.Environment.NORMAL, (WorldType) worldTypeOrEnvironment, seedValue, generator);
+            createWorld(sender, name, World.Environment.NORMAL, (WorldType) worldTypeOrEnvironment, seedValue, generator);
         } else if (worldTypeOrEnvironment instanceof World.Environment) {
             sendStarting(type, name, seed, generator);
-            createWorld(name, (World.Environment) worldTypeOrEnvironment, WorldType.NORMAL, seedValue, generator);
+            createWorld(sender, name, (World.Environment) worldTypeOrEnvironment, WorldType.NORMAL, seedValue, generator);
         } else {
             WorldManager.langConfig.sendFormat(sender, "create.invalidDimensionType");
 
             WorldManager.langConfig.sendFormat(sender, "create.availableDimensions");
 
             for (World.Environment env : World.Environment.values()) {
-                if (isVersionLowerThan1_16() || env != World.Environment.CUSTOM && env != World.Environment.NORMAL) {
+                if (env != World.Environment.CUSTOM && env != World.Environment.NORMAL) {
                     WorldManager.langConfig.sendFormat(sender, "create.dimensionList", env.name().toLowerCase());
                 }
             }
@@ -97,7 +96,7 @@ public class Create {
         }
     }
 
-    public void createWorld(String name, @Nullable World.Environment environment, WorldType type, @Nullable Long seed, @Nullable String generator) {
+    public void createWorld(CommandSender player, String name, @Nullable World.Environment environment, WorldType type, @Nullable Long seed, @Nullable String generator) {
         assert environment != null;
         WorldCreator creator = new WorldCreator(name).environment(environment).type(type);
         if (seed != null) {
@@ -118,7 +117,7 @@ public class Create {
         } else {
             WorldManager.langConfig.sendFormat(sender, "create.worldCreationSuccess", name);
             world.save();
-            WorldManager.addWorld(creator.name(), creator.type().name(), creator.environment(), generator);
+            WorldManager.addWorld(player, creator.name(), creator.type().name(), creator.environment(), generator);
         }
     }
 

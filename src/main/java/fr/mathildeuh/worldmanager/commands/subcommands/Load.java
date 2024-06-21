@@ -47,7 +47,7 @@ public class Load {
         if (world != null) {
 
             WorldManager.langConfig.sendFormat(sender, "load.loadSuccess", worldName);
-            WorldManager.addWorld(worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);
+            WorldManager.addWorld(sender, worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);
 
         } else {
             WorldManager.langConfig.sendFormat(sender, "load.failedLoadingWorld", worldName);

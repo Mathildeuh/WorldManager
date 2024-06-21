@@ -1,16 +1,17 @@
 package fr.mathildeuh.worldmanager;
 
-import com.samjakob.spigui.SpiGUI;
 import fr.mathildeuh.worldmanager.commands.WorldManagerCommand;
 import fr.mathildeuh.worldmanager.configs.BackupConfig;
 import fr.mathildeuh.worldmanager.configs.LangConfig;
 import fr.mathildeuh.worldmanager.configs.WorldsConfig;
 import fr.mathildeuh.worldmanager.events.JoinListener;
+import fr.mathildeuh.worldmanager.guis.GUIList;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,12 +33,8 @@ public final class WorldManager extends JavaPlugin {
     public static FileConfiguration worldsConfig;
     public static BackupConfig backupConfig;
     public static LangConfig langConfig;
-    private static SpiGUI spiGUI;
     private boolean updated = true;
 
-    public static SpiGUI getSpiGUI() {
-        return spiGUI;
-    }
 
     public static BukkitAudiences adventure() {
         if (adventure == null) {
@@ -46,8 +43,8 @@ public final class WorldManager extends JavaPlugin {
         return adventure;
     }
 
-    public static void addWorld(String name, String type, World.Environment environement, String generator) {
-        WorldsConfig.addWorld(name, type, environement, generator);
+    public static void addWorld(CommandSender player, String name, String type, World.Environment environement, String generator) {
+        WorldsConfig.addWorld(player, name, type, environement, generator);
     }
 
     public static void removeWorld(String name) {
@@ -57,8 +54,6 @@ public final class WorldManager extends JavaPlugin {
     @Override
     public void onEnable() {
 
-
-        spiGUI = new SpiGUI(this);
 
         saveDefaultConfig();
         loadLangFile();
@@ -77,7 +72,9 @@ public final class WorldManager extends JavaPlugin {
         if (getConfig().getBoolean("update-checker"))
             update();
 
-
+        for (GUIList gui : GUIList.values()) {
+            gui.update();
+        }
     }
 
     private void loadLangFile() {

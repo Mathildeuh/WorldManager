@@ -2,6 +2,7 @@ name: WorldManager
 version: '${version}'
 main: fr.mathildeuh.worldmanager.WorldManager
 api-version: '1.13'
+author: Mathildeuh
 commands:
   worldmanager:
     permission: "worldmanager.command"

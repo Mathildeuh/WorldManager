@@ -35,7 +35,7 @@ dependencies {
     implementation 'org.json:json:20231013'
     implementation 'org.zeroturnaround:zt-zip:1.17'
 
-    implementation 'com.samjakob:SpiGUI:1.3.1'
+    implementation "dev.triumphteam:triumph-gui:3.1.7"
 
     implementation 'commons-io:commons-io:2.11.0'
 }
@@ -72,5 +72,6 @@ compileJava.options.encoding("UTF-8")
 libsDirectory = file("./out")
 shadowJar {
     archiveClassifier.set('')
-    relocate 'org.bstats', 'fr.mathildeuh.utils'
+    relocate 'org.bstats', 'fr.mathildeuh.bstats'
+    relocate("dev.triumphteam.gui", "fr.mathildeuh.gui")
 }
