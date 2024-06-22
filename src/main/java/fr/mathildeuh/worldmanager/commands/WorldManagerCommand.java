@@ -2,7 +2,8 @@ package fr.mathildeuh.worldmanager.commands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.commands.subcommands.*;
-import fr.mathildeuh.worldmanager.commands.subcommands.pregen.Pregen;
+import fr.mathildeuh.worldmanager.commands.subcommands.pregenerator.ChunkGenerator;
+import fr.mathildeuh.worldmanager.commands.subcommands.pregenerator.Pregen;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -20,11 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class WorldManagerCommand implements CommandExecutor, TabCompleter {
-    private final WorldManager plugin;
-
-    public WorldManagerCommand(WorldManager plugin) {
-        this.plugin = plugin;
-    }
+    public static ChunkGenerator generator;
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -171,6 +168,9 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     break;
                 case "pregen":
                     completions.add("start");
+                    completions.add("stop");
+                    completions.add("pause");
+                    completions.add("resume");
                     break;
                 default:
                     break;
@@ -201,7 +201,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 default:
                     break;
             }
-        } else if (args.length == 4 && args[0].equalsIgnoreCase("pregen") && args[1].equalsIgnoreCase("start")) {
+        } else if (args.length == 4 && args[0].equalsIgnoreCase("pregen")) {
             String partialName = args[2].toLowerCase();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.getName().toLowerCase().startsWith(partialName)) {

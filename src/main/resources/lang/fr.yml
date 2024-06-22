@@ -3,7 +3,7 @@ help:
   - ""
   - "<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>create</color> <dark_green>[nom]</dark_green> <dark_aqua><type> <seed> <generator></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Créer un nouveau monde</color></click>"
   - "<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>delete</color> <dark_green>[nom]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Supprimer un monde =(</color></click>"
-  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start</color> <dark_green> [monde]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Pré-générer un monde</color></click>"
+  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start|stop|resume|pause</color><dark_green> [monde]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Pré-générer un monde</color></click>"
   - "<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>load</color> <dark_green>[nom] [type] <dark_aqua><generator></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Charger un monde</color></click>"
   - "<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>unload</color> <dark_green>[nom]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Décharger un monde</color></click>"
   - "<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teleport</color> <dark_green>[monde]</dark_green> <dark_aqua><player></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Téléportez vous ou un joueur vers un monde</color></click>"
@@ -70,6 +70,19 @@ teleport:
   worldNotFound: "(ERROR) Le monde spécifié n'existe pas."
   teleportSuccess: "(SUCCESS) {0} téléporté vers le monde {1}."
   errorFromConsole: "(CUSTOM) Vous devez spécifier un joueur lors de l'exécution depuis la console."
+
+pregen:
+  finished: "(SUCCESS) Pré-génération terminée avec succès ! {0} chunks générés."
+  start: "(WAITING) Pré-génération commencée pour le monde \"{0}\" avec un centre en ({1},{2}) et un total de {3} chunks."
+  pause: "(SUCCESS) Pré-génération pour le monde \"{0}\" mise en pause."
+  resume: "(SUCCESS) Pré-génération pour le monde \"{0}\" reprise."
+  stop: "(SUCCESS) Pré-génération pour le monde \"{0}\" arrêtée."
+  worldNotFound: "(ERROR) Le monde spécifié n'existe pas."
+  alreadyRunning: "(ERROR) La pré-génération est déjà en cours pour le monde \"{0}\"."
+  notRunning: "(ERROR) La pré-génération n'est pas en cours pour le monde \"{0}\"."
+  invalidRadius: "(ERROR) Valeur de rayon invalide."
+  invalidCenter: "(ERROR) Coordonnées du centre invalides."
+
 
 permission:
   noPermission: "(ERROR) Vous n'avez pas la permission d'utiliser cette commande."

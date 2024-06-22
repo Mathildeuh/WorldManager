@@ -1,13 +1,13 @@
 help:
   - "<color:#7d66ff>{</color><color:#6258a6>-----</color> <color:#02a876>Gerente Mundial - Subcomandos</color> <color:#6258a6>-----</color><color:#7d66ff>}</color>"
   - ""
-  - "<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>crear</color> <dark_green>[nombre]</dark_green> <dark_aqua><tipo> <semilla> <generador></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Crea un nuevo mundo</color></click>"
-  - "<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>borrar</color> <dark_green>[nombre]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Eliminar un mundo =(</color></click>"
-  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen iniciar</color> <dark_green> [mundo]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Pre-genera un mundo</color></click>"
-  - "<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>cargar</color> <dark_green>[nombre] [tipo] <dark_aqua><generador></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Carga un mundo</color></click>"
-  - "<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>descargar</color> <dark_green>[nombre]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Descarga un mundo</color></click>"
-  - "<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teletransportar</color> <dark_green>[mundo]</dark_green> <dark_aqua><jugador></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Teletransporta a ti/jugador a un mundo</color></click>"
-  - "<click:suggest_command:'/wm list '><color:#7471b0>➥</color> <color:#ff9900>lista</color> <dark_gray>-</dark_gray> <color:#ffa1f9>Ver lista de mundos cargados</color></click>"
+  - "<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>create</color> <dark_green>[nombre]</dark_green> <dark_aqua><tipo> <semilla> <generador></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Crea un nuevo mundo</color></click>"
+  - "<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>delete</color> <dark_green>[nombre]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Eliminar un mundo =(</color></click>"
+  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start|stop|resume|pause</color> <dark_green> [mundo]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Pre-genera un mundo</color></click>"
+  - "<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>load</color> <dark_green>[nombre] [tipo] <dark_aqua><generador></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Carga un mundo</color></click>"
+  - "<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>unload</color> <dark_green>[nombre]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Descarga un mundo</color></click>"
+  - "<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teleport</color> <dark_green>[mundo]</dark_green> <dark_aqua><jugador></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Teletransporta a ti/jugador a un mundo</color></click>"
+  - "<click:suggest_command:'/wm list '><color:#7471b0>➥</color> <color:#ff9900>list</color> <dark_gray>-</dark_gray> <color:#ffa1f9>Ver lista de mundos cargados</color></click>"
 
 create:
   invalidSeed: "(ERROR) ¡La semilla debe ser un número!"
@@ -70,6 +70,19 @@ teleport:
   worldNotFound: "(ERROR) El mundo especificado no existe."
   teleportSuccess: "(SUCCESS) Teletransportado {0} al mundo {1}."
   errorFromConsole: "(CUSTOM) Debes especificar un jugador al ejecutar desde la consola."
+
+pregen:
+  finished: "(SUCCESS) ¡Pre-generación terminada con éxito! {0} chunks generados."
+  start: "(WAITING) Pre-generación comenzada para el mundo \"{0}\" con centro ({1},{2}) y un total de {3} chunks."
+  pause: "(SUCCESS) Pre-generación pausada para el mundo \"{0}\"."
+  resume: "(SUCCESS) Pre-generación reanudada para el mundo \"{0}\"."
+  stop: "(SUCCESS) Pre-generación detenida para el mundo \"{0}\"."
+  worldNotFound: "(ERROR) El mundo especificado no existe."
+  alreadyRunning: "(ERROR) La pre-generación ya está en curso para el mundo \"{0}\"."
+  notRunning: "(ERROR) La pre-generación no está en curso para el mundo \"{0}\"."
+  invalidRadius: "(ERROR) Valor de radio no válido."
+  invalidCenter: "(ERROR) Coordenadas del centro no válidas."
+
 
 permission:
   noPermission: "(ERROR) No tienes permiso para usar este comando."

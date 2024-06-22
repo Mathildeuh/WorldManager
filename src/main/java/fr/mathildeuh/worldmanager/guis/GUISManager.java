@@ -30,7 +30,7 @@ public class GUISManager {
 
     public GUISManager() {
 
-        gui = new ChestGui(3, "World Manager");
+        gui = new ChestGui(3, "World Manager - GUI");
         StaticPane pane = new StaticPane(0, 0, 9, 3);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
 
@@ -106,14 +106,16 @@ public class GUISManager {
 
             String seedString = seed != null ? seed : "Random";
 
-            ItemStack createItem = new ItemBuilder(worldName == null ? Material.RED_WOOL : Material.GREEN_WOOL).name(worldName == null ? "&c&nCan't create new world" : "&2&nCreate world").lore(worldName == null ? List.of("", "&4ERROR: &7Please click on ", "&7the anvil to set a name") :
+            ItemBuilder createItem = new ItemBuilder(worldName == null ? Material.RED_WOOL : Material.GREEN_WOOL).name(worldName == null ? "&c&nCan't create new world" : "&2&nCreate world").lore(worldName == null ? List.of("", "&4ERROR: &7Please click on ", "&7the anvil to set a name") :
                     List.of("",
                             "&6Name: &b" + worldName,
                             "&6Type: &b" + worldTypesAndEnvironments.get(currentIndex).replace("➥ ", "").toLowerCase(),
                             "&6Seed: &b" + seedString,
                             "&6Generator: &b" + (generator == null ? "Default" : generator)
-                    )).build();
-            GuiItem createGuiItem = new GuiItem(createItem, event -> {
+                    ));
+            if (createItem.getMaterial() == Material.GREEN_WOOL)
+                createItem = createItem.glow();
+            GuiItem createGuiItem = new GuiItem(createItem.build(), event -> {
 
                 if (worldName == null) return;
                 event.getWhoClicked().closeInventory();
@@ -133,7 +135,7 @@ public class GUISManager {
 
             });
 
-            pane.addItem(nameGuiItem, 2, 0);
+            pane.addItem(nameGuiItem, 1, 1);
 
             ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cCancel").lore("&7Click to re-open the main menu").build();
             GuiItem backGuiItem = new GuiItem(backItem, event -> {
@@ -142,7 +144,7 @@ public class GUISManager {
                 }
             });
 
-            pane.addItem(backGuiItem, 1, 1);
+            pane.addItem(backGuiItem, 2, 0);
 
             List<String> lore = new ArrayList<>();
 
@@ -362,7 +364,6 @@ public class GUISManager {
         private void handleItemClick(InventoryClickEvent event, String worldName) {
 
             if (event.getWhoClicked() instanceof Player player) {
-                player.closeInventory();
                 new EditorOptions(Bukkit.getWorld(worldName)).getGui().show(player);
             }
         }
@@ -493,7 +494,6 @@ public class GUISManager {
         private void handleItemClick(InventoryClickEvent event, String worldName) {
 
             if (event.getWhoClicked() instanceof Player player) {
-                player.closeInventory();
                 new Load(player).execute(worldName, "normal", null);
                 GUIList.LOADER.open(player);
             }
@@ -541,6 +541,14 @@ public class GUISManager {
 
             }), Slot.fromIndex(11));
 
+//            pane.addItem(new GuiItem(new ItemBuilder(Material.DARK_OAK_SAPLING).name("&8&nPre-Gen").build(), event -> {
+//
+//                Player player = (Player) event.getWhoClicked();
+//                pregenGui((Player) event.getWhoClicked(), currentWorld.getName(), 0, null).show(event.getWhoClicked());
+//
+//
+//            }), Slot.fromIndex(13));
+
             pane.addItem(new GuiItem(new ItemBuilder(Material.REDSTONE_BLOCK).name("&4&nDelete").lore(isDefaultWorld ? disabledLore : List.of("")).build(), event -> {
                 if (!isDefaultWorld)
                     confirmationGui((Player) event.getWhoClicked(), ConfirmTypes.DELETE).show(event.getWhoClicked());
@@ -570,6 +578,48 @@ public class GUISManager {
             return gui;
         }
 
+//        private ChestGui pregenGui(Player whoClicked, String name, int radius, String xy) {
+//            ChestGui gui = new ChestGui(3, "Pre-Gen for " + name);
+//            gui.setOnGlobalClick(event -> event.setCancelled(true));
+//
+//            StaticPane pane = new StaticPane(0, 0, 9, 3);  // 9 colonnes et 3 rangées
+//
+//            xy = xy == null ? xy : "0,0";
+//            radius = radius == 0 ? 200 : radius;
+//
+//            pane.addItem(new GuiItem(new ItemBuilder(Material.GREEN_CONCRETE_POWDER).name("&c&nStart Pre-Generate").build(), event -> {
+//
+//            }), Slot.fromIndex(11));
+//
+//            // Anvil for radius
+//            ItemStack radiusItem = new ItemBuilder(Material.ANVIL).name("&7Radius").lore(List.of("", "&7Radius: &b" + radius)).build();
+//            int finalRadius = radius;
+//            String finalXy = xy;
+//            pane.addItem(new GuiItem(radiusItem, event -> {
+//                if (event.getWhoClicked() instanceof Player player) {
+//                    player.closeInventory();
+//                    pregenGui(player, name, finalRadius, "2000,2000");
+//                }
+//            }), Slot.fromIndex(13));
+//
+//            // Sign for XY
+//            pane.addItem(new GuiItem(new ItemBuilder(Material.ACACIA_SIGN).name("&7XY").lore(List.of("", "&7XY: &b" + xy)).build(), event -> {
+//                if (event.getWhoClicked() instanceof Player player) {
+//                    player.closeInventory();
+//
+//                    pregenGui(player, name, finalRadius, finalXy);
+//                }
+//            }), Slot.fromIndex(15));
+//
+//            gui.addPane(pane);
+//
+//            // Add the button to the GUI
+//
+//
+//            return gui;
+//
+//        }
+
         public ChestGui getGui() {
             return this.gui;
         }
@@ -585,21 +635,20 @@ public class GUISManager {
                 case DELETE:
                     pane.addItem(new GuiItem(new ItemBuilder(Material.REDSTONE_BLOCK).name("&4&nDelete").build(), event -> {
                         new Delete(player).execute(currentWorld.getName());
-                        player.closeInventory();
-                        GUIList.EDITOR.open(player);
+                        new EditorOptions(currentWorld).getGui().show(player);
+
                     }), Slot.fromIndex(4));
                     break;
                 case UNLOAD:
                     pane.addItem(new GuiItem(new ItemBuilder(Material.STRUCTURE_BLOCK).name("&e&nUnload").build(), event -> {
                         new Unload(player).execute(currentWorld.getName());
-                        player.closeInventory();
-                        GUIList.EDITOR.open(player);
+                        new EditorOptions(currentWorld).getGui().show(player);
+
                     }), Slot.fromIndex(4));
                     break;
                 case RESTORE:
                     pane.addItem(new GuiItem(new ItemBuilder(Material.DIAMOND).name("&b&nRestore").build(), event -> {
                         new Restore(player).execute(currentWorld.getName());
-                        player.closeInventory();
                         new EditorOptions(currentWorld).getGui().show(player);
                     }), Slot.fromIndex(4));
                     break;
@@ -687,7 +736,7 @@ public class GUISManager {
             ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cBack").build();
             navigationPane.addItem(new GuiItem(backItem, event -> {
                 if (event.getWhoClicked() instanceof Player player) {
-                    GUIList.EDITOR.open(player);
+                    new EditorOptions(currentWorld).getGui().show(player);
                 }
             }), Slot.fromIndex(8));
 
@@ -698,8 +747,6 @@ public class GUISManager {
 
         private void handleGameRuleClick(InventoryClickEvent event, GameRule<?> gameRule) {
             Player player = (Player) event.getWhoClicked();
-
-
         }
 
         public ChestGui getGui() {

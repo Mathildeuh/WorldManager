@@ -3,7 +3,7 @@ help:
   - ""
   - "<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>создать</color> <dark_green>[название]</dark_green> <dark_aqua><тип> <семя> <генератор></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Создать новый мир</color></click>"
   - "<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>удалить</color> <dark_green>[название]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Удалить мир =(</color></click>"
-  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start</color> <dark_green> [мир]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Предварительно сгенерировать мир</color></click>"
+  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start|stop|resume|pause</color> <dark_green> [мир]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Предварительно сгенерировать мир</color></click>"
   - "<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>загрузить</color> <dark_green>[название] [тип] <dark_aqua><генератор></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Загрузить мир</color></click>"
   - "<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>выгрузить</color> <dark_green>[название]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Выгрузить мир</color></click>"
   - "<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>телепорт</color> <dark_green>[мир]</dark_green> <dark_aqua><игрок></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Телепортировать себя/игрока в мир</color></click>"
@@ -70,6 +70,19 @@ teleport:
   worldNotFound: "(ERROR) Указанный мир не существует."
   teleportSuccess: "(SUCCESS) {0} телепортирован в мир {1}."
   errorFromConsole: "(CUSTOM) Вы должны указать игрока при выполнении из консоли."
+
+pregen:
+  finished: "(SUCCESS) Предгенерация успешно завершена! Сгенерировано {0} чанков."
+  start: "(WAITING) Начата предгенерация для мира \"{0}\" с центром в ({1},{2}) и общим числом {3} чанков."
+  pause: "(SUCCESS) Предгенерация для мира \"{0}\" приостановлена."
+  resume: "(SUCCESS) Предгенерация для мира \"{0}\" возобновлена."
+  stop: "(SUCCESS) Предгенерация для мира \"{0}\" остановлена."
+  worldNotFound: "(ERROR) Указанный мир не существует."
+  alreadyRunning: "(ERROR) Предгенерация уже запущена для мира \"{0}\"."
+  notRunning: "(ERROR) Предгенерация не запущена для мира \"{0}\"."
+  invalidRadius: "(ERROR) Неверное значение радиуса."
+  invalidCenter: "(ERROR) Неверные координаты центра."
+
 
 permission:
   noPermission: "(ERROR) У вас нет разрешения на использование этой команды."

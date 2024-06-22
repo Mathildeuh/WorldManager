@@ -1,13 +1,13 @@
 help:
   - "<color:#7d66ff>{</color><color:#6258a6>-----</color> <color:#02a876>Welt-Manager - Unterbefehle</color> <color:#6258a6>-----</color><color:#7d66ff>}</color>"
   - ""
-  - "<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>erstellen</color> <dark_green>[Name]</dark_green> <dark_aqua><Typ> <Samen> <Generator></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Erstellen einer neuen Welt</color></click>"
-  - "<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>löschen</color> <dark_green>[Name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Entfernen einer Welt =(</color></click>"
-  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start</color> <dark_green> [Welt]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Vorabgenerieren einer Welt</color></click>"
-  - "<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>laden</color> <dark_green>[Name] [Typ] <dark_aqua><Generator></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Laden einer Welt</color></click>"
-  - "<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>entladen</color> <dark_green>[Name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Entladen einer Welt</color></click>"
-  - "<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teleportieren</color> <dark_green>[Welt]</dark_green> <dark_aqua><Spieler></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Dich/Spieler zur Welt teleportieren</color></click>"
-  - "<click:suggest_command:'/wm list '><color:#7471b0>➥</color> <color:#ff9900>liste</color> <dark_gray>-</dark_gray> <color:#ffa1f9>Liste der geladenen Welten anzeigen</color></click>"
+  - "<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>create</color> <dark_green>[Name]</dark_green> <dark_aqua><Typ> <Samen> <Generator></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Erstellen einer neuen Welt</color></click>"
+  - "<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>delete</color> <dark_green>[Name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Entfernen einer Welt =(</color></click>"
+  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start|stop|resume|pause</color> <dark_green> [Welt]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Vorabgenerieren einer Welt</color></click>"
+  - "<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>load</color> <dark_green>[Name] [Typ] <dark_aqua><Generator></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Laden einer Welt</color></click>"
+  - "<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>unload</color> <dark_green>[Name]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Entladen einer Welt</color></click>"
+  - "<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teleport</color> <dark_green>[Welt]</dark_green> <dark_aqua><Spieler></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Dich/Spieler zur Welt teleportieren</color></click>"
+  - "<click:suggest_command:'/wm list '><color:#7471b0>➥</color> <color:#ff9900>list</color> <dark_gray>-</dark_gray> <color:#ffa1f9>Liste der geladenen Welten anzeigen</color></click>"
 
 create:
   invalidSeed: "(ERROR) Der Samen muss eine Zahl sein!"
@@ -70,6 +70,19 @@ teleport:
   worldNotFound: "(ERROR) Die angegebene Welt existiert nicht."
   teleportSuccess: "(SUCCESS) {0} wurde zur Welt {1} teleportiert."
   errorFromConsole: "(CUSTOM) Du musst einen Spieler angeben, wenn du es von der Konsole ausführst."
+
+pregen:
+  finished: "(SUCCESS) Vor-Generierung erfolgreich abgeschlossen! {0} Chunks generiert."
+  start: "(WAITING) Vor-Generierung für Welt \"{0}\" mit Zentrum ({1},{2}) und insgesamt {3} Chunks gestartet."
+  pause: "(SUCCESS) Vor-Generierung für Welt \"{0}\" pausiert."
+  resume: "(SUCCESS) Vor-Generierung für Welt \"{0}\" fortgesetzt."
+  stop: "(SUCCESS) Vor-Generierung für Welt \"{0}\" gestoppt."
+  worldNotFound: "(ERROR) Die angegebene Welt existiert nicht."
+  alreadyRunning: "(ERROR) Vor-Generierung läuft bereits für Welt \"{0}\"."
+  notRunning: "(ERROR) Vor-Generierung läuft nicht für Welt \"{0}\"."
+  invalidRadius: "(ERROR) Ungültiger Radiuswert."
+  invalidCenter: "(ERROR) Ungültige Zentrum-Koordinaten."
+
 
 permission:
   noPermission: "(ERROR) Du hast keine Berechtigung, diesen Befehl zu verwenden."

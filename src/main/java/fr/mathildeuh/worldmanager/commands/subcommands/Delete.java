@@ -1,7 +1,6 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.commands.subcommands.pregen.Pregen;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -48,10 +47,6 @@ public class Delete {
         if (!unloadSuccess) {
             WorldManager.langConfig.sendFormat(sender, "delete.failedToDelete");
             return;
-        }
-        if (Pregen.generators.containsKey(name)) {
-            Pregen.generators.get(name).cancel();
-            Pregen.generators.remove(name);
         }
 
         File worldFolder = targetWorld.getWorldFolder();

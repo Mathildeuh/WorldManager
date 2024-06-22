@@ -1,7 +1,6 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.commands.subcommands.pregen.Pregen;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -27,11 +26,6 @@ public class Unload {
                 player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
                 WorldManager.langConfig.sendFormat(sender, "unload.playersInWorld");
             }
-        }
-
-        if (Pregen.generators.containsKey(worldName)) {
-            Pregen.generators.get(worldName).cancel();
-            Pregen.generators.remove(worldName);
         }
 
         boolean unloaded = Bukkit.unloadWorld(world, true);

@@ -272,7 +272,7 @@ public class ItemBuilder {
         return this;
     }
 
-    public String getDisplayname() {
+    public String getName() {
         return displayname;
     }
 

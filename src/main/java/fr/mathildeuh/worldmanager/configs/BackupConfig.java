@@ -1,7 +1,6 @@
 package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.commands.subcommands.pregen.Pregen;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -31,18 +30,18 @@ public class BackupConfig {
             Bukkit.getLogger().info("Backing up world " + name);
             WorldManager.langConfig.sendFormat(player, "backup.backupStarted");
 
+            world.save();
 
             File worldFolder = world.getWorldFolder();
             File backupDir = new File(worldFolder.getParentFile(), "backups/WorldManager");
             File backupFile = new File(backupDir, name.toLowerCase() + ".zip");
 
-            // Create the backup directory if it doesn't exist
-            if (!backupDir.exists()) {
-                backupDir.mkdirs();
-            }
-
             if (backupFile.exists()) {
                 backupFile.delete();
+            }
+
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
             }
 
             Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), () -> {
@@ -87,10 +86,6 @@ public class BackupConfig {
 
             if (worldFolder.exists()) {
                 deleteFolder(worldFolder);
-            }
-            if (Pregen.generators.containsKey(name)) {
-                Pregen.generators.get(name).cancel();
-                Pregen.generators.remove(name);
             }
 
             List<Player> finalWorldPlayers = worldPlayers;

@@ -61,8 +61,8 @@ public final class WorldManager extends JavaPlugin {
         new Metrics(this, 22073);
         adventure = BukkitAudiences.create(this);
 
-        getCommand("worldmanager").setExecutor(new WorldManagerCommand(this));
-        getCommand("worldmanager").setTabCompleter(new WorldManagerCommand(this));
+        getCommand("worldmanager").setExecutor(new WorldManagerCommand());
+        getCommand("worldmanager").setTabCompleter(new WorldManagerCommand());
 
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
 

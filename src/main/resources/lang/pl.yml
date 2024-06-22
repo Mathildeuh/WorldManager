@@ -3,7 +3,7 @@ help:
   - ""
   - "<click:suggest_command:'/wm create '><color:#7471b0>➥</color> <color:#ff9900>stwórz</color> <dark_green>[nazwa]</dark_green> <dark_aqua><typ> <ziarno> <generator></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Stwórz nowy świat</color></click>"
   - "<click:suggest_command:'/wm delete '><color:#7471b0>➥</color> <color:#ff9900>usuń</color> <dark_green>[nazwa]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Usuń świat =(</color></click>"
-  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start</color> <dark_green> [świat]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Wstępnie wygeneruj świat</color></click>"
+  - "<click:suggest_command:'/wm pregen start '><color:#7471b0>➥</color> <color:#ff9900>pregen start|stop|resume|pause</color> <dark_green> [świat]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Wstępnie wygeneruj świat</color></click>"
   - "<click:suggest_command:'/wm load '><color:#7471b0>➥</color> <color:#ff9900>załaduj</color> <dark_green>[nazwa] [typ] <dark_aqua><generator></dark_aqua></dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Załaduj świat</color></click>"
   - "<click:suggest_command:'/wm unload '><color:#7471b0>➥</color> <color:#ff9900>wyładuj</color> <dark_green>[nazwa]</dark_green> <dark_gray>-</dark_gray> <color:#ffa1f9>Wyładuj świat</color></click>"
   - "<click:suggest_command:'/wm teleport '><color:#7471b0>➥</color> <color:#ff9900>teleport</color> <dark_green>[świat]</dark_green> <dark_aqua><gracz></dark_aqua> <dark_gray>-</dark_gray> <color:#ffa1f9>Teleportuj się/gracza do świata</color></click>"
@@ -64,6 +64,19 @@ unload:
   playersInWorld: "(CUSTOM) <color:#aa3e00>☠</color> <color:#ff2e1f>Świat, w którym byłeś, został wyładowany.</color>"
   unloadSuccess: "(SUCCESS) Świat {0} został pomyślnie wyładowany!"
   failedUnloadingWorld: "(SUCCESS) Wystąpił błąd podczas wyładowywania świata: {0}"
+
+pregen:
+  finished: "(SUCCESS) Pre-generacja zakończona pomyślnie! Wygenerowano {0} chunków."
+  start: "(WAITING) Rozpoczęto pre-generację dla świata \"{0}\" z centrum w ({1},{2}) i łączną liczbą {3} chunków."
+  pause: "(SUCCESS) Pre-generacja dla świata \"{0}\" została wstrzymana."
+  resume: "(SUCCESS) Wznowiono pre-generację dla świata \"{0}\"."
+  stop: "(SUCCESS) Zatrzymano pre-generację dla świata \"{0}\"."
+  worldNotFound: "(ERROR) Podany świat nie istnieje."
+  alreadyRunning: "(ERROR) Pre-generacja już trwa dla świata \"{0}\"."
+  notRunning: "(ERROR) Pre-generacja nie jest uruchomiona dla świata \"{0}\"."
+  invalidRadius: "(ERROR) Nieprawidłowa wartość promienia."
+  invalidCenter: "(ERROR) Nieprawidłowe współrzędne centrum."
+
 
 teleport:
   playerNotFound: "(ERROR) Gracz nie został znaleziony."
