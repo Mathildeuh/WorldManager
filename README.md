@@ -1,6 +1,6 @@
 [![Release](https://github.com/Mathildeuh/WorldManager/actions/workflows/gradle.yml/badge.svg)](https://github.com/Mathildeuh/WorldManager/actions/workflows/gradle.yml)
 
-First release, create issue for suggestions or bug reports
+Create issue for suggestions or bug reports
 
 Easily create worlds and manage it !
 
