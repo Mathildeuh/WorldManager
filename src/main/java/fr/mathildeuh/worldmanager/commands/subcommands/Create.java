@@ -24,7 +24,7 @@ public class Create {
 
     public void run(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
         long seedValue = 0L;
-        if (seed != null && seed.matches("\\d+")) {
+        if (seed != null && seed.matches("-?\\d+")) {
             seedValue = Long.parseLong(seed);
         } else if (seed != null && !seed.isEmpty()) {
             WorldManager.langConfig.sendFormat(sender, "create.invalidSeed");

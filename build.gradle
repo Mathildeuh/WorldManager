@@ -5,7 +5,7 @@ plugins {
 
 
 group = 'fr.Mathildeuh'
-version = '1.4.0'
+version = '1.4.1'
 
 repositories {
     mavenCentral()
@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly "org.spigotmc:spigot:1.21-R0.1-SNAPSHOT:remapped-mojang"
+    compileOnly "org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT"
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
     implementation "net.kyori:adventure-platform-bukkit:4.3.2"
@@ -36,6 +36,7 @@ dependencies {
     implementation 'org.zeroturnaround:zt-zip:1.17'
 
     implementation 'org.json:json:20231013'
+    implementation 'commons-io:commons-io:2.11.0'
 }
 
 def targetJavaVersion = 17
@@ -68,7 +69,7 @@ processResources {
 compileJava.options.encoding("UTF-8")
 
 
-libsDirectory = file("E:\\Servers\\1.21\\plugins")
+//libsDirectory = file("E:\\Servers\\1.21\\plugins")
 
 
 shadowJar {
