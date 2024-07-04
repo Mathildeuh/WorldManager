@@ -1,4 +1,4 @@
-[![Release](https://github.com/Mathildeuh/WorldManager/actions/workflows/gradle.yml/badge.svg)](https://github.com/Mathildeuh/WorldManager/actions/workflows/gradle.yml)
+[![Release](https://github.com/Mathildeuh/WorldManager/actions/workflows/gradle.yml/badge.svg)](https://github.com/Mathildeuh/WorldManager/actions/workflows/gradle.yml) ![maintained - yes](https://img.shields.io/badge/maintained-yes-blue)
 
 Create issue for suggestions or bug reports
 
