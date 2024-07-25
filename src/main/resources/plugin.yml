@@ -3,6 +3,7 @@ version: '${version}'
 main: fr.mathildeuh.worldmanager.WorldManager
 api-version: '1.13'
 author: Mathildeuh
+softdepend: [PlaceholderAPI]
 commands:
   worldmanager:
     permission: "worldmanager.command"

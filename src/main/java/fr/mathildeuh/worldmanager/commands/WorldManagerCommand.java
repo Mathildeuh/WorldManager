@@ -213,7 +213,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
         return completions;
     }
 
-    private List<String> getUnloadedWorlds() {
+    public static List<String> getUnloadedWorlds() {
         List<String> unloadedWorlds = new ArrayList<>();
         List<String> loadedWorldNames = new ArrayList<>();
         for (World world : Bukkit.getWorlds()) {
@@ -232,7 +232,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
         return unloadedWorlds;
     }
 
-    private boolean containsLevelDat(File folder) {
+    private static boolean containsLevelDat(File folder) {
         File levelDat = new File(folder, "level.dat");
         return levelDat.exists();
     }

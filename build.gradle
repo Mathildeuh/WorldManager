@@ -24,6 +24,9 @@ repositories {
     maven {
         url = "https://repo.codemc.io/repository/maven-snapshots/"
     }
+    maven {
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
 }
 
 dependencies {
@@ -37,6 +40,8 @@ dependencies {
 
     implementation 'org.json:json:20231013'
     implementation 'commons-io:commons-io:2.11.0'
+
+    compileOnly 'me.clip:placeholderapi:2.11.6'
 }
 
 def targetJavaVersion = 17
@@ -69,7 +74,7 @@ processResources {
 compileJava.options.encoding("UTF-8")
 
 
-//libsDirectory = file("E:\\Servers\\1.21\\plugins")
+libsDirectory = file("C:\\Users\\preve\\Documents\\server\\plugins")
 
 
 shadowJar {

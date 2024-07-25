@@ -6,6 +6,7 @@ import fr.mathildeuh.worldmanager.configs.LangConfig;
 import fr.mathildeuh.worldmanager.configs.WorldsConfig;
 import fr.mathildeuh.worldmanager.events.JoinListener;
 import fr.mathildeuh.worldmanager.guis.GUIList;
+import fr.mathildeuh.worldmanager.placeholder.Placeholders;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
@@ -56,6 +57,12 @@ public final class WorldManager extends JavaPlugin {
 
 
         saveDefaultConfig();
+        if (setupPlaceholderAPI()) {
+            getLogger().info("PlaceholderAPI is enabled.");
+            new Placeholders().register();
+        } else {
+            getLogger().warning("PlaceholderAPI not found so PlaceholderAPI features will not work.");
+        }
         loadLangFile();
 
         new Metrics(this, 22073);
@@ -74,6 +81,18 @@ public final class WorldManager extends JavaPlugin {
 
         for (GUIList gui : GUIList.values()) {
             gui.update();
+        }
+    }
+
+    private boolean setupPlaceholderAPI() {
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") == null) {
+            return false;
+        }
+        try {
+            Class.forName("me.clip.placeholderapi.PlaceholderAPI");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
     }
 
