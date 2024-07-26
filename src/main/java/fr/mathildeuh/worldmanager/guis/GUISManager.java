@@ -10,6 +10,7 @@ import fr.mathildeuh.worldmanager.commands.subcommands.*;
 import fr.mathildeuh.worldmanager.configs.WorldsConfig;
 import fr.mathildeuh.worldmanager.messages.MessageManager;
 import fr.mathildeuh.worldmanager.util.ItemBuilder;
+import fr.mathildeuh.worldmanager.worlds.EmptyWorldGenerator;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,6 +24,8 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+
+import static fr.mathildeuh.worldmanager.commands.WorldManagerCommand.getUnloadedWorlds;
 
 public class GUISManager {
 
@@ -80,10 +83,7 @@ public class GUISManager {
         private String worldName, seed, generator;
 
         public Creator() {
-
-
             for (World.Environment env : World.Environment.values()) {
-
                 if (env != World.Environment.CUSTOM)
                     this.worldTypesAndEnvironments.add("➥ " + env.name());
             }
@@ -94,50 +94,52 @@ public class GUISManager {
             }
             this.gui = createGui();
             Bukkit.getServer().getPluginManager().registerEvents(this, JavaPlugin.getPlugin(WorldManager.class));
-
         }
 
         private ChestGui createGui() {
-
             AtomicReference<ChestGui> gui = new AtomicReference<>(new ChestGui(3, "Create a world"));
             gui.get().setOnGlobalClick(event -> event.setCancelled(true));
 
-            StaticPane pane = new StaticPane(3, 0, 3, 3);
+            StaticPane pane = new StaticPane(3, 0, 6, 3);
 
             String seedString = seed != null ? seed : "Random";
 
-            ItemBuilder createItem = new ItemBuilder(worldName == null ? Material.RED_WOOL : Material.GREEN_WOOL).name(worldName == null ? "&c&nCan't create new world" : "&2&nCreate world").lore(worldName == null ? List.of("", "&4ERROR: &7Please click on ", "&7the anvil to set a name") :
-                    List.of("",
-                            "&6Name: &b" + worldName,
-                            "&6Type: &b" + worldTypesAndEnvironments.get(currentIndex).replace("➥ ", "").toLowerCase(),
-                            "&6Seed: &b" + seedString,
-                            "&6Generator: &b" + (generator == null ? "Default" : generator)
-                    ));
+            ItemBuilder createItem = new ItemBuilder(worldName == null ? Material.RED_WOOL : Material.GREEN_WOOL)
+                    .name(worldName == null ? "&c&nCan't create new world" : "&2&nCreate world")
+                    .lore(worldName == null ? List.of("", "&4ERROR: &7Please click on ", "&7the anvil to set a name") :
+                            List.of(
+                                    "",
+                                    "&6Name: &b" + worldName,
+                                    "&6Type: &b" + worldTypesAndEnvironments.get(currentIndex).replace("➥ ", "").toLowerCase(),
+                                    "&6Seed: &b" + seedString,
+                                    "&6Generator: &b" + (generator == null ? "Default" : generator)
+                            ));
+
             if (createItem.getMaterial() == Material.GREEN_WOOL)
                 createItem = createItem.glow();
             GuiItem createGuiItem = new GuiItem(createItem.build(), event -> {
-
                 if (worldName == null) return;
                 event.getWhoClicked().closeInventory();
                 new Create(event.getWhoClicked()).run(worldName, worldTypesAndEnvironments.get(currentIndex).split(" ")[1].toLowerCase(), seed, generator);
-
             });
 
             pane.addItem(createGuiItem, 0, 0);
 
-            ItemStack nameItem = new ItemBuilder(Material.ANVIL).name(worldName == null ? "&cRequired: §6World name" : "&6World name: &b" + worldName).lore("&7Click to edit world name").build();
+            ItemStack nameItem = new ItemBuilder(Material.ANVIL)
+                    .name(worldName == null ? "&cRequired: §6World name" : "&6World name: &b" + worldName)
+                    .lore("&7Click to edit world name").build();
             GuiItem nameGuiItem = new GuiItem(nameItem, event -> {
                 this.message = new MessageManager(event.getWhoClicked());
-
                 message.parse("<dark_gray>></dark_gray> <green><b>Write world name in chat</b></green>");
                 playersInEditor.put(Bukkit.getPlayer(event.getWhoClicked().getName()), "name");
                 event.getWhoClicked().closeInventory();
-
             });
 
             pane.addItem(nameGuiItem, 1, 1);
 
-            ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cCancel").lore("&7Click to re-open the main menu").build();
+            ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR)
+                    .name("&cCancel")
+                    .lore("&7Click to re-open the main menu").build();
             GuiItem backGuiItem = new GuiItem(backItem, event -> {
                 if (event.getWhoClicked() instanceof Player player) {
                     GUIList.MAIN.open(player);
@@ -147,7 +149,6 @@ public class GUISManager {
             pane.addItem(backGuiItem, 2, 0);
 
             List<String> lore = new ArrayList<>();
-
             for (int i = 0; i < worldTypesAndEnvironments.size(); i++) {
                 String type = worldTypesAndEnvironments.get(i);
                 if (i == currentIndex) {
@@ -157,7 +158,9 @@ public class GUISManager {
                 }
             }
 
-            ItemStack worldTypeItem = new ItemBuilder(Material.GRASS_BLOCK).name("&7Optional: &6World Type").lore(lore).build();
+            ItemStack worldTypeItem = new ItemBuilder(Material.GRASS_BLOCK)
+                    .name("&7Optional: &6World Type")
+                    .lore(lore).build();
             GuiItem worldTypeGuiItem = new GuiItem(worldTypeItem, event -> {
                 currentIndex = (currentIndex + 1) % worldTypesAndEnvironments.size();
                 gui.set(createGui());
@@ -166,10 +169,11 @@ public class GUISManager {
 
             pane.addItem(worldTypeGuiItem, 0, 2);
 
-            ItemStack generatorItem = new ItemBuilder(Material.STRUCTURE_BLOCK).name(generator == null ? "&7Optional: &6World Generator" : "&6World Generator: &b" + generator).lore("&7Click to edit world generator").build();
+            ItemStack generatorItem = new ItemBuilder(Material.STRUCTURE_BLOCK)
+                    .name(generator == null ? "&7Optional: &6World Generator" : "&6World Generator: &b" + generator)
+                    .lore("&7Click to edit world generator").build();
             GuiItem generatorGuiItem = new GuiItem(generatorItem, event -> {
                 this.message = new MessageManager(event.getWhoClicked());
-
                 message.parse("<dark_gray>></dark_gray> <green><b>Write custom generator in chat</b></green>");
                 playersInEditor.put(Bukkit.getPlayer(event.getWhoClicked().getName()), "generator");
                 event.getWhoClicked().closeInventory();
@@ -177,10 +181,11 @@ public class GUISManager {
 
             pane.addItem(generatorGuiItem, 1, 2);
 
-            ItemStack seedItem = new ItemBuilder(Material.BOOK).name(seed == null ? "&7Optional: &6World Seed" : "&6World Seed: &b" + seed).lore("&7Click to edit world seed").build();
+            ItemStack seedItem = new ItemBuilder(Material.BOOK)
+                    .name(seed == null ? "&7Optional: &6World Seed" : "&6World Seed: &b" + seed)
+                    .lore("&7Click to edit world seed").build();
             GuiItem seedGuiItem = new GuiItem(seedItem, event -> {
                 this.message = new MessageManager(event.getWhoClicked());
-
                 message.parse("<dark_gray>></dark_gray> <green><b>Write world seed in chat</b></green>");
                 message.parse("");
                 playersInEditor.put(Bukkit.getPlayer(event.getWhoClicked().getName()), "seed");
@@ -189,14 +194,57 @@ public class GUISManager {
 
             pane.addItem(seedGuiItem, 2, 2);
 
+            ItemStack emptyWorld = new ItemBuilder(Material.BARRIER)
+                    .name("Generate an empty world").lore(worldName == null ? "&cRequired: §6World name" : "&6World name: &b" + worldName).build();
+
+            GuiItem emptyWorldGuiItem = new GuiItem(emptyWorld, event -> {
+                if (worldName == null) return;
+                event.getWhoClicked().closeInventory();
+
+                long seedValue = 0L;
+                if (seed != null && seed.matches("-?\\d+")) {
+                    seedValue = Long.parseLong(seed);
+                } else if (seed != null && !seed.isEmpty()) {
+                    WorldManager.langConfig.sendFormat(event.getWhoClicked(), "create.invalidSeed");
+
+                    return;
+                }
+                if (Bukkit.getWorld(worldName) != null) {
+                    WorldManager.langConfig.sendFormat(event.getWhoClicked(), "create.worldAlreadyExists");
+                    return;
+                }
+
+                if (worldName.equalsIgnoreCase("plugins") || worldName.equalsIgnoreCase("logs") || worldName.equalsIgnoreCase("libraries") || worldName.equalsIgnoreCase("versions") || worldName.equalsIgnoreCase("config") || worldName.equalsIgnoreCase("cache")) {
+                    WorldManager.langConfig.sendFormat(event.getWhoClicked(), "create.worldNameCantBeUsed");
+                    return;
+                }
+
+                if (getUnloadedWorlds().contains(worldName)) {
+                    WorldManager.langConfig.sendFormat(event.getWhoClicked(), "create.worldExistButNotLoaded", worldName);
+                    return;
+                }
+
+                WorldCreator creator = new WorldCreator(worldName);
+                creator.environment(World.Environment.NORMAL);
+                creator.type(WorldType.FLAT);
+                creator.seed(seedValue);
+                creator.generator(new EmptyWorldGenerator());
+                World world = Bukkit.createWorld(creator);
+
+                Create.sendStarting("Empty", worldName, seed, "Empty");
+                WorldManager.langConfig.sendFormat(event.getWhoClicked(), "create.worldCreationSuccess", worldName);
+                world.save();
+                WorldManager.addWorld(event.getWhoClicked(), creator.name(), creator.type().name(), creator.environment(), generator);
+            });
+
+            // Ajout de l'élément emptyWorld dans le coin en bas à droite du panneau
+            pane.addItem(emptyWorldGuiItem, 5, 2);
 
             gui.get().addPane(pane);
-
             return gui.get();
         }
 
         public ChestGui getGui() {
-
             return this.gui;
         }
 
@@ -219,7 +267,6 @@ public class GUISManager {
 
                 String key = playersInEditor.get(player);
 
-
                 switch (type) {
                     case "name":
                         runTask(() -> worldName = words[0]);
@@ -230,7 +277,6 @@ public class GUISManager {
                     case "generator":
                         runTask(() -> generator = words[0]);
                         break;
-
                 }
 
                 runTask(() -> {
@@ -670,14 +716,14 @@ public class GUISManager {
 
     }
 
-    public static class GameRuleEditor {
+    public static class GameRuleEditor implements Listener {
 
-        private final ChestGui gui;
         private final World currentWorld;
+        private final Map<Player, GameRule<Integer>> chatInputPlayers = new HashMap<>();
 
         public GameRuleEditor(World currentWorld) {
             this.currentWorld = currentWorld;
-            this.gui = createGui();
+            Bukkit.getPluginManager().registerEvents(this, JavaPlugin.getPlugin(WorldManager.class));
         }
 
         private ChestGui createGui() {
@@ -736,6 +782,7 @@ public class GUISManager {
             ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cBack").build();
             navigationPane.addItem(new GuiItem(backItem, event -> {
                 if (event.getWhoClicked() instanceof Player player) {
+                    saveCurrentValues();
                     new EditorOptions(currentWorld).getGui().show(player);
                 }
             }), Slot.fromIndex(8));
@@ -747,10 +794,122 @@ public class GUISManager {
 
         private void handleGameRuleClick(InventoryClickEvent event, GameRule<?> gameRule) {
             Player player = (Player) event.getWhoClicked();
+            openGameRuleEditMenu(player, gameRule);
+        }
+
+        private void openGameRuleEditMenu(Player player, GameRule<?> gameRule) {
+            ChestGui editGui = new ChestGui(3, "Edit " + gameRule.getName());
+            editGui.setOnGlobalClick(event -> event.setCancelled(true));
+
+            StaticPane pane = new StaticPane(0, 0, 9, 3);
+
+            ItemStack currentValueItem = new ItemBuilder(Material.PAPER)
+                    .name("&eCurrent Value: " + currentWorld.getGameRuleValue(gameRule))
+                    .build();
+            pane.addItem(new GuiItem(currentValueItem), Slot.fromIndex(4));
+
+            if (gameRule.getType() == Boolean.class) {
+                addBooleanGameRuleEditOptions(pane, (GameRule<Boolean>) gameRule, player);
+            } else if (gameRule.getType() == Integer.class) {
+                addIntegerGameRuleEditOptions(pane, (GameRule<Integer>) gameRule, player);
+            }
+
+            ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cBack").build();
+            pane.addItem(new GuiItem(backItem, event -> {
+                saveCurrentValues();
+                getGui().show(player);
+            }), Slot.fromIndex(8));
+
+            editGui.addPane(pane);
+            editGui.show(player);
+        }
+
+        private void addBooleanGameRuleEditOptions(StaticPane pane, GameRule<Boolean> gameRule, Player player) {
+            Boolean currentValue = currentWorld.getGameRuleValue(gameRule);
+
+            ItemStack trueItem = new ItemBuilder(Material.LIME_DYE)
+                    .name("&aTrue")
+                    .lore(currentValue ? "&7Current Value" : "")
+                    .build();
+            pane.addItem(new GuiItem(trueItem, event -> {
+                currentWorld.setGameRule(gameRule, true);
+                openGameRuleEditMenu(player, gameRule);
+            }), Slot.fromIndex(3));
+
+            ItemStack falseItem = new ItemBuilder(Material.RED_DYE)
+                    .name("&cFalse")
+                    .lore(!currentValue ? "&7Current Value" : "")
+                    .build();
+            pane.addItem(new GuiItem(falseItem, event -> {
+                currentWorld.setGameRule(gameRule, false);
+                openGameRuleEditMenu(player, gameRule);
+            }), Slot.fromIndex(5));
+        }
+
+        private void addIntegerGameRuleEditOptions(StaticPane pane, GameRule<Integer> gameRule, Player player) {
+            int currentValue = currentWorld.getGameRuleValue(gameRule);
+
+            ItemStack currentValueItem = new ItemBuilder(Material.PAPER)
+                    .name("&eCurrent Value: " + currentValue)
+                    .build();
+            pane.addItem(new GuiItem(currentValueItem), Slot.fromIndex(4));
+
+            ItemStack increaseItem = new ItemBuilder(Material.ARROW)
+                    .name("&aIncrease")
+                    .build();
+            pane.addItem(new GuiItem(increaseItem, event -> {
+                currentWorld.setGameRule(gameRule, currentValue + 1);
+                openGameRuleEditMenu(player, gameRule);
+            }), Slot.fromIndex(3));
+
+            ItemStack decreaseItem = new ItemBuilder(Material.ARROW)
+                    .name("&cDecrease")
+                    .build();
+            pane.addItem(new GuiItem(decreaseItem, event -> {
+                currentWorld.setGameRule(gameRule, currentValue - 1);
+                openGameRuleEditMenu(player, gameRule);
+            }), Slot.fromIndex(5));
+
+            ItemStack setItem = new ItemBuilder(Material.ANVIL)
+                    .name("&eSet Value")
+                    .build();
+            pane.addItem(new GuiItem(setItem, event -> {
+                player.closeInventory();
+                player.sendMessage("Please enter a new value for " + gameRule.getName() + ":");
+                chatInputPlayers.put(player, gameRule);
+            }), Slot.fromIndex(4));
+        }
+
+        @EventHandler
+        public void onPlayerChat(AsyncPlayerChatEvent event) {
+            Player player = event.getPlayer();
+            if (chatInputPlayers.containsKey(player)) {
+                event.setCancelled(true);
+                GameRule<Integer> gameRule = chatInputPlayers.remove(player);
+                try {
+                    int newValue = Integer.parseInt(event.getMessage());
+                    currentWorld.setGameRule(gameRule, newValue);
+                    player.sendMessage("Game rule " + gameRule.getName() + " set to " + newValue);
+                    Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), () -> openGameRuleEditMenu(player, gameRule));
+                } catch (NumberFormatException e) {
+                    player.sendMessage("Invalid number. Please enter a valid integer.");
+                    chatInputPlayers.put(player, gameRule);
+                }
+            }
+        }
+
+        private void saveCurrentValues() {
+            // This method can be used to save the current values to persistent storage if needed.
+            // For now, it just logs the current game rule values.
+            for (GameRule<?> gameRule : GameRule.values()) {
+                System.out.println("GameRule: " + gameRule.getName() + " = " + currentWorld.getGameRuleValue(gameRule));
+            }
         }
 
         public ChestGui getGui() {
-            return this.gui;
+            return createGui();
         }
     }
+
+
 }

@@ -226,7 +226,6 @@ public class ItemBuilder {
     }
 
     public ItemBuilder glow() {
-        enchant(material != Material.BOW ? Enchantment.INFINITY : Enchantment.CHANNELING, 1);
         flag(ItemFlag.HIDE_ENCHANTS);
         return this;
     }

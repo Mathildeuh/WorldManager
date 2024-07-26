@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
 
 
 public class Create {
-    CommandSender sender;
+    static CommandSender sender;
 
     public Create(CommandSender sender) {
         this.sender = sender;
@@ -58,7 +58,7 @@ public class Create {
 
     }
 
-    public void sendStarting(String type, String name, String seed, String generator) {
+    public static void sendStarting(String type, String name, String seed, String generator) {
         WorldManager.langConfig.sendFormat(sender, "create.startingWorldCreation");
         WorldManager.langConfig.sendFormat(sender, "create.worldRecap.name", name);
 

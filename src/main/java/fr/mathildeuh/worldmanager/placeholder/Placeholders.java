@@ -39,8 +39,7 @@ public class Placeholders extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, String identifier) {
-        System.out.println(identifier);
-        if (player == null) {
+            if (player == null) {
             return "";
         }
 
