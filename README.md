@@ -1,3 +1,5 @@
+# Currently discontinued
+
 [![Release](https://github.com/Mathildeuh/WorldManager/actions/workflows/gradle.yml/badge.svg)](https://github.com/Mathildeuh/WorldManager/actions/workflows/gradle.yml) ![maintained - yes](https://img.shields.io/badge/maintained-yes-blue) [![Version - 1.16 - 1.21](https://img.shields.io/badge/Version-1.16_--_1.21-2ea44f)](https://github.com/Mathildeuh/WorldManager)
 
 
