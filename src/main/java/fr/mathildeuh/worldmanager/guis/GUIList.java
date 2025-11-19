@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.guis;
 
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
+import fr.mathildeuh.worldmanager.WorldManager;
 import org.bukkit.entity.Player;
 
 public enum GUIList {
@@ -15,7 +16,7 @@ public enum GUIList {
         if (gui != null) {
             gui.show(player);
         } else {
-            player.sendMessage("GUI is not initialized.");
+            WorldManager.langConfig.sendError(player, "gui.not_initialized");
         }
     }
 

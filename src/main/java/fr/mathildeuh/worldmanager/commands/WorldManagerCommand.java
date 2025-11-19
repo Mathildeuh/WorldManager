@@ -24,12 +24,12 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
     public static ChunkGenerator generator;
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
             if (hasPermission(sender, "worldmanager.gui")) {
                 new Gui(sender).execute();
             } else {
-                WorldManager.langConfig.sendFormat(sender, "permission.noPermission");
+                WorldManager.langConfig.sendError(sender, "permission.no_permission");
             }
             return true;
         }
@@ -40,7 +40,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 if (hasPermission(sender, "worldmanager.list")) {
                     new Lists(sender).execute();
                 } else {
-                    WorldManager.langConfig.sendFormat(sender, "permission.noPermission");
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission");
                 }
                 break;
             case "gui":
@@ -48,21 +48,21 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 if (hasPermission(sender, "worldmanager.gui")) {
                     new Gui(sender).execute();
                 } else {
-                    WorldManager.langConfig.sendFormat(sender, "permission.noPermission");
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission");
                 }
                 break;
             case "backup":
                 if (args.length > 1 && hasPermission(sender, "worldmanager.backup")) {
                     new Backup(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToBackup");
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_backup");
                 }
                 break;
             case "restore":
                 if (args.length > 1 && hasPermission(sender, "worldmanager.restore")) {
                     new Restore(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToRestore");
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_restore");
                 }
                 break;
             case "c":
@@ -74,7 +74,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     String gen = args.length > 4 ? args[4] : null;
                     new Create(sender).execute(name, type, seed, gen);
                 } else {
-                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToCreate");
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_create");
                 }
                 break;
             case "del":
@@ -82,7 +82,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 if (args.length > 1 && hasPermission(sender, "worldmanager.delete")) {
                     new Delete(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToDelete");
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_delete");
                 }
                 break;
             case "l":
@@ -94,7 +94,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     String gen = args.length > 3 ? args[3] : null;
                     new Load(sender).execute(name, type, gen);
                 } else {
-                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToLoad");
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_load");
                 }
                 break;
             case "u":
@@ -102,7 +102,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 if (args.length > 1 && hasPermission(sender, "worldmanager.unload")) {
                     new Unload(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToUnload");
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_unload");
                 }
                 break;
             case "tp":
@@ -110,14 +110,14 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 if (hasPermission(sender, "worldmanager.teleport")) {
                     new Teleport(sender).execute(args);
                 } else {
-                    WorldManager.langConfig.sendFormat(sender, "permission.noPermissionToTeleport");
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_teleport");
                 }
                 break;
             case "pregen":
                 if (hasPermission(sender, "worldmanager.pregen")) {
                     new Pregen(sender).execute(args);
                 } else {
-                    WorldManager.langConfig.sendFormat(sender, "permission.noPermission");
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission");
                 }
                 break;
             case "help":

@@ -1,14 +1,19 @@
 package fr.mathildeuh.worldmanager.messages;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public record FormattedMessage(CommandSender sender, net.kyori.adventure.text.Component formattedMessage) {
+public record FormattedMessage(CommandSender sender, Component formattedMessage) {
 
     public void send() {
-        if (sender instanceof Player player)
+        if (sender instanceof Player player) {
             WorldManager.adventure().player(player).sendMessage(formattedMessage);
-
+        } else {
+            // Send to console via Adventure console audience
+            WorldManager.adventure().console().sendMessage(formattedMessage);
+        }
     }
+
 }

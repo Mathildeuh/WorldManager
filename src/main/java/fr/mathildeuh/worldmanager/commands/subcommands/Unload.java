@@ -17,24 +17,30 @@ public class Unload {
     public void execute(String worldName) {
         World world = Bukkit.getWorld(worldName);
         if (world == null) {
-            WorldManager.langConfig.sendFormat(sender, "unload.worldNotLoaded", worldName);
+            WorldManager.langConfig.sendError(sender, "unload.world_not_loaded", worldName);
             return;
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getWorld().equals(world)) {
                 player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
-                WorldManager.langConfig.sendFormat(sender, "unload.playersInWorld");
+                WorldManager.langConfig.sendError(sender, "unload.players_in_world");
+                for (Player player1 : world.getPlayers()) {
+                    player1.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+                }
             }
         }
 
-        boolean unloaded = Bukkit.unloadWorld(world, true);
+        try {
+            boolean unloaded = Bukkit.unloadWorld(world, true);
 
-        if (unloaded) {
-            WorldManager.langConfig.sendFormat(sender, "unload.unloadSuccess", worldName);
-            WorldManager.removeWorld(worldName);
-        } else {
-            WorldManager.langConfig.sendFormat(sender, "unload.failedUnloadingWorld", worldName);
+            if (unloaded) {
+                WorldManager.langConfig.sendSuccess(sender, "unload.success", worldName);
+                WorldManager.removeWorld(worldName);
+                return;
+            } } catch (Exception e) {
+            e.printStackTrace();
+            WorldManager.langConfig.sendError(sender, "unload.failed", worldName);
         }
     }
 }

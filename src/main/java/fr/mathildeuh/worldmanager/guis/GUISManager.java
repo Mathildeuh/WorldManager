@@ -8,7 +8,7 @@ import com.github.stefvanschie.inventoryframework.pane.util.Slot;
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.commands.subcommands.*;
 import fr.mathildeuh.worldmanager.configs.WorldsConfig;
-import fr.mathildeuh.worldmanager.messages.MessageManager;
+import fr.mathildeuh.worldmanager.messages.MessageUtils;
 import fr.mathildeuh.worldmanager.util.ItemBuilder;
 import fr.mathildeuh.worldmanager.worlds.EmptyWorldGenerator;
 import org.bukkit.*;
@@ -39,30 +39,15 @@ public class GUISManager {
 
 
         ItemBuilder grass = new ItemBuilder(Material.GRASS_BLOCK).name("&2&nCreate a world").lore("", "&7&oCreate a new fully customizable world");
-        pane.addItem(new GuiItem(grass.build(), event -> {
-
-
-            if (event.getWhoClicked() instanceof Player player) GUIList.CREATOR.open(player);
-
-        }), Slot.fromIndex(11));
+        pane.addItem(new GuiItem(grass.build(), event -> { if (event.getWhoClicked() instanceof Player player) GUIList.CREATOR.open(player); }), Slot.fromIndex(11));
 
 
         ItemBuilder cmd = new ItemBuilder(Material.COMMAND_BLOCK).name("&2&nEdit your worlds").lore("", "&7&oManage your loaded worlds");
-        pane.addItem(new GuiItem(cmd.build(), event -> {
-
-
-            if (event.getWhoClicked() instanceof Player player) GUIList.EDITOR.open(player);
-
-        }), Slot.fromIndex(13));
+        pane.addItem(new GuiItem(cmd.build(), event -> { if (event.getWhoClicked() instanceof Player player) GUIList.EDITOR.open(player); }), Slot.fromIndex(13));
 
 
         ItemBuilder struct = new ItemBuilder(Material.STRUCTURE_VOID).name("&2&nLoad a world").lore("", "&7&oLoad a world that is", "&7&oin server folders");
-        pane.addItem(new GuiItem(struct.build(), event -> {
-
-
-            if (event.getWhoClicked() instanceof Player player) GUIList.LOADER.open(player);
-
-        }), Slot.fromIndex(15));
+        pane.addItem(new GuiItem(struct.build(), event -> { if (event.getWhoClicked() instanceof Player player) GUIList.LOADER.open(player); }), Slot.fromIndex(15));
 
 
         gui.addPane(pane);
@@ -79,7 +64,6 @@ public class GUISManager {
         private final List<String> worldTypesAndEnvironments = new ArrayList<>();
         ChestGui gui;
         int currentIndex = 0;
-        private MessageManager message;
         private String worldName, seed, generator;
 
         public Creator() {
@@ -128,23 +112,14 @@ public class GUISManager {
             ItemStack nameItem = new ItemBuilder(Material.ANVIL)
                     .name(worldName == null ? "&cRequired: §6World name" : "&6World name: &b" + worldName)
                     .lore("&7Click to edit world name").build();
-            GuiItem nameGuiItem = new GuiItem(nameItem, event -> {
-                this.message = new MessageManager(event.getWhoClicked());
-                message.parse("<dark_gray>></dark_gray> <green><b>Write world name in chat</b></green>");
-                playersInEditor.put(Bukkit.getPlayer(event.getWhoClicked().getName()), "name");
-                event.getWhoClicked().closeInventory();
-            });
+            GuiItem nameGuiItem = new GuiItem(nameItem, event -> { MessageUtils.sendMini(event.getWhoClicked(), "<dark_gray>></dark_gray> <green><b>Write world name in chat</b></green>"); playersInEditor.put(Bukkit.getPlayer(event.getWhoClicked().getName()), "name"); event.getWhoClicked().closeInventory(); });
 
             pane.addItem(nameGuiItem, 1, 1);
 
             ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR)
                     .name("&cCancel")
                     .lore("&7Click to re-open the main menu").build();
-            GuiItem backGuiItem = new GuiItem(backItem, event -> {
-                if (event.getWhoClicked() instanceof Player player) {
-                    GUIList.MAIN.open(player);
-                }
-            });
+            GuiItem backGuiItem = new GuiItem(backItem, event -> { if (event.getWhoClicked() instanceof Player player) GUIList.MAIN.open(player); });
 
             pane.addItem(backGuiItem, 2, 0);
 
@@ -161,36 +136,21 @@ public class GUISManager {
             ItemStack worldTypeItem = new ItemBuilder(Material.GRASS_BLOCK)
                     .name("&7Optional: &6World Type")
                     .lore(lore).build();
-            GuiItem worldTypeGuiItem = new GuiItem(worldTypeItem, event -> {
-                currentIndex = (currentIndex + 1) % worldTypesAndEnvironments.size();
-                gui.set(createGui());
-                gui.get().show(event.getWhoClicked());
-            });
+            GuiItem worldTypeGuiItem = new GuiItem(worldTypeItem, event -> { currentIndex = (currentIndex + 1) % worldTypesAndEnvironments.size(); gui.set(createGui()); gui.get().show(event.getWhoClicked()); });
 
             pane.addItem(worldTypeGuiItem, 0, 2);
 
             ItemStack generatorItem = new ItemBuilder(Material.STRUCTURE_BLOCK)
                     .name(generator == null ? "&7Optional: &6World Generator" : "&6World Generator: &b" + generator)
                     .lore("&7Click to edit world generator").build();
-            GuiItem generatorGuiItem = new GuiItem(generatorItem, event -> {
-                this.message = new MessageManager(event.getWhoClicked());
-                message.parse("<dark_gray>></dark_gray> <green><b>Write custom generator in chat</b></green>");
-                playersInEditor.put(Bukkit.getPlayer(event.getWhoClicked().getName()), "generator");
-                event.getWhoClicked().closeInventory();
-            });
+            GuiItem generatorGuiItem = new GuiItem(generatorItem, event -> { MessageUtils.sendMini(event.getWhoClicked(), "<dark_gray>></dark_gray> <green><b>Write custom generator in chat</b></green>"); playersInEditor.put(Bukkit.getPlayer(event.getWhoClicked().getName()), "generator"); event.getWhoClicked().closeInventory(); });
 
             pane.addItem(generatorGuiItem, 1, 2);
 
             ItemStack seedItem = new ItemBuilder(Material.BOOK)
                     .name(seed == null ? "&7Optional: &6World Seed" : "&6World Seed: &b" + seed)
                     .lore("&7Click to edit world seed").build();
-            GuiItem seedGuiItem = new GuiItem(seedItem, event -> {
-                this.message = new MessageManager(event.getWhoClicked());
-                message.parse("<dark_gray>></dark_gray> <green><b>Write world seed in chat</b></green>");
-                message.parse("");
-                playersInEditor.put(Bukkit.getPlayer(event.getWhoClicked().getName()), "seed");
-                event.getWhoClicked().closeInventory();
-            });
+            GuiItem seedGuiItem = new GuiItem(seedItem, event -> { MessageUtils.sendMini(event.getWhoClicked(), "<dark_gray>></dark_gray> <green><b>Write world seed in chat</b></green>"); playersInEditor.put(Bukkit.getPlayer(event.getWhoClicked().getName()), "seed"); event.getWhoClicked().closeInventory(); });
 
             pane.addItem(seedGuiItem, 2, 2);
 
@@ -205,22 +165,21 @@ public class GUISManager {
                 if (seed != null && seed.matches("-?\\d+")) {
                     seedValue = Long.parseLong(seed);
                 } else if (seed != null && !seed.isEmpty()) {
-                    WorldManager.langConfig.sendFormat(event.getWhoClicked(), "create.invalidSeed");
-
+                    WorldManager.langConfig.sendError(event.getWhoClicked(), "create.invalid_seed");
                     return;
                 }
                 if (Bukkit.getWorld(worldName) != null) {
-                    WorldManager.langConfig.sendFormat(event.getWhoClicked(), "create.worldAlreadyExists");
+                    WorldManager.langConfig.sendError(event.getWhoClicked(), "create.already_exists");
                     return;
                 }
 
                 if (worldName.equalsIgnoreCase("plugins") || worldName.equalsIgnoreCase("logs") || worldName.equalsIgnoreCase("libraries") || worldName.equalsIgnoreCase("versions") || worldName.equalsIgnoreCase("config") || worldName.equalsIgnoreCase("cache")) {
-                    WorldManager.langConfig.sendFormat(event.getWhoClicked(), "create.worldNameCantBeUsed");
+                    WorldManager.langConfig.sendError(event.getWhoClicked(), "create.name_unusable");
                     return;
                 }
 
                 if (getUnloadedWorlds().contains(worldName)) {
-                    WorldManager.langConfig.sendFormat(event.getWhoClicked(), "create.worldExistButNotLoaded", worldName);
+                    WorldManager.langConfig.sendError(event.getWhoClicked(), "create.exists_but_not_loaded", worldName);
                     return;
                 }
 
@@ -231,10 +190,16 @@ public class GUISManager {
                 creator.generator(new EmptyWorldGenerator());
                 World world = Bukkit.createWorld(creator);
 
-                Create.sendStarting("Empty", worldName, seed, "Empty");
-                WorldManager.langConfig.sendFormat(event.getWhoClicked(), "create.worldCreationSuccess", worldName);
-                world.save();
-                WorldManager.addWorld(event.getWhoClicked(), creator.name(), creator.type().name(), creator.environment(), generator);
+                Create.sendStarting(event.getWhoClicked(), "Empty", worldName, seed, "Empty");
+                WorldManager.langConfig.sendSuccess(event.getWhoClicked(), "create.success", worldName);
+                if (world != null) {
+                    try {
+                        world.save();
+                    } catch (Exception ignored) { }
+                    WorldManager.addWorld(event.getWhoClicked(), creator.name(), creator.type().name(), creator.environment(), generator);
+                } else {
+                    WorldManager.langConfig.sendError(event.getWhoClicked(), "create.error", "World creation returned null");
+                }
             });
 
             // Ajout de l'élément emptyWorld dans le coin en bas à droite du panneau
@@ -264,8 +229,6 @@ public class GUISManager {
                     });
                     return;
                 }
-
-                String key = playersInEditor.get(player);
 
                 switch (type) {
                     case "name":
@@ -309,7 +272,8 @@ public class GUISManager {
         }
 
         private ChestGui createGui(List<File> worldFolders) {
-            List<String> worldNames = new ArrayList<>(Bukkit.getWorlds().stream().map(World::getName).toList());
+            // Use provided worldFolders list instead of Bukkit.getWorlds() to avoid unused parameter warning
+            List<String> worldNames = new ArrayList<>(worldFolders.stream().map(File::getName).toList());
 
 
 //            Fake loaded worlds
@@ -362,24 +326,12 @@ public class GUISManager {
                     .name("&aPrevious Page")
                     .build();
 
-            navigationPane.addItem(new GuiItem(prevPageItem, event -> {
-                if (paginatedPane.getPage() > 0) {
-                    paginatedPane.setPage(paginatedPane.getPage() - 1);
-                    gui.setTitle(buildGuiTitle(paginatedPane));
-                    gui.update();
-                }
-            }), Slot.fromIndex(3));
+            navigationPane.addItem(new GuiItem(prevPageItem, event -> { if (paginatedPane.getPage() > 0) { paginatedPane.setPage(paginatedPane.getPage() - 1); gui.setTitle(buildGuiTitle(paginatedPane)); gui.update(); } }), Slot.fromIndex(3));
 
             ItemStack nextPageItem = new ItemBuilder(Material.LIME_DYE)
                     .name("&aNext Page")
                     .build();
-            navigationPane.addItem(new GuiItem(nextPageItem, event -> {
-                if (paginatedPane.getPage() < pageCount - 1) {
-                    paginatedPane.setPage(paginatedPane.getPage() + 1);
-                    gui.setTitle(buildGuiTitle(paginatedPane));
-                    gui.update();
-                }
-            }), Slot.fromIndex(5));
+            navigationPane.addItem(new GuiItem(nextPageItem, event -> { if (paginatedPane.getPage() < pageCount - 1) { paginatedPane.setPage(paginatedPane.getPage() + 1); gui.setTitle(buildGuiTitle(paginatedPane)); gui.update(); } }), Slot.fromIndex(5));
 
             gui.addPane(navigationPane);
 
@@ -387,11 +339,7 @@ public class GUISManager {
             ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR)
                     .name("&cBack")
                     .build();
-            backButton.addItem(new GuiItem(backItem, event -> {
-                if (event.getWhoClicked() instanceof Player player) {
-                    GUIList.MAIN.open(player);
-                }
-            }), Slot.fromIndex(8));
+            backButton.addItem(new GuiItem(backItem, event -> { if (event.getWhoClicked() instanceof Player player) GUIList.MAIN.open(player); }), Slot.fromIndex(8));
 
             gui.addPane(backButton);
 
@@ -492,24 +440,12 @@ public class GUISManager {
                     .name("&aPrevious Page")
                     .build();
 
-            navigationPane.addItem(new GuiItem(prevPageItem, event -> {
-                if (paginatedPane.getPage() > 0) {
-                    paginatedPane.setPage(paginatedPane.getPage() - 1);
-                    gui.setTitle(buildGuiTitle(paginatedPane));
-                    gui.update();
-                }
-            }), Slot.fromIndex(3));
+            navigationPane.addItem(new GuiItem(prevPageItem, event -> { if (paginatedPane.getPage() > 0) { paginatedPane.setPage(paginatedPane.getPage() - 1); gui.setTitle(buildGuiTitle(paginatedPane)); gui.update(); } }), Slot.fromIndex(3));
 
             ItemStack nextPageItem = new ItemBuilder(Material.LIME_DYE)
                     .name("&aNext Page")
                     .build();
-            navigationPane.addItem(new GuiItem(nextPageItem, event -> {
-                if (paginatedPane.getPage() < pageCount - 1) {
-                    paginatedPane.setPage(paginatedPane.getPage() + 1);
-                    gui.setTitle(buildGuiTitle(paginatedPane));
-                    gui.update();
-                }
-            }), Slot.fromIndex(5));
+            navigationPane.addItem(new GuiItem(nextPageItem, event -> { if (paginatedPane.getPage() < pageCount - 1) { paginatedPane.setPage(paginatedPane.getPage() + 1); gui.setTitle(buildGuiTitle(paginatedPane)); gui.update(); } }), Slot.fromIndex(5));
 
             gui.addPane(navigationPane);
 
@@ -517,11 +453,7 @@ public class GUISManager {
             ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR)
                     .name("&cBack")
                     .build();
-            backButton.addItem(new GuiItem(backItem, event -> {
-                if (event.getWhoClicked() instanceof Player player) {
-                    GUIList.MAIN.open(player);
-                }
-            }), Slot.fromIndex(8));
+            backButton.addItem(new GuiItem(backItem, event -> { if (event.getWhoClicked() instanceof Player player) GUIList.MAIN.open(player); }), Slot.fromIndex(8));
 
             gui.addPane(backButton);
 
@@ -571,7 +503,10 @@ public class GUISManager {
 
             pane.addItem(new GuiItem(new ItemBuilder(Material.COMMAND_BLOCK).name("&c&nGame Rules").build(), event -> {
                 if (event.getWhoClicked() instanceof Player player) {
-                    new GameRuleEditor(currentWorld).getGui().show(player);
+                    // small feedback to ensure the click was registered
+                    MessageUtils.sendMini(player, "<gray>></gray> <yellow>Opening game rules editor...</yellow>");
+                    GameRuleEditor editor = new GameRuleEditor(currentWorld);
+                    editor.getGui().show(player);
                 }
             }), Slot.fromIndex(3));
 
@@ -700,9 +635,7 @@ public class GUISManager {
                     break;
             }
 
-            pane.addItem(new GuiItem(new ItemBuilder(Material.DARK_OAK_DOOR).name("&c&nBack").build(), event -> {
-                new EditorOptions(currentWorld).getGui().show(player);
-            }), Slot.fromIndex(8));
+            pane.addItem(new GuiItem(new ItemBuilder(Material.DARK_OAK_DOOR).name("&c&nBack").build(), event -> new EditorOptions(currentWorld).getGui().show(player)), Slot.fromIndex(8));
 
             gui.addPane(pane);
             return gui;
@@ -719,14 +652,436 @@ public class GUISManager {
     public static class GameRuleEditor implements Listener {
 
         private final World currentWorld;
-        private final Map<Player, GameRule<Integer>> chatInputPlayers = new HashMap<>();
+        private static final Map<Player, ChatEntry> chatInputPlayers = new HashMap<>();
+        private static boolean chatListenerRegistered = false;
+
+        private static class ChatEntry {
+            final World world;
+            final GameRule<Integer> rule;
+
+            ChatEntry(World world, GameRule<Integer> rule) {
+                this.world = world;
+                this.rule = rule;
+            }
+        }
 
         public GameRuleEditor(World currentWorld) {
             this.currentWorld = currentWorld;
-            Bukkit.getPluginManager().registerEvents(this, JavaPlugin.getPlugin(WorldManager.class));
+            // Register the static chat listener only once
+            synchronized (GameRuleEditor.class) {
+                if (!chatListenerRegistered) {
+                    Bukkit.getPluginManager().registerEvents(new Listener() {
+                        @EventHandler
+                        public void onPlayerChat(AsyncPlayerChatEvent event) {
+                            Player player = event.getPlayer();
+                            if (!chatInputPlayers.containsKey(player)) return;
+                            event.setCancelled(true);
+                            ChatEntry entry = chatInputPlayers.remove(player);
+                            String message = event.getMessage();
+                            try {
+                                int newValue = Integer.parseInt(message);
+                                Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), () -> {
+                                    entry.world.setGameRule(entry.rule, newValue);
+                                    WorldManager.langConfig.sendSuccess(player, "gui.game_rule_set", entry.rule.getName(), String.valueOf(newValue));
+                                    // Show the editor for this world directly
+                                    showGameRuleGui(player, entry.world);
+                                });
+                            } catch (NumberFormatException e) {
+                                Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), () -> {
+                                    WorldManager.langConfig.sendError(player, "gui.invalid_number");
+                                    chatInputPlayers.put(player, entry);
+                                });
+                            }
+                        }
+                    }, JavaPlugin.getPlugin(WorldManager.class));
+                    chatListenerRegistered = true;
+                }
+            }
         }
 
-        private ChestGui createGui() {
+
+        private void handleGameRuleClick(InventoryClickEvent event, GameRule<?> gameRule) {
+            Player player = (Player) event.getWhoClicked();
+            openGameRuleEditMenu(player, gameRule);
+        }
+
+        @SuppressWarnings("unchecked")
+        private void openGameRuleEditMenu(Player player, GameRule<?> gameRule) {
+            ChestGui editGui = new ChestGui(3, "Edit " + gameRule.getName());
+            editGui.setOnGlobalClick(event -> event.setCancelled(true));
+
+            StaticPane pane = new StaticPane(0, 0, 9, 3);
+
+            Object tempValue = null;
+            try {
+                tempValue = currentWorld.getGameRuleValue(gameRule);
+            } catch (IllegalArgumentException e) {
+                // GameRule is not available
+                ItemStack errorItem = new ItemBuilder(Material.BARRIER)
+                        .name("&cGameRule Not Available")
+                        .lore("&7This GameRule is not available in this version")
+                        .build();
+                pane.addItem(new GuiItem(errorItem), Slot.fromIndex(4));
+                ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cBack").build();
+                pane.addItem(new GuiItem(backItem, event -> {
+                    saveCurrentValues();
+                    getGui().show(player);
+                }), Slot.fromIndex(8));
+                editGui.addPane(pane);
+                editGui.show(player);
+                return;
+            }
+
+            String displayValue = tempValue == null ? "null" : tempValue.toString();
+            ItemStack currentValueItem = new ItemBuilder(Material.PAPER)
+                    .name("&eCurrent Value: " + displayValue)
+                    .build();
+            pane.addItem(new GuiItem(currentValueItem), Slot.fromIndex(4));
+
+            if (gameRule.getType() == Boolean.class) {
+                addBooleanGameRuleEditOptions(pane, (GameRule<Boolean>) gameRule, player);
+            } else if (gameRule.getType() == Integer.class) {
+                addIntegerGameRuleEditOptions(pane, (GameRule<Integer>) gameRule, player);
+            }
+
+            ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cBack").build();
+            pane.addItem(new GuiItem(backItem, event -> {
+                saveCurrentValues();
+                getGui().show(player);
+            }), Slot.fromIndex(8));
+
+            editGui.addPane(pane);
+            editGui.show(player);
+        }
+
+        private void addBooleanGameRuleEditOptions(StaticPane pane, GameRule<Boolean> gameRule, Player player) {
+            Boolean currentValue = null;
+            try {
+                currentValue = currentWorld.getGameRuleValue(gameRule);
+            } catch (IllegalArgumentException e) {
+                // Should not happen as the rule was already verified in openGameRuleEditMenu
+                return;
+            }
+
+            ItemStack trueItem = new ItemBuilder(Material.LIME_DYE)
+                    .name("&aTrue")
+                    .lore(currentValue != null && currentValue ? "&7Current Value" : "")
+                    .build();
+            pane.addItem(new GuiItem(trueItem, event -> {
+                try {
+                    currentWorld.setGameRule(gameRule, true);
+                    openGameRuleEditMenu(player, gameRule);
+                } catch (IllegalArgumentException e) {
+                    // Silently fail
+                }
+            }), Slot.fromIndex(3));
+
+            ItemStack falseItem = new ItemBuilder(Material.RED_DYE)
+                    .name("&cFalse")
+                    .lore(currentValue != null && !currentValue ? "&7Current Value" : "")
+                    .build();
+            pane.addItem(new GuiItem(falseItem, event -> {
+                try {
+                    currentWorld.setGameRule(gameRule, false);
+                    openGameRuleEditMenu(player, gameRule);
+                } catch (IllegalArgumentException e) {
+                    // Silently fail
+                }
+            }), Slot.fromIndex(5));
+        }
+
+        private void addIntegerGameRuleEditOptions(StaticPane pane, GameRule<Integer> gameRule, Player player) {
+            int currentValue = 0;
+            Integer tempVal = null;
+            try {
+                tempVal = currentWorld.getGameRuleValue(gameRule);
+            } catch (IllegalArgumentException e) {
+                // Should not happen as the rule was already verified in openGameRuleEditMenu
+                return;
+            }
+            if (tempVal != null) currentValue = tempVal;
+
+            ItemStack currentValueItem = new ItemBuilder(Material.PAPER)
+                    .name("&eCurrent Value: " + currentValue)
+                    .build();
+            pane.addItem(new GuiItem(currentValueItem), Slot.fromIndex(4));
+
+            ItemStack increaseItem = new ItemBuilder(Material.ARROW)
+                    .name("&aIncrease")
+                    .build();
+            pane.addItem(new GuiItem(increaseItem, event -> {
+                try {
+                    // compute current value at click time
+                    Integer cur = currentWorld.getGameRuleValue(gameRule);
+                    int newVal = (cur == null ? 0 : cur) + 1;
+                    currentWorld.setGameRule(gameRule, newVal);
+                    openGameRuleEditMenu(player, gameRule);
+                } catch (IllegalArgumentException e) {
+                    // Silently fail
+                }
+            }), Slot.fromIndex(3));
+
+            ItemStack decreaseItem = new ItemBuilder(Material.ARROW)
+                    .name("&cDecrease")
+                    .build();
+            pane.addItem(new GuiItem(decreaseItem, event -> {
+                try {
+                    Integer cur = currentWorld.getGameRuleValue(gameRule);
+                    int newVal = (cur == null ? 0 : cur) - 1;
+                    currentWorld.setGameRule(gameRule, newVal);
+                    openGameRuleEditMenu(player, gameRule);
+                } catch (IllegalArgumentException e) {
+                    // Silently fail
+                }
+            }), Slot.fromIndex(5));
+
+            ItemStack setItem = new ItemBuilder(Material.ANVIL)
+                    .name("&eSet Value")
+                    .build();
+            pane.addItem(new GuiItem(setItem, event -> {
+                player.closeInventory();
+                WorldManager.langConfig.sendWaiting(player, "gui.enter_game_rule_value", gameRule.getName());
+                chatInputPlayers.put(player, new ChatEntry(currentWorld, gameRule));
+            }), Slot.fromIndex(4));
+        }
+
+        private static void showGameRuleGui(Player player, World world) {
+            // Create GUI directly without creating new GameRuleEditor instance to avoid re-registering listener
+            ChestGui gui = new ChestGui(6, "Game Rules for " + world.getName());
+            gui.setOnGlobalClick(event -> event.setCancelled(true));
+
+            PaginatedPane paginatedPane = new PaginatedPane(0, 0, 9, 6);
+
+            List<GameRule<?>> gameRules = List.of(GameRule.values());
+            int rulesPerPage = 45;
+            int pageCount = (int) Math.ceil((double) gameRules.size() / rulesPerPage);
+
+            for (int page = 0; page < pageCount; page++) {
+                StaticPane pane = new StaticPane(0, 0, 9, 6);
+                int start = page * rulesPerPage;
+                int end = Math.min(start + rulesPerPage, gameRules.size());
+                int addedItems = 0;
+
+                for (int index = start; index < end; index++) {
+                    GameRule<?> gameRule = gameRules.get(index);
+
+                    // Skip GameRules that are not available in this version
+                    Object ruleValue = null;
+                    try {
+                        ruleValue = world.getGameRuleValue(gameRule);
+                    } catch (IllegalArgumentException e) {
+                        // Skip unavailable GameRule
+                        continue;
+                    }
+
+                    ItemStack itemStack = new ItemBuilder(Material.PAPER)
+                            .name("&e" + gameRule.getName())
+                            .lore("&7Current Value: &b" + ruleValue)
+                            .build();
+
+                    pane.addItem(new GuiItem(itemStack, event -> {
+                        if (event.getWhoClicked() instanceof Player p) {
+                            openGameRuleEditMenu(p, world, gameRule);
+                        }
+                    }), Slot.fromIndex(addedItems));
+                    addedItems++;
+                }
+
+                paginatedPane.addPane(page, pane);
+            }
+
+            gui.addPane(paginatedPane);
+
+            if (pageCount > 0) {
+                paginatedPane.setPage(0);
+            }
+
+            StaticPane navigationPane = new StaticPane(0, 5, 9, 1);
+            ItemStack prevPageItem = new ItemBuilder(Material.MAGENTA_DYE).name("&aPrevious Page").build();
+            navigationPane.addItem(new GuiItem(prevPageItem, event -> {
+                if (paginatedPane.getPage() > 0) {
+                    paginatedPane.setPage(paginatedPane.getPage() - 1);
+                    gui.update();
+                }
+            }), Slot.fromIndex(3));
+
+            ItemStack nextPageItem = new ItemBuilder(Material.LIME_DYE).name("&aNext Page").build();
+            navigationPane.addItem(new GuiItem(nextPageItem, event -> {
+                if (paginatedPane.getPage() < pageCount - 1) {
+                    paginatedPane.setPage(paginatedPane.getPage() + 1);
+                    gui.update();
+                }
+            }), Slot.fromIndex(5));
+
+            ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cBack").build();
+            navigationPane.addItem(new GuiItem(backItem, event -> {
+                if (event.getWhoClicked() instanceof Player p) {
+                    new EditorOptions(world).getGui().show(p);
+                }
+            }), Slot.fromIndex(8));
+
+            gui.addPane(navigationPane);
+            gui.show(player);
+        }
+
+        private static void openGameRuleEditMenu(Player player, World world, GameRule<?> gameRule) {
+            ChestGui editGui = new ChestGui(3, "Edit " + gameRule.getName());
+            editGui.setOnGlobalClick(event -> event.setCancelled(true));
+
+            StaticPane pane = new StaticPane(0, 0, 9, 3);
+
+            Object tempValue = null;
+            try {
+                tempValue = world.getGameRuleValue(gameRule);
+            } catch (IllegalArgumentException e) {
+                // GameRule is not available
+                ItemStack errorItem = new ItemBuilder(Material.BARRIER)
+                        .name("&cGameRule Not Available")
+                        .lore("&7This GameRule is not available in this version")
+                        .build();
+                pane.addItem(new GuiItem(errorItem), Slot.fromIndex(4));
+                ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cBack").build();
+                pane.addItem(new GuiItem(backItem, event -> {
+                    showGameRuleGui(player, world);
+                }), Slot.fromIndex(8));
+                editGui.addPane(pane);
+                editGui.show(player);
+                return;
+            }
+
+            String displayValue = tempValue == null ? "null" : tempValue.toString();
+            ItemStack currentValueItem = new ItemBuilder(Material.PAPER)
+                    .name("&eCurrent Value: " + displayValue)
+                    .build();
+            pane.addItem(new GuiItem(currentValueItem), Slot.fromIndex(4));
+
+            if (gameRule.getType() == Boolean.class) {
+                addBooleanGameRuleEditOptions(pane, (GameRule<Boolean>) gameRule, player, world);
+            } else if (gameRule.getType() == Integer.class) {
+                addIntegerGameRuleEditOptions(pane, (GameRule<Integer>) gameRule, player, world);
+            }
+
+            ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cBack").build();
+            pane.addItem(new GuiItem(backItem, event -> {
+                showGameRuleGui(player, world);
+            }), Slot.fromIndex(8));
+
+            editGui.addPane(pane);
+            editGui.show(player);
+        }
+
+        private static void addBooleanGameRuleEditOptions(StaticPane pane, GameRule<Boolean> gameRule, Player player, World world) {
+            Boolean currentValue = null;
+            try {
+                currentValue = world.getGameRuleValue(gameRule);
+            } catch (IllegalArgumentException e) {
+                // Should not happen as the rule was already verified in openGameRuleEditMenu
+                return;
+            }
+
+            ItemStack trueItem = new ItemBuilder(Material.LIME_DYE)
+                    .name("&aTrue")
+                    .lore(currentValue != null && currentValue ? "&7Current Value" : "")
+                    .build();
+            pane.addItem(new GuiItem(trueItem, event -> {
+                try {
+                    world.setGameRule(gameRule, true);
+                    openGameRuleEditMenu(player, world, gameRule);
+                } catch (IllegalArgumentException e) {
+                    // Silently fail
+                }
+            }), Slot.fromIndex(3));
+
+            ItemStack falseItem = new ItemBuilder(Material.RED_DYE)
+                    .name("&cFalse")
+                    .lore(currentValue != null && !currentValue ? "&7Current Value" : "")
+                    .build();
+            pane.addItem(new GuiItem(falseItem, event -> {
+                try {
+                    world.setGameRule(gameRule, false);
+                    openGameRuleEditMenu(player, world, gameRule);
+                } catch (IllegalArgumentException e) {
+                    // Silently fail
+                }
+            }), Slot.fromIndex(5));
+        }
+
+        private static void addIntegerGameRuleEditOptions(StaticPane pane, GameRule<Integer> gameRule, Player player, World world) {
+            Integer tempVal = null;
+            try {
+                tempVal = world.getGameRuleValue(gameRule);
+            } catch (IllegalArgumentException e) {
+                // Should not happen as the rule was already verified in openGameRuleEditMenu
+                return;
+            }
+            int currentValue = tempVal == null ? 0 : tempVal;
+
+            ItemStack currentValueItem = new ItemBuilder(Material.PAPER)
+                    .name("&eCurrent Value: " + currentValue)
+                    .build();
+            pane.addItem(new GuiItem(currentValueItem), Slot.fromIndex(4));
+
+            ItemStack increaseItem = new ItemBuilder(Material.ARROW)
+                    .name("&aIncrease")
+                    .build();
+            pane.addItem(new GuiItem(increaseItem, event -> {
+                try {
+                    Integer cur = world.getGameRuleValue(gameRule);
+                    int newVal = (cur == null ? 0 : cur) + 1;
+                    world.setGameRule(gameRule, newVal);
+                    openGameRuleEditMenu(player, world, gameRule);
+                } catch (IllegalArgumentException e) {
+                    // Silently fail
+                }
+            }), Slot.fromIndex(3));
+
+            ItemStack decreaseItem = new ItemBuilder(Material.ARROW)
+                    .name("&cDecrease")
+                    .build();
+            pane.addItem(new GuiItem(decreaseItem, event -> {
+                try {
+                    Integer cur = world.getGameRuleValue(gameRule);
+                    int newVal = (cur == null ? 0 : cur) - 1;
+                    world.setGameRule(gameRule, newVal);
+                    openGameRuleEditMenu(player, world, gameRule);
+                } catch (IllegalArgumentException e) {
+                    // Silently fail
+                }
+            }), Slot.fromIndex(5));
+
+            ItemStack setItem = new ItemBuilder(Material.ANVIL)
+                    .name("&eSet Value")
+                    .build();
+            pane.addItem(new GuiItem(setItem, event -> {
+                player.closeInventory();
+                WorldManager.langConfig.sendWaiting(player, "gui.enter_game_rule_value", gameRule.getName());
+                chatInputPlayers.put(player, new ChatEntry(world, gameRule));
+            }), Slot.fromIndex(4));
+        }
+
+        private void saveCurrentValues() {
+            // This method can be used to save the current values to persistent storage if needed.
+            // For now, it just logs the current game rule values.
+            for (GameRule<?> gameRule : GameRule.values()) {
+                try {
+                    System.out.println("GameRule: " + gameRule.getName() + " = " + currentWorld.getGameRuleValue(gameRule));
+                } catch (IllegalArgumentException e) {
+                    // GameRule is not available in this version, skip it
+                }
+            }
+        }
+
+        private boolean isGameRuleAvailable(GameRule<?> gameRule) {
+            try {
+                currentWorld.getGameRuleValue(gameRule);
+                return true;
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+        }
+
+        public ChestGui getGui() {
+            // Create the GUI directly without creating recursion
             ChestGui gui = new ChestGui(6, "Game Rules for " + currentWorld.getName());
             gui.setOnGlobalClick(event -> event.setCancelled(true));
 
@@ -740,17 +1095,31 @@ public class GUISManager {
                 StaticPane pane = new StaticPane(0, 0, 9, 6);
                 int start = page * rulesPerPage;
                 int end = Math.min(start + rulesPerPage, gameRules.size());
+                int addedItems = 0;
 
                 for (int index = start; index < end; index++) {
                     GameRule<?> gameRule = gameRules.get(index);
 
+                    // Skip GameRules that are not available in this version
+                    if (!isGameRuleAvailable(gameRule)) {
+                        continue;
+                    }
+
+                    Object ruleValue = null;
+                    try {
+                        ruleValue = currentWorld.getGameRuleValue(gameRule);
+                    } catch (IllegalArgumentException e) {
+                        // Skip unavailable GameRule
+                        continue;
+                    }
+
                     ItemStack itemStack = new ItemBuilder(Material.PAPER)
                             .name("&e" + gameRule.getName())
-                            .lore("&7Current Value: &b" + currentWorld.getGameRuleValue(gameRule))
+                            .lore("&7Current Value: &b" + ruleValue)
                             .build();
 
-                    int slotIndex = index % rulesPerPage;
-                    pane.addItem(new GuiItem(itemStack, event -> handleGameRuleClick(event, gameRule)), Slot.fromIndex(slotIndex));
+                    pane.addItem(new GuiItem(itemStack, event -> handleGameRuleClick(event, gameRule)), Slot.fromIndex(addedItems));
+                    addedItems++;
                 }
 
                 paginatedPane.addPane(page, pane);
@@ -788,126 +1157,7 @@ public class GUISManager {
             }), Slot.fromIndex(8));
 
             gui.addPane(navigationPane);
-
             return gui;
-        }
-
-        private void handleGameRuleClick(InventoryClickEvent event, GameRule<?> gameRule) {
-            Player player = (Player) event.getWhoClicked();
-            openGameRuleEditMenu(player, gameRule);
-        }
-
-        private void openGameRuleEditMenu(Player player, GameRule<?> gameRule) {
-            ChestGui editGui = new ChestGui(3, "Edit " + gameRule.getName());
-            editGui.setOnGlobalClick(event -> event.setCancelled(true));
-
-            StaticPane pane = new StaticPane(0, 0, 9, 3);
-
-            ItemStack currentValueItem = new ItemBuilder(Material.PAPER)
-                    .name("&eCurrent Value: " + currentWorld.getGameRuleValue(gameRule))
-                    .build();
-            pane.addItem(new GuiItem(currentValueItem), Slot.fromIndex(4));
-
-            if (gameRule.getType() == Boolean.class) {
-                addBooleanGameRuleEditOptions(pane, (GameRule<Boolean>) gameRule, player);
-            } else if (gameRule.getType() == Integer.class) {
-                addIntegerGameRuleEditOptions(pane, (GameRule<Integer>) gameRule, player);
-            }
-
-            ItemStack backItem = new ItemBuilder(Material.DARK_OAK_DOOR).name("&cBack").build();
-            pane.addItem(new GuiItem(backItem, event -> {
-                saveCurrentValues();
-                getGui().show(player);
-            }), Slot.fromIndex(8));
-
-            editGui.addPane(pane);
-            editGui.show(player);
-        }
-
-        private void addBooleanGameRuleEditOptions(StaticPane pane, GameRule<Boolean> gameRule, Player player) {
-            Boolean currentValue = currentWorld.getGameRuleValue(gameRule);
-
-            ItemStack trueItem = new ItemBuilder(Material.LIME_DYE)
-                    .name("&aTrue")
-                    .lore(currentValue ? "&7Current Value" : "")
-                    .build();
-            pane.addItem(new GuiItem(trueItem, event -> {
-                currentWorld.setGameRule(gameRule, true);
-                openGameRuleEditMenu(player, gameRule);
-            }), Slot.fromIndex(3));
-
-            ItemStack falseItem = new ItemBuilder(Material.RED_DYE)
-                    .name("&cFalse")
-                    .lore(!currentValue ? "&7Current Value" : "")
-                    .build();
-            pane.addItem(new GuiItem(falseItem, event -> {
-                currentWorld.setGameRule(gameRule, false);
-                openGameRuleEditMenu(player, gameRule);
-            }), Slot.fromIndex(5));
-        }
-
-        private void addIntegerGameRuleEditOptions(StaticPane pane, GameRule<Integer> gameRule, Player player) {
-            int currentValue = currentWorld.getGameRuleValue(gameRule);
-
-            ItemStack currentValueItem = new ItemBuilder(Material.PAPER)
-                    .name("&eCurrent Value: " + currentValue)
-                    .build();
-            pane.addItem(new GuiItem(currentValueItem), Slot.fromIndex(4));
-
-            ItemStack increaseItem = new ItemBuilder(Material.ARROW)
-                    .name("&aIncrease")
-                    .build();
-            pane.addItem(new GuiItem(increaseItem, event -> {
-                currentWorld.setGameRule(gameRule, currentValue + 1);
-                openGameRuleEditMenu(player, gameRule);
-            }), Slot.fromIndex(3));
-
-            ItemStack decreaseItem = new ItemBuilder(Material.ARROW)
-                    .name("&cDecrease")
-                    .build();
-            pane.addItem(new GuiItem(decreaseItem, event -> {
-                currentWorld.setGameRule(gameRule, currentValue - 1);
-                openGameRuleEditMenu(player, gameRule);
-            }), Slot.fromIndex(5));
-
-            ItemStack setItem = new ItemBuilder(Material.ANVIL)
-                    .name("&eSet Value")
-                    .build();
-            pane.addItem(new GuiItem(setItem, event -> {
-                player.closeInventory();
-                player.sendMessage("Please enter a new value for " + gameRule.getName() + ":");
-                chatInputPlayers.put(player, gameRule);
-            }), Slot.fromIndex(4));
-        }
-
-        @EventHandler
-        public void onPlayerChat(AsyncPlayerChatEvent event) {
-            Player player = event.getPlayer();
-            if (chatInputPlayers.containsKey(player)) {
-                event.setCancelled(true);
-                GameRule<Integer> gameRule = chatInputPlayers.remove(player);
-                try {
-                    int newValue = Integer.parseInt(event.getMessage());
-                    currentWorld.setGameRule(gameRule, newValue);
-                    player.sendMessage("Game rule " + gameRule.getName() + " set to " + newValue);
-                    Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), () -> openGameRuleEditMenu(player, gameRule));
-                } catch (NumberFormatException e) {
-                    player.sendMessage("Invalid number. Please enter a valid integer.");
-                    chatInputPlayers.put(player, gameRule);
-                }
-            }
-        }
-
-        private void saveCurrentValues() {
-            // This method can be used to save the current values to persistent storage if needed.
-            // For now, it just logs the current game rule values.
-            for (GameRule<?> gameRule : GameRule.values()) {
-                System.out.println("GameRule: " + gameRule.getName() + " = " + currentWorld.getGameRuleValue(gameRule));
-            }
-        }
-
-        public ChestGui getGui() {
-            return createGui();
         }
     }
 

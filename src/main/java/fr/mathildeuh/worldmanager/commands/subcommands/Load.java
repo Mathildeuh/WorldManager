@@ -18,7 +18,7 @@ public class Load {
     public void execute(String worldName, String dimension, String generator) {
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
-            WorldManager.langConfig.sendFormat(sender, "load.worldAlreadyLoaded", worldName);
+            WorldManager.langConfig.sendError(sender, "load.already_loaded", worldName);
             return;
         }
 
@@ -31,11 +31,11 @@ public class Load {
 
         Environment env = getEnvironment(dimension);
         if (env == null) {
-            WorldManager.langConfig.sendFormat(sender, "load.invalidDimension");
-            WorldManager.langConfig.sendFormat(sender, "load.availableDimensions");
+            WorldManager.langConfig.sendError(sender, "load.invalid_dimension");
+            WorldManager.langConfig.sendWaiting(sender, "load.available_dimensions");
             for (Environment env2 : Environment.values()) {
                 if (env2 != Environment.CUSTOM)
-                    WorldManager.langConfig.sendFormat(sender, "load.dimensionList", env2.toString().toLowerCase());
+                    WorldManager.langConfig.sendWaiting(sender, "load.dimension_list", env2.toString().toLowerCase());
             }
             return;
         } else {
@@ -46,11 +46,11 @@ public class Load {
 
         if (world != null) {
 
-            WorldManager.langConfig.sendFormat(sender, "load.loadSuccess", worldName);
+            WorldManager.langConfig.sendSuccess(sender, "load.success", worldName);
             WorldManager.addWorld(sender, worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);
 
         } else {
-            WorldManager.langConfig.sendFormat(sender, "load.failedLoadingWorld", worldName);
+            WorldManager.langConfig.sendError(sender, "load.failed", worldName);
         }
     }
 

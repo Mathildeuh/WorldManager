@@ -67,7 +67,7 @@ public class ChunkGenerator {
         generating = false;
         bossBar.removeAll();
         WorldManagerCommand.generator = null;
-        WorldManager.langConfig.sendFormat(player, "pregen.finished", generatedChunkCount);
+        WorldManager.langConfig.sendSuccess(player, "pregen.finished", generatedChunkCount);
         System.out.println("Chunk generation completed! " + generatedChunkCount + "/" + totalChunks + " chunks generated.");
         System.out.println("Elapsed time: " + elapsedTime + "ms");
         System.out.println("Average time per chunk: " + (elapsedTime / (double) generatedChunkCount) + "ms");

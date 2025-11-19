@@ -5,7 +5,9 @@ plugins {
 
 
 group = 'fr.Mathildeuh'
-version = '1.4.1'
+version = '2.0.0'
+
+def mcVersion = '1.21.10-R0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -27,10 +29,15 @@ repositories {
     maven {
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
+    // Paper maven (left for compatibility)
+    maven {
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
 }
 
 dependencies {
-    compileOnly "org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT"
+    // Target Spigot API for 1.21.10 (switch from Paper back to Spigot)
+    compileOnly "org.spigotmc:spigot-api:${mcVersion}"
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
     implementation "net.kyori:adventure-platform-bukkit:4.3.2"
@@ -42,6 +49,9 @@ dependencies {
     implementation 'commons-io:commons-io:2.11.0'
 
     compileOnly 'me.clip:placeholderapi:2.11.6'
+
+    // JetBrains annotations for nullability hints (compileOnly)
+    compileOnly 'org.jetbrains:annotations:24.0.1'
 }
 
 def targetJavaVersion = 17
@@ -73,12 +83,22 @@ processResources {
 
 compileJava.options.encoding("UTF-8")
 
-
-libsDirectory = file("C:\\Users\\preve\\Documents\\server\\plugins")
-
-
 shadowJar {
     archiveClassifier.set('')
     relocate 'org.bstats', 'fr.mathildeuh.bstats'
     relocate 'com.github.stefvanschie.inventoryframework', 'fr.mathildeuh.inventoryframework'
+
+    doLast {
+        def pluginDir = file("C:\\Users\\Mathilde\\IdeaProjects\\WorldManager\\server\\plugins")
+        if (!pluginDir.exists()) {
+            pluginDir.mkdirs()
+        }
+        def jarFile = jar.archiveFile.get().asFile
+        copy {
+            from jarFile
+            into pluginDir
+        }
+        println "✓ Plugin copied to server/plugins/${jarFile.name}"
+    }
 }
+

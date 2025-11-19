@@ -2,7 +2,6 @@ package fr.mathildeuh.worldmanager.messages;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -13,7 +12,6 @@ public class MessageManager {
 
     private final CommandSender sender;
     private final List<String> helpMessage = new ArrayList<>();
-    private final String SOURCE = "World Manager";
 
     public MessageManager(CommandSender receivedSender) {
         this.sender = receivedSender;
@@ -28,11 +26,12 @@ public class MessageManager {
     public void sendHelp() {
         if (!(sender instanceof Player player)) return;
         for (String message : helpMessage) {
-            WorldManager.adventure().player(player).sendMessage(MiniMessage.miniMessage().deserialize(message));
+            MessageUtils.sendMini(player, message);
         }
     }
 
     public void parse(String message) {
+        // Legacy prefix handling for backwards compatibility
         MessageType type;
         if (message.startsWith("(ERROR) ")) {
             message = message.replace("(ERROR) ", "");
@@ -50,30 +49,13 @@ public class MessageManager {
             type = MessageType.CUSTOM;
         }
 
+        Component formatted = MessageUtils.parseMini(message);
         switch (type) {
-            case ERROR -> formatError(message).send();
-            case SUCCESS -> formatSuccess(message).send();
-            case WAITING -> formatWaiting(message).send();
-            case CUSTOM -> {
-                Component formattedMessage = MiniMessage.miniMessage().deserialize(message);
-                new FormattedMessage(sender, formattedMessage).send();
-            }
+            case ERROR -> MessageUtils.send(sender, MessageUtils.wrapError(formatted));
+            case SUCCESS -> MessageUtils.send(sender, MessageUtils.wrapSuccess(formatted));
+            case WAITING -> MessageUtils.send(sender, MessageUtils.wrapWaiting(formatted));
+            case CUSTOM -> MessageUtils.send(sender, formatted);
         }
-    }
-
-    public FormattedMessage formatError(String message) {
-        Component formattedMessage = MiniMessage.miniMessage().deserialize("<color:#aa3e00>☠</color> <color:#7d66ff>{" + SOURCE + "}</color> <color:#ff2e1f>" + message + "</color>");
-        return new FormattedMessage(sender, formattedMessage);
-    }
-
-    public FormattedMessage formatSuccess(String message) {
-        Component formattedMessage = MiniMessage.miniMessage().deserialize("<dark_green>✔</dark_green> <color:#7d66ff>{" + SOURCE + "}</color> <yellow>" + message + "</yellow>");
-        return new FormattedMessage(sender, formattedMessage);
-    }
-
-    public FormattedMessage formatWaiting(String message) {
-        Component formattedMessage = MiniMessage.miniMessage().deserialize("<gold>⌛</gold> <color:#7d66ff>{" + SOURCE + "}</color> <gray>" + message + "</gray>");
-        return new FormattedMessage(sender, formattedMessage);
     }
 
     public enum MessageType {

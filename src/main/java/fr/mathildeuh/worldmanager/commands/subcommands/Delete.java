@@ -25,27 +25,27 @@ public class Delete {
         World targetWorld = Bukkit.getWorld(name);
 
         if (targetWorld == null) {
-            WorldManager.langConfig.sendFormat(sender, "delete.worldNotFound");
+            WorldManager.langConfig.sendError(sender, "delete.world_not_found");
             return;
         }
 
         if (targetWorld.equals(Bukkit.getWorlds().get(0))) {
-            WorldManager.langConfig.sendFormat(sender, "delete.defaultWorld");
+            WorldManager.langConfig.sendError(sender, "delete.default_world");
             return;
         }
 
-        WorldManager.langConfig.sendFormat(sender, "delete.warning", name);
+        WorldManager.langConfig.sendWaiting(sender, "delete.warning", name);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getWorld().equals(targetWorld)) {
                 player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
-                WorldManager.langConfig.sendFormat(player, "delete.kickedPlayers");
+                WorldManager.langConfig.sendError(player, "delete.kicked_players");
             }
         }
 
         boolean unloadSuccess = plugin.getServer().unloadWorld(targetWorld, false);
         if (!unloadSuccess) {
-            WorldManager.langConfig.sendFormat(sender, "delete.failedToDelete");
+            WorldManager.langConfig.sendError(sender, "delete.failed_to_delete");
             return;
         }
 
@@ -58,7 +58,7 @@ public class Delete {
                 throw new RuntimeException(e);
             }
         });
-        WorldManager.langConfig.sendFormat(sender, "delete.success");
+        WorldManager.langConfig.sendSuccess(sender, "delete.success");
         WorldManager.removeWorld(targetWorld.getName());
 
     }

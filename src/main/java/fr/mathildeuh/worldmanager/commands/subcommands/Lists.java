@@ -14,9 +14,9 @@ public class Lists {
 
     public void execute() {
 
-        WorldManager.langConfig.sendFormat(sender, "list.worldList");
+        WorldManager.langConfig.sendWaiting(sender, "list.world_list");
         for (World world : Bukkit.getWorlds()) {
-            WorldManager.langConfig.sendFormat(sender, "list.worlds", world.getName());
+            WorldManager.langConfig.sendWaiting(sender, "list.item", world.getName());
         }
     }
 

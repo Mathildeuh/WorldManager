@@ -28,7 +28,7 @@ public class BackupConfig {
         World world = Bukkit.getWorld(name);
         if (world != null) {
             Bukkit.getLogger().info("Backing up world " + name);
-            WorldManager.langConfig.sendFormat(player, "backup.backupStarted");
+            WorldManager.langConfig.sendWaiting(player, "backup.started");
 
             world.save();
 
@@ -54,15 +54,15 @@ public class BackupConfig {
                     config.set("backups." + name + ".generator", world.getGenerator());
                     config.save(configFile);
 
-                    WorldManager.langConfig.sendFormat(player, "backup.backupFinished");
+                    WorldManager.langConfig.sendSuccess(player, "backup.finished");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    WorldManager.langConfig.sendFormat(player, "backup.backupFailed");
+                    WorldManager.langConfig.sendError(player, "backup.failed");
                 }
             });
 
         } else {
-            WorldManager.langConfig.sendFormat(player, "backup.worldNotFound");
+            WorldManager.langConfig.sendError(player, "backup.world_not_found");
         }
     }
 
@@ -82,7 +82,7 @@ public class BackupConfig {
 
             }
 
-            WorldManager.langConfig.sendFormat(player, "restore.restoreStarted");
+            WorldManager.langConfig.sendWaiting(player, "restore.started");
 
             if (worldFolder.exists()) {
                 deleteFolder(worldFolder);
@@ -113,10 +113,10 @@ public class BackupConfig {
                 }, 20L * 2L);
             }, 20L * 2L);
 
-            WorldManager.langConfig.sendFormat(player, "restore.restoreFinished");
+            WorldManager.langConfig.sendSuccess(player, "restore.finished");
 
         } else {
-            WorldManager.langConfig.sendFormat(player, "restore.worldNotFound");
+            WorldManager.langConfig.sendError(player, "restore.world_not_found");
         }
     }
 

@@ -1,7 +1,7 @@
 package fr.mathildeuh.worldmanager.events;
 
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.messages.MessageManager;
+import fr.mathildeuh.worldmanager.messages.MessageUtils;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -32,13 +32,13 @@ public class JoinListener implements Listener {
         final String name = player.getName();
         if (this.updateInfoSent.contains(name)) return;
 
-        new MessageManager(event.getPlayer()).parse("<color:#7d66ff>{</color><color:#6258a6>------</color> <color:#02a876>World Manager</color> <color:#6258a6>------</color><color:#7d66ff>}</color>\n");
-        new MessageManager(event.getPlayer()).parse("");
-        new MessageManager(event.getPlayer()).parse("<dark_red> ⚠</dark_red><color:#ffa1f9> A new update is available !</color> <dark_red>⚠</dark_red>");
-        new MessageManager(event.getPlayer()).parse("<click:open_url:' " + UpdateChecker.getURL() + "'>   <color:#7471b0>➥</color> <color:#ff9900>Click here to download</color></click>");
-        new MessageManager(event.getPlayer()).parse("");
-        new MessageManager(event.getPlayer()).parse("<gray>Patch note: </gray> <green>" + getLatestReleaseNote() + "</green>");
-        new MessageManager(event.getPlayer()).parse("<color:#7d66ff>{</color><color:#6258a6>--------------------------</color><color:#7d66ff>}</color>");
+        MessageUtils.sendMini(player, "<color:#7d66ff>{</color><color:#6258a6>------</color> <color:#02a876>World Manager</color> <color:#6258a6>------</color><color:#7d66ff>}</color>\n");
+        MessageUtils.sendMini(player, "");
+        MessageUtils.sendMini(player, "<dark_red> ⚠</dark_red><color:#ffa1f9> A new update is available !</color> <dark_red>⚠</dark_red>");
+        MessageUtils.sendMini(player, "<click:open_url:' " + UpdateChecker.getURL() + "'>   <color:#7471b0>➥</color> <color:#ff9900>Click here to download</color></click>");
+        MessageUtils.sendMini(player, "");
+        MessageUtils.sendMini(player, "<gray>Patch note: </gray> <green>" + getLatestReleaseNote() + "</green>");
+        MessageUtils.sendMini(player, "<color:#7d66ff>{</color><color:#6258a6>--------------------------</color><color:#7d66ff>}</color>");
         this.updateInfoSent.add(name);
     }
 

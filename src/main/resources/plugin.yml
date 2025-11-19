@@ -1,7 +1,7 @@
 name: WorldManager
-version: '${version}'
+version: '2.1.0'
 main: fr.mathildeuh.worldmanager.WorldManager
-api-version: '1.13'
+api-version: '1.21'
 author: Mathildeuh
 softdepend: [PlaceholderAPI]
 commands:
@@ -10,4 +10,4 @@ commands:
     aliases: wm
     description: Main command of WorldManager
     usage: /<command> <subcommand> [arguments]
-    permission-message: "§cYou can't use this command. §7(Missing permission: §eworldmanager.command§7)"
+    permission-message: "<red>Vous n'avez pas la permission requise : <gold>worldmanager.command</gold>"

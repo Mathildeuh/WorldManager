@@ -6,8 +6,8 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
 
 
 public class Create {
-    static CommandSender sender;
+    private final CommandSender sender;
 
     public Create(CommandSender sender) {
         this.sender = sender;
@@ -27,50 +27,50 @@ public class Create {
         if (seed != null && seed.matches("-?\\d+")) {
             seedValue = Long.parseLong(seed);
         } else if (seed != null && !seed.isEmpty()) {
-            WorldManager.langConfig.sendFormat(sender, "create.invalidSeed");
+            WorldManager.langConfig.sendError(sender, "create.invalid_seed");
 
-            return;
+             return;
         }
 
         Object worldTypeOrEnvironment = getWorldType(type);
 
         if (worldTypeOrEnvironment instanceof WorldType) {
-            sendStarting(type, name, seed, generator);
+            sendStarting(sender, type, name, seed, generator);
             createWorld(sender, name, World.Environment.NORMAL, (WorldType) worldTypeOrEnvironment, seedValue, generator);
         } else if (worldTypeOrEnvironment instanceof World.Environment) {
-            sendStarting(type, name, seed, generator);
+            sendStarting(sender, type, name, seed, generator);
             createWorld(sender, name, (World.Environment) worldTypeOrEnvironment, WorldType.NORMAL, seedValue, generator);
         } else {
-            WorldManager.langConfig.sendFormat(sender, "create.invalidDimensionType");
+            WorldManager.langConfig.sendError(sender, "create.invalid_dimension_type");
 
-            WorldManager.langConfig.sendFormat(sender, "create.availableDimensions");
+            WorldManager.langConfig.sendWaiting(sender, "create.available_dimensions");
 
             for (World.Environment env : World.Environment.values()) {
                 if (env != World.Environment.CUSTOM && env != World.Environment.NORMAL) {
-                    WorldManager.langConfig.sendFormat(sender, "create.dimensionList", env.name().toLowerCase());
+                    WorldManager.langConfig.sendWaiting(sender, "create.dimension_list", env.name().toLowerCase());
                 }
             }
 
             for (WorldType worldType : WorldType.values()) {
-                WorldManager.langConfig.sendFormat(sender, "create.dimensionList", worldType.name().toLowerCase());
+                WorldManager.langConfig.sendWaiting(sender, "create.dimension_list", worldType.name().toLowerCase());
             }
         }
 
     }
 
-    public static void sendStarting(String type, String name, String seed, String generator) {
-        WorldManager.langConfig.sendFormat(sender, "create.startingWorldCreation");
-        WorldManager.langConfig.sendFormat(sender, "create.worldRecap.name", name);
+    public static void sendStarting(CommandSender sender, String type, String name, String seed, String generator) {
+        WorldManager.langConfig.sendWaiting(sender, "create.starting");
+        WorldManager.langConfig.sendWaiting(sender, "create.recap.name", name);
 
 
         String t = (type != null && !type.isEmpty()) ? type : "default";
-        WorldManager.langConfig.sendFormat(sender, "create.worldRecap.type", t);
+        WorldManager.langConfig.sendWaiting(sender, "create.recap.type", t);
 
         String s = (seed != null && !seed.isEmpty()) ? seed : "random";
-        WorldManager.langConfig.sendFormat(sender, "create.worldRecap.seed", s);
+        WorldManager.langConfig.sendWaiting(sender, "create.recap.seed", s);
 
         String g = (generator != null && !generator.isEmpty()) ? generator : "default";
-        WorldManager.langConfig.sendFormat(sender, "create.worldRecap.generator", g);
+        WorldManager.langConfig.sendWaiting(sender, "create.recap.generator", g);
     }
 
     private Object getWorldType(String type) {
@@ -106,17 +106,19 @@ public class Create {
             try {
                 creator.generator(generator);
             } catch (NoSuchElementException e) {
-                WorldManager.langConfig.sendFormat(sender, "create.generatorNotFound", generator);
+                WorldManager.langConfig.sendError(sender, "create.generator_not_found", generator);
                 return;
             }
         }
 
         World world = creator.createWorld();
         if (world == null) {
-            WorldManager.langConfig.sendFormat(sender, "create.worldCreationError", name);
+            WorldManager.langConfig.sendError(sender, "create.error", name);
         } else {
-            WorldManager.langConfig.sendFormat(sender, "create.worldCreationSuccess", name);
-            world.save();
+            WorldManager.langConfig.sendSuccess(sender, "create.success", name);
+            try {
+                world.save();
+            } catch (Exception ignored) { }
             WorldManager.addWorld(player, creator.name(), creator.type().name(), creator.environment(), generator);
         }
     }
@@ -124,28 +126,28 @@ public class Create {
 
     public void execute(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
         if (Bukkit.getWorld(name) != null) {
-            WorldManager.langConfig.sendFormat(sender, "create.worldAlreadyExists");
-            return;
-        }
+            WorldManager.langConfig.sendError(sender, "create.already_exists");
+             return;
+         }
 
         if (name.equalsIgnoreCase("plugins") || name.equalsIgnoreCase("logs") || name.equalsIgnoreCase("libraries") || name.equalsIgnoreCase("versions") || name.equalsIgnoreCase("config") || name.equalsIgnoreCase("cache")) {
-            WorldManager.langConfig.sendFormat(sender, "create.worldNameCantBeUsed");
-            return;
-        }
+            WorldManager.langConfig.sendError(sender, "create.name_unusable");
+             return;
+         }
 
         if (getUnloadedWorlds().contains(name)) {
-            WorldManager.langConfig.sendFormat(sender, "create.worldExistButNotLoaded", name);
-            return;
-        }
+            WorldManager.langConfig.sendError(sender, "create.exists_but_not_loaded", name);
+             return;
+         }
 
-        if (type == null) {
-            run(name, null, null, null);
-        } else if (seed == null) {
-            run(name, type, null, null);
-        } else {
-            run(name, type, seed, generator);
-        }
-    }
+         if (type == null) {
+             run(name, null, null, null);
+         } else if (seed == null) {
+             run(name, type, null, null);
+         } else {
+             run(name, type, seed, generator);
+         }
+     }
 
     private List<String> getUnloadedWorlds() {
         List<String> unloadedWorlds = new ArrayList<>();
