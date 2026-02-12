@@ -5,9 +5,9 @@ plugins {
 
 
 group = 'fr.Mathildeuh'
-version = '2.1.0'
+version = '2.2.0'
 
-def mcVersion = '1.21.10-R0.1-SNAPSHOT'
+def mcVersion = '1.21.11-R0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()

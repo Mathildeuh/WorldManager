@@ -2,6 +2,7 @@ package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import org.bukkit.Bukkit;
+import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
@@ -11,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Set;
 
 public class WorldsConfig {
 
@@ -38,6 +40,9 @@ public class WorldsConfig {
             String environment = WorldManager.worldsConfig.getString("worlds." + worldName + ".environment");
             createWorld(worldName, type, environment, generator);
         }
+
+        // Charger les game rules après que les mondes soient créés
+        Bukkit.getScheduler().scheduleSyncDelayedTask(JavaPlugin.getPlugin(WorldManager.class), WorldsConfig::loadGameRules, 20L);
     }
 
     private static void createWorld(String name, String type, String environment, String generator) {
@@ -96,5 +101,74 @@ public class WorldsConfig {
         return creator == null ? "Unknown" : creator;
     }
 
+    @SuppressWarnings("unchecked")
+    public static void loadGameRules() {
+        ConfigurationSection worlds = WorldManager.worldsConfig.getConfigurationSection("worlds");
 
+        if (worlds == null) {
+            Bukkit.getLogger().info("No worlds configuration found, skipping game rules loading");
+            return;
+        }
+
+        int loadedRules = 0;
+        int skippedRules = 0;
+        var logger = Bukkit.getLogger();
+
+        for (String worldName : worlds.getKeys(false)) {
+            World world = Bukkit.getWorld(worldName);
+            if (world == null) {
+                logger.fine("World '" + worldName + "' not loaded, skipping game rules");
+                continue;
+            }
+
+            ConfigurationSection gameRulesSection = WorldManager.worldsConfig.getConfigurationSection("worlds." + worldName + ".gameRules");
+            if (gameRulesSection == null) {
+                logger.fine("No game rules saved for world '" + worldName + "'");
+                continue;
+            }
+
+            Set<String> ruleNames = gameRulesSection.getKeys(false);
+            if (ruleNames.isEmpty()) {
+                continue;
+            }
+
+            for (String gameRuleName : ruleNames) {
+                try {
+                    GameRule<?> gameRule = GameRule.getByName(gameRuleName);
+                    if (gameRule == null) {
+                        logger.warning("GameRule '" + gameRuleName + "' not recognized (may be from a mod or newer MC version)");
+                        skippedRules++;
+                        continue;
+                    }
+
+                    Object value = gameRulesSection.get(gameRuleName);
+                    if (value == null) {
+                        logger.warning("GameRule '" + gameRuleName + "' has null value for world '" + worldName + "'");
+                        skippedRules++;
+                        continue;
+                    }
+
+                    Class<?> ruleType = gameRule.getType();
+
+                    if (ruleType == Boolean.class && value instanceof Boolean boolValue) {
+                        world.setGameRule((GameRule<Boolean>) gameRule, boolValue);
+                        loadedRules++;
+                        logger.fine("✓ GameRule '" + gameRuleName + "' → " + value + " (World: " + worldName + ")");
+                    } else if (ruleType == Integer.class && value instanceof Number numValue) {
+                        world.setGameRule((GameRule<Integer>) gameRule, numValue.intValue());
+                        loadedRules++;
+                        logger.fine("✓ GameRule '" + gameRuleName + "' → " + value + " (World: " + worldName + ")");
+                    } else {
+                        logger.warning("GameRule '" + gameRuleName + "' has unexpected type: " + value.getClass().getSimpleName());
+                        skippedRules++;
+                    }
+                } catch (Exception e) {
+                    logger.severe("Failed to load GameRule '" + gameRuleName + "' for world '" + worldName + "': " + e.getMessage());
+                    skippedRules++;
+                }
+            }
+        }
+
+        logger.info("GameRules loading complete - Loaded: " + loadedRules + " | Skipped: " + skippedRules);
+    }
 }

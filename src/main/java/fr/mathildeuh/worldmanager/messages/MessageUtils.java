@@ -17,7 +17,9 @@ public final class MessageUtils {
     }
 
     public static Component wrapError(Component message) {
-        return MINI.deserialize("<color:#aa3e00>☠</color> <color:#7d66ff>{" + SOURCE + "}</color> <color:#ff2e1f>").append(message);
+        return MINI.deserialize("<color:#aa3e00>☠</color> <color:#7d66ff>{" + SOURCE + "}</color> <color:#ff2e1f>")
+                .append(message)
+                .append(MINI.deserialize("</color>"));
     }
 
     public static Component wrapSuccess(Component message) {

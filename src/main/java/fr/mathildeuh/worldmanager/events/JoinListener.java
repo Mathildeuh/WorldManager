@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -47,10 +48,15 @@ public class JoinListener implements Listener {
         String repo = "WorldManager";
         try {
             String apiUrl = String.format(GITHUB_API_URL, owner, repo);
-            HttpClient client = HttpClient.newHttpClient();
+            // HttpClient is stateless and doesn't need to be closed
+            @SuppressWarnings("resource")
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(5))
+                    .build();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(apiUrl))
                     .header("Accept", "application/json")
+                    .timeout(Duration.ofSeconds(5))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());

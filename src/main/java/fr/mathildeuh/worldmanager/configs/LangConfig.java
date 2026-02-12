@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.messages.MessageUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -38,19 +39,28 @@ public class LangConfig {
 
     public void sendError(CommandSender target, String path, Object... objects) {
         String mini = formatMessage(path, objects);
-        if (mini == null) return;
+        if (mini == null) {
+            Bukkit.getLogger().warning("[WorldManager] Missing error message key: " + path);
+            return;
+        }
         MessageUtils.send(target, MessageUtils.wrapError(MessageUtils.parseMini(mini)));
     }
 
     public void sendSuccess(CommandSender target, String path, Object... objects) {
         String mini = formatMessage(path, objects);
-        if (mini == null) return;
+        if (mini == null) {
+            Bukkit.getLogger().warning("[WorldManager] Missing success message key: " + path);
+            return;
+        }
         MessageUtils.send(target, MessageUtils.wrapSuccess(MessageUtils.parseMini(mini)));
     }
 
     public void sendWaiting(CommandSender target, String path, Object... objects) {
         String mini = formatMessage(path, objects);
-        if (mini == null) return;
+        if (mini == null) {
+            Bukkit.getLogger().warning("[WorldManager] Missing waiting message key: " + path);
+            return;
+        }
         MessageUtils.send(target, MessageUtils.wrapWaiting(MessageUtils.parseMini(mini)));
     }
 

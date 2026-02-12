@@ -30,13 +30,13 @@ public enum GUIList {
                 this.gui = new GUISManager().getGui();
                 break;
             case CREATOR:
-                this.gui = new GUISManager.Creator().getGui();
+                this.gui = new CreatorGUI().getGui();
                 break;
             case EDITOR:
-                this.gui = new GUISManager.Editor().getGui();
+                this.gui = new EditorGUI().getGui();
                 break;
             case LOADER:
-                this.gui = new GUISManager.Loader().getGui();
+                this.gui = new LoaderGUI().getGui();
                 break;
         }
     }

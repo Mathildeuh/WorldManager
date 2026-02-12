@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Random;
 
 
 public class Create {
@@ -23,13 +25,18 @@ public class Create {
     }
 
     public void run(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
-        long seedValue = 0L;
-        if (seed != null && seed.matches("-?\\d+")) {
-            seedValue = Long.parseLong(seed);
-        } else if (seed != null && !seed.isEmpty()) {
-            WorldManager.langConfig.sendError(sender, "create.invalid_seed");
+        long seedValue;
 
-             return;
+        if (seed != null && !seed.isEmpty()) {
+            if (seed.matches("-?\\d+")) {
+                seedValue = Long.parseLong(seed);
+            } else {
+                WorldManager.langConfig.sendError(sender, "create.invalid_seed");
+                return;
+            }
+        } else {
+            // Générer une seed aléatoire si aucune n'est spécifiée
+            seedValue = new Random().nextLong();
         }
 
         Object worldTypeOrEnvironment = getWorldType(type);
@@ -97,11 +104,16 @@ public class Create {
     }
 
     public void createWorld(CommandSender player, String name, @Nullable World.Environment environment, WorldType type, @Nullable Long seed, @Nullable String generator) {
-        assert environment != null;
-        WorldCreator creator = new WorldCreator(name).environment(environment).type(type);
-        if (seed != null) {
-            creator.seed(seed);
+        if (environment == null) {
+            throw new IllegalArgumentException("Environment cannot be null");
         }
+
+        WorldCreator creator = new WorldCreator(name).environment(environment).type(type);
+
+        // Si aucune seed n'est spécifiée, en générer une aléatoire pour éviter les mondes identiques
+        long seedValue = Objects.requireNonNullElseGet(seed, () -> new Random().nextLong());
+        creator.seed(seedValue);
+
         if (generator != null) {
             try {
                 creator.generator(generator);

@@ -30,8 +30,12 @@ import java.util.logging.Level;
 public final class WorldManager extends JavaPlugin {
 
     public static BukkitAudiences adventure;
+
+    // Fichiers de configuration séparés
     public static File configFile;
     public static FileConfiguration worldsConfig;
+
+
     public static BackupConfig backupConfig;
     public static LangConfig langConfig;
     private boolean updated = true;
@@ -68,8 +72,13 @@ public final class WorldManager extends JavaPlugin {
         new Metrics(this, 22073);
         adventure = BukkitAudiences.create(this);
 
-        getCommand("worldmanager").setExecutor(new WorldManagerCommand());
-        getCommand("worldmanager").setTabCompleter(new WorldManagerCommand());
+        var worldManagerCommand = getCommand("worldmanager");
+        if (worldManagerCommand != null) {
+            worldManagerCommand.setExecutor(new WorldManagerCommand());
+            worldManagerCommand.setTabCompleter(new WorldManagerCommand());
+        } else {
+            getLogger().severe("Could not register 'worldmanager' command! Check plugin.yml");
+        }
 
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
 
@@ -102,7 +111,9 @@ public final class WorldManager extends JavaPlugin {
 
         List<String> defaultLangs = Arrays.asList("en", "es", "fr", "ru", "de");
 
-        langFile.getParentFile().mkdirs();
+        if (!langFile.getParentFile().mkdirs() && !langFile.getParentFile().exists()) {
+            getLogger().warning("Could not create lang directory!");
+        }
 
         if (!langFile.exists()) {
             if (this.getResource("lang/" + lang + ".yml") != null) {
@@ -123,7 +134,7 @@ public final class WorldManager extends JavaPlugin {
                 try {
                     Files.copy(defaultLangFile.toPath(), langFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    getLogger().severe("Failed to copy language file: " + e.getMessage());
                 }
             }
         }
@@ -147,15 +158,18 @@ public final class WorldManager extends JavaPlugin {
     }
 
     private void loadBackupFile() {
-        configFile = new File("backups/WorldManager/backups.yml");
-        worldsConfig = YamlConfiguration.loadConfiguration(configFile);
+        File backupConfigFile = new File("backups/WorldManager/backups.yml");
+        FileConfiguration backupConfigYaml = YamlConfiguration.loadConfiguration(backupConfigFile);
         try {
-            if (worldsConfig.getString("backups") == null)
-                worldsConfig.set("backups", "");
-            worldsConfig.save(configFile);
-            backupConfig = new BackupConfig(configFile, worldsConfig);
+            if (backupConfigYaml.getString("backups") == null)
+                backupConfigYaml.set("backups", "");
+            backupConfigYaml.save(backupConfigFile);
+            @SuppressWarnings("InstantiationOfUtilityClass")
+            BackupConfig tempConfig = new BackupConfig(backupConfigFile, backupConfigYaml);
+            backupConfig = tempConfig;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            getLogger().severe("Failed to load backup configuration: " + e.getMessage());
+            throw new RuntimeException("Failed to initialize backup config", e);
         }
     }
 

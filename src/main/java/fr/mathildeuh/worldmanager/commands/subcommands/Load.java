@@ -1,7 +1,6 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.messages.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
@@ -23,7 +22,12 @@ public class Load {
         }
 
         if (dimension == null || dimension.isEmpty()) {
-            new MessageManager(sender).sendHelp(); // TODO: Help message configurable
+            WorldManager.langConfig.sendError(sender, "load.invalid_dimension");
+            WorldManager.langConfig.sendWaiting(sender, "load.available_dimensions");
+            for (Environment env2 : Environment.values()) {
+                if (env2 != Environment.CUSTOM)
+                    WorldManager.langConfig.sendWaiting(sender, "load.dimension_list", env2.toString().toLowerCase());
+            }
             return;
         }
 

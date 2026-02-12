@@ -13,11 +13,9 @@ import java.io.IOException;
 
 public class Delete {
 
-    private final JavaPlugin plugin;
     CommandSender sender;
 
     public Delete(CommandSender sender) {
-        this.plugin = JavaPlugin.getPlugin(WorldManager.class);
         this.sender = sender;
     }
 
@@ -43,14 +41,14 @@ public class Delete {
             }
         }
 
-        boolean unloadSuccess = plugin.getServer().unloadWorld(targetWorld, false);
+        boolean unloadSuccess = JavaPlugin.getPlugin(WorldManager.class).getServer().unloadWorld(targetWorld, false);
         if (!unloadSuccess) {
             WorldManager.langConfig.sendError(sender, "delete.failed_to_delete");
             return;
         }
 
         File worldFolder = targetWorld.getWorldFolder();
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(JavaPlugin.getPlugin(WorldManager.class), () -> {
             try {
                 FileUtils.deleteDirectory(worldFolder);
 
