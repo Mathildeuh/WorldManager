@@ -28,7 +28,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly "org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT"
+    // Target PaperMC API
+    compileOnly "io.papermc.paper:paper-api:${mcVersion}"
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
     implementation "net.kyori:adventure-platform-bukkit:4.3.2"
@@ -37,10 +38,16 @@ dependencies {
     implementation 'org.zeroturnaround:zt-zip:1.17'
 
     implementation 'org.json:json:20231013'
+    implementation 'commons-io:commons-io:2.14.0'
 
-    implementation 'commons-io:commons-io:2.11.0'
+    // Database drivers
+    implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+
     compileOnly 'me.clip:placeholderapi:2.11.6'
 
+    // JetBrains annotations for nullability hints (compileOnly)
+    compileOnly 'org.jetbrains:annotations:24.0.1'
 }
 
 def targetJavaVersion = 17
