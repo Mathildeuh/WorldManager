@@ -54,7 +54,7 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:24.0.1'
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
