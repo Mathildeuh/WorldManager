@@ -8,11 +8,13 @@ def buildGradleContent = file('build.gradle').text
 def versionMatcher = buildGradleContent =~ /version = '(.*)'/
 def version = versionMatcher[0][1]
 
-version = version
-
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {
+        name = "papermc"
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
     maven {
         name = "spigotmc-repo"
         url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
@@ -31,7 +33,7 @@ repositories {
 
 dependencies {
     // Target PaperMC API
-    compileOnly "io.papermc.paper:paper-api:${version}"
+    compileOnly "io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT"
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
     implementation "net.kyori:adventure-platform-bukkit:4.3.2"
