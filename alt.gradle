@@ -8,6 +8,8 @@ def buildGradleContent = file('build.gradle').text
 def versionMatcher = buildGradleContent =~ /version = '(.*)'/
 def version = versionMatcher[0][1]
 
+ext.mcVersion = '1.21.11-R0.1-SNAPSHOT'
+
 repositories {
     mavenCentral()
     mavenLocal()
