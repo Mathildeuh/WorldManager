@@ -3,8 +3,14 @@ package fr.mathildeuh.worldmanager;
 import fr.mathildeuh.worldmanager.commands.WorldManagerCommand;
 import fr.mathildeuh.worldmanager.configs.BackupConfig;
 import fr.mathildeuh.worldmanager.configs.LangConfig;
+import fr.mathildeuh.worldmanager.configs.LinkedWorldsManager;
+import fr.mathildeuh.worldmanager.configs.PlayerInventoryManager;
 import fr.mathildeuh.worldmanager.configs.WorldsConfig;
+import fr.mathildeuh.worldmanager.database.DatabaseConnection;
+import fr.mathildeuh.worldmanager.database.DatabaseFactory;
+import fr.mathildeuh.worldmanager.database.DatabaseManager;
 import fr.mathildeuh.worldmanager.events.JoinListener;
+import fr.mathildeuh.worldmanager.events.WorldChangeListener;
 import fr.mathildeuh.worldmanager.guis.GUIList;
 import fr.mathildeuh.worldmanager.placeholder.Placeholders;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
@@ -35,6 +41,9 @@ public final class WorldManager extends JavaPlugin {
     public static File configFile;
     public static FileConfiguration worldsConfig;
 
+    // Database
+    private static DatabaseConnection databaseConnection;
+    private static DatabaseManager databaseManager;
 
     public static BackupConfig backupConfig;
     public static LangConfig langConfig;
@@ -81,9 +90,15 @@ public final class WorldManager extends JavaPlugin {
         }
 
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
+        getServer().getPluginManager().registerEvents(new WorldChangeListener(), this);
 
         loadBackupFile();
         loadWorldsFile();
+
+        // Initialize database
+        initializeDatabase();
+
+        LinkedWorldsManager.loadLinkedWorlds();
 
         if (getConfig().getBoolean("update-checker"))
             update();
@@ -173,6 +188,19 @@ public final class WorldManager extends JavaPlugin {
         }
     }
 
+    private void initializeDatabase() {
+        try {
+            databaseConnection = DatabaseFactory.createConnection(this);
+            databaseManager = new DatabaseManager(databaseConnection);
+            databaseManager.initialize();
+            PlayerInventoryManager.setDatabaseManager(databaseManager);
+            getLogger().info("[WorldManager] Database initialized successfully");
+        } catch (Exception e) {
+            getLogger().severe("[WorldManager] Failed to initialize database: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onDisable() {
         if (adventure != null) {
@@ -180,6 +208,18 @@ public final class WorldManager extends JavaPlugin {
             adventure = null;
         }
 
+        // Clean up player inventory data
+        PlayerInventoryManager.clearAllData();
+
+        // Close database connection
+        if (databaseConnection != null) {
+            try {
+                databaseConnection.closeConnection();
+                getLogger().info("[WorldManager] Database connection closed");
+            } catch (Exception e) {
+                getLogger().warning("[WorldManager] Error closing database: " + e.getMessage());
+            }
+        }
     }
 
     private void update() {

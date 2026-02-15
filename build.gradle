@@ -1,11 +1,11 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.gradleup.shadow' version '8.3.0'
 }
 
 
 group = 'fr.Mathildeuh'
-version = '2.2.0'
+version = '2.2.1'
 
 def mcVersion = '1.21.11-R0.1-SNAPSHOT'
 
@@ -13,8 +13,8 @@ repositories {
     mavenCentral()
     mavenLocal()
     maven {
-        name = "spigot-repo"
-        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+        name = "papermc"
+        url = 'https://repo.papermc.io/repository/maven-public/'
     }
     maven {
         name = "sonatype"
@@ -29,15 +29,11 @@ repositories {
     maven {
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
-    // Paper maven (left for compatibility)
-    maven {
-        url = 'https://repo.papermc.io/repository/maven-public/'
-    }
 }
 
 dependencies {
-    // Target Spigot API for 1.21.10 (switch from Paper back to Spigot)
-    compileOnly "org.spigotmc:spigot-api:${mcVersion}"
+    // Target PaperMC API
+    compileOnly "io.papermc.paper:paper-api:${mcVersion}"
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
     implementation "net.kyori:adventure-platform-bukkit:4.3.2"
@@ -48,13 +44,17 @@ dependencies {
     implementation 'org.json:json:20231013'
     implementation 'commons-io:commons-io:2.14.0'
 
+    // Database drivers
+    implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+
     compileOnly 'me.clip:placeholderapi:2.11.6'
 
     // JetBrains annotations for nullability hints (compileOnly)
     compileOnly 'org.jetbrains:annotations:24.0.1'
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -101,4 +101,3 @@ shadowJar {
         println "✓ Plugin copied to server/plugins/${jarFile.name}"
     }
 }
-

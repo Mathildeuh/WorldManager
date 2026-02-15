@@ -4,3 +4,34 @@
 
 update-checker: true
 lang: en # (en, fr, es, de, pl, ru, or custom but you have to do it yourself)
+
+# Database Configuration
+# Type: sqlite (default) or mysql
+database:
+  type: sqlite
+  # SQLite settings (used when type is 'sqlite')
+  sqlite:
+    filename: inventories
+  # MySQL/MariaDB settings (used when type is 'mysql')
+  mysql:
+    host: localhost
+    port: 3306
+    database: worldmanager
+    username: root
+    password: password
+
+# Linked Worlds Inventory
+# Enable or disable the linked worlds inventory feature
+# When enabled, players will keep their inventory when traveling between worlds in the same group
+# When disabled, all linked-worlds-inventory configurations are ignored
+enable-linked-inventory: false
+
+# Linked worlds configuration
+# Players will keep their inventory when traveling between worlds in the same group
+linked-worlds-inventory:
+  group1:
+    - world
+    - test
+  group2:
+    - world_nether
+    - world_the_end

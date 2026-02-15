@@ -10,7 +10,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,7 +25,6 @@ public class ItemBuilder {
     private ItemMeta meta;
     private Material material = Material.STONE;
     private int amount = 1;
-    private MaterialData data;
     private short damage = 0;
     private Map<Enchantment, Integer> enchantments = new HashMap<>();
     private String displayname;
@@ -87,7 +85,6 @@ public class ItemBuilder {
         this.item = item;
         this.material = item.getType();
         this.amount = item.getAmount();
-        this.data = item.getData();
         this.damage = item.getDurability();
         this.enchantments = item.getEnchantments();
 
@@ -114,8 +111,6 @@ public class ItemBuilder {
         this.material = builder.material;
         this.amount = builder.amount;
         this.damage = builder.damage;
-        this.data = builder.data;
-        this.damage = builder.damage;
         this.enchantments = builder.enchantments;
         this.displayname = builder.displayname;
         this.lore = builder.lore;
@@ -141,10 +136,6 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder data(MaterialData data) {
-        this.data = data;
-        return this;
-    }
 
     @Deprecated
     public ItemBuilder damage(short damage) {
@@ -232,7 +223,7 @@ public class ItemBuilder {
 
     @Deprecated
     public ItemBuilder owner(String user) {
-        if ((material == Material.LEGACY_SKULL_ITEM) || (material == Material.PLAYER_HEAD)) {
+        if (material == Material.PLAYER_HEAD) {
             SkullMeta smeta = (SkullMeta) meta;
             smeta.setOwner(user);
             meta = smeta;
@@ -312,9 +303,6 @@ public class ItemBuilder {
         return meta;
     }
 
-    public MaterialData getData() {
-        return data;
-    }
 
     @Deprecated
     public List<String> getLore() {
@@ -340,8 +328,6 @@ public class ItemBuilder {
             return b;
         if (b.displayname != null)
             displayname = b.displayname;
-        if (b.data != null)
-            data = b.data;
         if (b.material != null)
             material = b.material;
         if (b.lore != null)
@@ -363,9 +349,6 @@ public class ItemBuilder {
         item.setAmount(amount);
         item.setDurability(damage);
         meta = item.getItemMeta();
-        if (data != null) {
-            item.setData(data);
-        }
         if (enchantments.size() > 0) {
             item.addUnsafeEnchantments(enchantments);
         }

@@ -47,7 +47,7 @@ public class GameRuleEditorGUI implements Listener {
                             int newValue = Integer.parseInt(message);
                             Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), () -> {
                                 entry.world.setGameRule(entry.rule, newValue);
-                                WorldManager.langConfig.sendSuccess(player, "gui.game_rule_set", entry.rule.getName(), String.valueOf(newValue));
+                                WorldManager.langConfig.sendSuccess(player, "gui.game_rule_set", entry.rule.key().asString(), String.valueOf(newValue));
                                 showGameRuleGui(player, entry.world);
                             });
                         } catch (NumberFormatException e) {
@@ -73,7 +73,9 @@ public class GameRuleEditorGUI implements Listener {
 
         PaginatedPane paginatedPane = new PaginatedPane(0, 0, 9, 6);
 
-        List<GameRule<?>> gameRules = List.of(GameRule.values());
+        // Get all GameRules available
+        @SuppressWarnings("removal")
+        List<GameRule<?>> gameRules = java.util.Arrays.asList(GameRule.values());
         int rulesPerPage = 45;
         int pageCount = (int) Math.ceil((double) gameRules.size() / rulesPerPage);
 
@@ -98,7 +100,7 @@ public class GameRuleEditorGUI implements Listener {
                 }
 
                 ItemStack itemStack = new ItemBuilder(Material.PAPER)
-                        .name("&e" + gameRule.getName())
+                        .name("&e" + gameRule.key().asString())
                         .lore("&7Current Value: &b" + ruleValue)
                         .build();
 
@@ -146,7 +148,7 @@ public class GameRuleEditorGUI implements Listener {
 
     @SuppressWarnings("unchecked")
     private void openEditMenu(Player player, GameRule<?> gameRule) {
-        ChestGui editGui = new ChestGui(3, "Edit " + gameRule.getName());
+        ChestGui editGui = new ChestGui(3, "Edit " + gameRule.key().asString());
         editGui.setOnGlobalClick(event -> event.setCancelled(true));
 
         StaticPane pane = new StaticPane(0, 0, 9, 3);
@@ -261,7 +263,7 @@ public class GameRuleEditorGUI implements Listener {
                 .build();
         pane.addItem(new GuiItem(setItem, event -> {
             player.closeInventory();
-            WorldManager.langConfig.sendWaiting(player, "gui.enter_game_rule_value", gameRule.getName());
+            WorldManager.langConfig.sendWaiting(player, "gui.enter_game_rule_value", gameRule.key().asString());
             chatInputPlayers.put(player, new ChatEntry(currentWorld, gameRule));
         }), Slot.fromIndex(4));
     }
@@ -274,10 +276,12 @@ public class GameRuleEditorGUI implements Listener {
         String worldName = currentWorld.getName();
         String gameRulesPath = "worlds." + worldName + ".gameRules";
 
-        for (GameRule<?> gameRule : GameRule.values()) {
+        @SuppressWarnings("removal")
+        GameRule<?>[] allRules = GameRule.values();
+        for (GameRule<?> gameRule : allRules) {
             try {
                 Object value = currentWorld.getGameRuleValue(gameRule);
-                WorldManager.worldsConfig.set(gameRulesPath + "." + gameRule.getName(), value);
+                WorldManager.worldsConfig.set(gameRulesPath + "." + gameRule.key().asString(), value);
             } catch (IllegalArgumentException e) {
                 // GameRule is not available in this version, skip it
             }
