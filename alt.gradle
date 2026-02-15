@@ -16,10 +16,6 @@ repositories {
         url = 'https://repo.papermc.io/repository/maven-public/'
     }
     maven {
-        name = "spigotmc-repo"
-        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-    }
-    maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
@@ -27,9 +23,13 @@ repositories {
         url = "https://jitpack.io/"
     }
     maven {
+        url = "https://repo.codemc.io/repository/maven-snapshots/"
+    }
+    maven {
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
 }
+
 
 dependencies {
     // Target PaperMC API
