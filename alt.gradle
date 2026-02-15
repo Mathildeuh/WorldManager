@@ -6,7 +6,7 @@ plugins {
 group = 'fr.Mathildeuh'
 def buildGradleContent = file('build.gradle').text
 def versionMatcher = buildGradleContent =~ /version = '(.*)'/
-def version = versionMatcher[0][1 as String]
+def version = versionMatcher[0][1]
 
 repositories {
     mavenCentral()
