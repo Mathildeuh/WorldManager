@@ -8,7 +8,7 @@ def buildGradleContent = file('build.gradle').text
 def versionMatcher = buildGradleContent =~ /version = '(.*)'/
 def version = versionMatcher[0][1]
 
-ext.mcVersion = '1.21.11-R0.1-SNAPSHOT'
+version = version
 
 repositories {
     mavenCentral()
@@ -31,7 +31,7 @@ repositories {
 
 dependencies {
     // Target PaperMC API
-    compileOnly "io.papermc.paper:paper-api:${mcVersion}"
+    compileOnly "io.papermc.paper:paper-api:${versiuon}"
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
     implementation "net.kyori:adventure-platform-bukkit:4.3.2"
