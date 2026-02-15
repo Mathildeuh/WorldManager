@@ -29,7 +29,7 @@ jobs:
         #        env:
         #          # Make sure you have added a repository secret in the repository's settings
         #          HANGAR_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}
-        run: ./gradlew -b alt.gradle shadowJar # publishPluginPublicationToHangar --stacktrace
+        run: ./gradlew -b alt.gradle shadowJar --no-daemon # publishPluginPublicationToHangar --stacktrace
 
       - name: Extract version from build.gradle
         id: extract_version
