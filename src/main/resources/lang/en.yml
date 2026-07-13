@@ -34,6 +34,7 @@ delete:
   kicked_players: "<red>⚠</red> <red>The world you were in has been deleted.</red>"
   failed: "<red>Error:</red> Failed to delete the world {0}."
   success: "<green>Success:</green> Success !"
+  async_failed: "Failed to delete the world folder for {0}. Check the server console for details."
 
 list:
   world_list: "<green>Worlds list :</green> \n<aqua>Click to teleport\n</aqua>"
@@ -50,6 +51,7 @@ restore:
   started: "Restore started..."
   finished: "Restore finished successfully!"
   world_not_found: "The specified world does not exist."
+  failed: "Failed to restore the world {0}. Check the server console for details."
 
 load:
   world_already_loaded: "The world {0} is already loaded."
@@ -64,6 +66,7 @@ unload:
   players_in_world: "The world you were in has been unloaded."
   success: "World {0} unloaded successfully!"
   failed: "An error occurred while unloading the world: {0}"
+  rejected: "The server refused to unload world {0}."
 
 teleport:
   player_not_found: "Player not found."
@@ -82,6 +85,12 @@ pregen:
   not_running: "Pre-generation is not running for world \"{0}\"."
   invalid_radius: "Invalid radius value."
   invalid_center: "Invalid center coordinates."
+  usage: "Usage: /wm pregen start|stop|pause|resume <world> [center:x,z] [radius:n]"
+  unknown_action: "Unknown pregen action: {0}"
+
+general:
+  players_only: "This command can only be used by a player."
+  invalid_world_name: "Invalid world name: {0}. Use only letters, numbers, underscores and hyphens."
 
 permission:
   no_permission: "You don't have permission to use this command."
@@ -93,9 +102,56 @@ permission:
   backup: "You don't have permission to backup this world."
   restore: "You don't have permission to restore this world."
 
-# GUI messages
-gui:
-  not_initialized: "GUI is not initialized."
-  enter_game_rule_value: "Please enter a new value for {0}:"
-  game_rule_set: "Game rule {0} set to {1}"
-  invalid_number: "Invalid number. Please enter a valid integer."
+# Dialog-based GUI (Minecraft native dialogs, 3.0.0+)
+dialog:
+  back: "<gray>◀ Back</gray>"
+  cancel: "<red>Cancel</red>"
+  confirm: "<green>Confirm</green>"
+  main:
+    title: "<color:#7d66ff><b>World Manager</b></color>"
+    create: "<green><b>Create a world</b></green>"
+    create_tooltip: "Create a new fully customizable world"
+    edit: "<green><b>Edit your worlds</b></green>"
+    edit_tooltip: "Manage your loaded worlds"
+    load: "<green><b>Load a world</b></green>"
+    load_tooltip: "Load a world found in your server folders"
+  creator:
+    title: "Create a world"
+    name_label: "World name"
+    name_required: "You must enter a world name."
+    type_label: "Type / dimension"
+    seed_label: "Seed (optional)"
+    generator_label: "Generator plugin (optional)"
+    empty_label: "Generate an empty (void) world"
+    confirm: "<green>Create</green>"
+  editor:
+    title: "World Editor"
+    title_paged: "World Editor - Page {0}/{1}"
+    empty: "<gray>No worlds found on this server.</gray>"
+    created_by: "<gray>Created by:</gray> <aqua>{0}</aqua>"
+    previous: "<gold>◀ Previous page</gold>"
+    next: "<gold>Next page ▶</gold>"
+  options:
+    title: "Options for {0}"
+    game_rules: "<red><b>Game Rules</b></red>"
+    teleport: "<light_purple><b>Teleport</b></light_purple>"
+    unload: "<yellow><b>Unload</b></yellow>"
+    backup: "<green><b>Backup</b></green>"
+    restore: "<aqua><b>Restore</b></aqua>"
+    delete: "<dark_red><b>Delete</b></dark_red>"
+    default_world_notice: "<red>This is the default world - destructive actions are disabled.</red>"
+    not_loaded: "<yellow>This world is not currently loaded.</yellow>"
+    confirm_unload: "<yellow>Unload world {0}?</yellow>"
+    confirm_delete: "<red>Permanently delete world {0} and its folder?</red>"
+    confirm_restore: "<aqua>Restore world {0} from its latest backup? This replaces the current world.</aqua>"
+  gamerules:
+    title: "Game Rules for {0}"
+    title_paged: "Game Rules for {0} - Page {1}/{2}"
+    current_value: "<gray>Current value:</gray> <aqua>{0}</aqua>"
+    "true": "<green>True</green>"
+    "false": "<red>False</red>"
+    not_available: "<gray>This game rule is not available on this version.</gray>"
+  loader:
+    title: "World Loader"
+    title_paged: "World Loader - Page {0}/{1}"
+    empty: "<gray>No unloaded worlds found.</gray>"

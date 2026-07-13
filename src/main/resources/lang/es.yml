@@ -34,6 +34,7 @@ delete:
   kicked_players: "Los jugadores en este mundo han sido teletransportados."
   failed: "Error al eliminar el mundo {0}."
   success: "¡Éxito!"
+  async_failed: "Error al eliminar la carpeta del mundo {0}. Consulta la consola del servidor para más detalles."
 
 list:
   world_list: "<green>Lista de mundos :</green> \n<aqua>Haz clic para teletransportarte\n</aqua>"
@@ -50,6 +51,7 @@ restore:
   started: "Comenzando restauración..."
   finished: "¡Restauración completada con éxito!"
   world_not_found: "El mundo especificado no existe."
+  failed: "Error al restaurar el mundo {0}. Consulta la consola del servidor para más detalles."
 
 load:
   world_already_loaded: "El mundo {0} ya está cargado."
@@ -64,6 +66,7 @@ unload:
   players_in_world: "El mundo en el que estabas ha sido descargado."
   success: "Mundo {0} descargado con éxito."
   failed: "Se produjo un error al descargar el mundo: {0}"
+  rejected: "El servidor rechazó descargar el mundo {0}."
 
 teleport:
   player_not_found: "Jugador no encontrado."
@@ -82,6 +85,12 @@ pregen:
   not_running: "La pre-generación no está en curso para el mundo \"{0}\"."
   invalid_radius: "Valor de radio inválido."
   invalid_center: "Coordenadas del centro inválidas."
+  usage: "Uso: /wm pregen start|stop|pause|resume <mundo> [center:x,z] [radius:n]"
+  unknown_action: "Acción de pregen desconocida: {0}"
+
+general:
+  players_only: "Este comando solo puede ser usado por un jugador."
+  invalid_world_name: "Nombre de mundo inválido: {0}. Usa solo letras, números, guiones y guiones bajos."
 
 permission:
   no_permission: "No tienes permiso para usar este comando."
@@ -93,9 +102,56 @@ permission:
   backup: "No tienes permiso para hacer una copia de seguridad de este mundo."
   restore: "No tienes permiso para restaurar este mundo."
 
-# GUI messages
-gui:
-  not_initialized: "La GUI no está inicializada."
-  enter_game_rule_value: "Por favor ingresa un nuevo valor para {0}:"
-  game_rule_set: "La regla {0} establecida a {1}"
-  invalid_number: "Número inválido. Introduce un entero válido."
+# Interfaz de diálogos (diálogos nativos de Minecraft, 3.0.0+)
+dialog:
+  back: "<gray>◀ Volver</gray>"
+  cancel: "<red>Cancelar</red>"
+  confirm: "<green>Confirmar</green>"
+  main:
+    title: "<color:#7d66ff><b>World Manager</b></color>"
+    create: "<green><b>Crear un mundo</b></green>"
+    create_tooltip: "Crear un nuevo mundo totalmente personalizable"
+    edit: "<green><b>Gestionar tus mundos</b></green>"
+    edit_tooltip: "Gestiona tus mundos cargados"
+    load: "<green><b>Cargar un mundo</b></green>"
+    load_tooltip: "Cargar un mundo presente en las carpetas del servidor"
+  creator:
+    title: "Crear un mundo"
+    name_label: "Nombre del mundo"
+    name_required: "Debes introducir un nombre de mundo."
+    type_label: "Tipo / dimensión"
+    seed_label: "Semilla (opcional)"
+    generator_label: "Plugin generador (opcional)"
+    empty_label: "Generar un mundo vacío"
+    confirm: "<green>Crear</green>"
+  editor:
+    title: "Editor de mundos"
+    title_paged: "Editor de mundos - Página {0}/{1}"
+    empty: "<gray>No se encontraron mundos en este servidor.</gray>"
+    created_by: "<gray>Creado por:</gray> <aqua>{0}</aqua>"
+    previous: "<gold>◀ Página anterior</gold>"
+    next: "<gold>Página siguiente ▶</gold>"
+  options:
+    title: "Opciones de {0}"
+    game_rules: "<red><b>Reglas del juego</b></red>"
+    teleport: "<light_purple><b>Teletransportar</b></light_purple>"
+    unload: "<yellow><b>Descargar</b></yellow>"
+    backup: "<green><b>Copia de seguridad</b></green>"
+    restore: "<aqua><b>Restaurar</b></aqua>"
+    delete: "<dark_red><b>Eliminar</b></dark_red>"
+    default_world_notice: "<red>Este es el mundo por defecto - las acciones destructivas están deshabilitadas.</red>"
+    not_loaded: "<yellow>Este mundo no está cargado actualmente.</yellow>"
+    confirm_unload: "<yellow>¿Descargar el mundo {0}?</yellow>"
+    confirm_delete: "<red>¿Eliminar permanentemente el mundo {0} y su carpeta?</red>"
+    confirm_restore: "<aqua>¿Restaurar el mundo {0} desde su última copia de seguridad? Esto reemplazará el mundo actual.</aqua>"
+  gamerules:
+    title: "Reglas del juego para {0}"
+    title_paged: "Reglas del juego para {0} - Página {1}/{2}"
+    current_value: "<gray>Valor actual:</gray> <aqua>{0}</aqua>"
+    "true": "<green>Verdadero</green>"
+    "false": "<red>Falso</red>"
+    not_available: "<gray>Esta regla del juego no está disponible en esta versión.</gray>"
+  loader:
+    title: "Cargador de mundos"
+    title_paged: "Cargador de mundos - Página {0}/{1}"
+    empty: "<gray>No se encontraron mundos descargados.</gray>"

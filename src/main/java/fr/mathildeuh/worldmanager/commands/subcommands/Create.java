@@ -137,6 +137,11 @@ public class Create {
 
 
     public void execute(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
+        if (!fr.mathildeuh.worldmanager.util.WorldNameValidator.isValid(name)) {
+            WorldManager.langConfig.sendError(sender, "general.invalid_world_name", name);
+            return;
+        }
+
         if (Bukkit.getWorld(name) != null) {
             WorldManager.langConfig.sendError(sender, "create.already_exists");
              return;

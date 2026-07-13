@@ -33,12 +33,11 @@ repositories {
 
 dependencies {
     // Target PaperMC API
-    compileOnly "io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT"
+    compileOnly "io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT"
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
     implementation "net.kyori:adventure-platform-bukkit:4.3.2"
 
-    implementation 'com.github.stefvanschie.inventoryframework:IF:0.10.14'
     implementation 'org.zeroturnaround:zt-zip:1.17'
 
     implementation 'org.json:json:20231013'
@@ -87,5 +86,4 @@ libsDirectory = file("./out")
 shadowJar {
     archiveClassifier.set('')
     relocate 'org.bstats', 'fr.mathildeuh.bstats'
-    relocate("dev.triumphteam.gui", "fr.mathildeuh.gui")
 }

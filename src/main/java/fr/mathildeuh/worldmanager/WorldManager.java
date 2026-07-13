@@ -11,7 +11,6 @@ import fr.mathildeuh.worldmanager.database.DatabaseFactory;
 import fr.mathildeuh.worldmanager.database.DatabaseManager;
 import fr.mathildeuh.worldmanager.events.JoinListener;
 import fr.mathildeuh.worldmanager.events.WorldChangeListener;
-import fr.mathildeuh.worldmanager.guis.GUIList;
 import fr.mathildeuh.worldmanager.placeholder.Placeholders;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -49,6 +48,14 @@ public final class WorldManager extends JavaPlugin {
     public static LangConfig langConfig;
     private boolean updated = true;
 
+    private static WorldManager instance;
+
+    public static WorldManager getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("Tried to access WorldManager instance before the plugin was enabled!");
+        }
+        return instance;
+    }
 
     public static BukkitAudiences adventure() {
         if (adventure == null) {
@@ -68,6 +75,7 @@ public final class WorldManager extends JavaPlugin {
     @Override
     public void onEnable() {
 
+        instance = this;
 
         saveDefaultConfig();
         if (setupPlaceholderAPI()) {
@@ -91,6 +99,7 @@ public final class WorldManager extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
         getServer().getPluginManager().registerEvents(new WorldChangeListener(), this);
+        getServer().getPluginManager().registerEvents(new fr.mathildeuh.worldmanager.events.PortalLinkListener(), this);
 
         loadBackupFile();
         loadWorldsFile();
@@ -99,13 +108,10 @@ public final class WorldManager extends JavaPlugin {
         initializeDatabase();
 
         LinkedWorldsManager.loadLinkedWorlds();
+        fr.mathildeuh.worldmanager.configs.LinkedPortalsManager.load();
 
         if (getConfig().getBoolean("update-checker"))
             update();
-
-        for (GUIList gui : GUIList.values()) {
-            gui.update();
-        }
     }
 
     private boolean setupPlaceholderAPI() {

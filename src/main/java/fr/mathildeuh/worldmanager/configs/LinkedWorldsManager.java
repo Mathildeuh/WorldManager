@@ -26,7 +26,7 @@ public class LinkedWorldsManager {
         WorldManager plugin = JavaPlugin.getPlugin(WorldManager.class);
 
         // Check if the feature is enabled
-        if (!plugin.getConfig().getBoolean("enable-linked-inventory", true)) {
+        if (!plugin.getConfig().getBoolean("enable-linked-inventory", false)) {
             Bukkit.getLogger().info("[WorldManager] Linked worlds inventory feature is disabled");
             return;
         }

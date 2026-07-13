@@ -17,6 +17,14 @@ public class MySQLConnection extends DatabaseConnection {
     private final String username;
     private final String password;
 
+    static {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new ExceptionInInitializerError("MySQL JDBC driver not found: " + e.getMessage());
+        }
+    }
+
     public MySQLConnection(String databaseName, String host, int port, String username, String password) {
         super(databaseName);
         this.host = host;
@@ -27,12 +35,6 @@ public class MySQLConnection extends DatabaseConnection {
 
     @Override
     public Connection getConnection() throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("MySQL JDBC driver not found", e);
-        }
-
         String url = String.format("jdbc:mysql://%s:%d/%s?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true",
                 host, port, databaseName);
 

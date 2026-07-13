@@ -1,12 +1,12 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.util.WorldNameValidator;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +20,11 @@ public class Delete {
     }
 
     public void execute(String name) {
+        if (!WorldNameValidator.isValid(name)) {
+            WorldManager.langConfig.sendError(sender, "general.invalid_world_name", name);
+            return;
+        }
+
         World targetWorld = Bukkit.getWorld(name);
 
         if (targetWorld == null) {
@@ -41,23 +46,26 @@ public class Delete {
             }
         }
 
-        boolean unloadSuccess = JavaPlugin.getPlugin(WorldManager.class).getServer().unloadWorld(targetWorld, false);
+        boolean unloadSuccess = WorldManager.getInstance().getServer().unloadWorld(targetWorld, false);
         if (!unloadSuccess) {
             WorldManager.langConfig.sendError(sender, "delete.failed_to_delete");
             return;
         }
 
         File worldFolder = targetWorld.getWorldFolder();
-        Bukkit.getScheduler().runTaskAsynchronously(JavaPlugin.getPlugin(WorldManager.class), () -> {
+        String worldName = name;
+        Bukkit.getScheduler().runTaskAsynchronously(WorldManager.getInstance(), () -> {
             try {
                 FileUtils.deleteDirectory(worldFolder);
-
+                Bukkit.getScheduler().runTask(WorldManager.getInstance(), () -> {
+                    WorldManager.langConfig.sendSuccess(sender, "delete.success");
+                    WorldManager.removeWorld(worldName);
+                });
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                Bukkit.getLogger().warning("[WorldManager] Failed to delete world folder for " + worldName + ": " + e.getMessage());
+                Bukkit.getScheduler().runTask(WorldManager.getInstance(), () ->
+                        WorldManager.langConfig.sendError(sender, "delete.async_failed", worldName));
             }
         });
-        WorldManager.langConfig.sendSuccess(sender, "delete.success");
-        WorldManager.removeWorld(targetWorld.getName());
-
     }
 }

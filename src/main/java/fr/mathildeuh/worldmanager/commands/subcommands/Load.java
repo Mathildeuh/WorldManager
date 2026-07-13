@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.util.WorldNameValidator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
@@ -15,6 +16,11 @@ public class Load {
     }
 
     public void execute(String worldName, String dimension, String generator) {
+        if (!WorldNameValidator.isValid(worldName)) {
+            WorldManager.langConfig.sendError(sender, "general.invalid_world_name", worldName);
+            return;
+        }
+
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
             WorldManager.langConfig.sendError(sender, "load.already_loaded", worldName);
@@ -22,42 +28,40 @@ public class Load {
         }
 
         if (dimension == null || dimension.isEmpty()) {
-            WorldManager.langConfig.sendError(sender, "load.invalid_dimension");
-            WorldManager.langConfig.sendWaiting(sender, "load.available_dimensions");
-            for (Environment env2 : Environment.values()) {
-                if (env2 != Environment.CUSTOM)
-                    WorldManager.langConfig.sendWaiting(sender, "load.dimension_list", env2.toString().toLowerCase());
-            }
+            sendInvalidDimension();
             return;
         }
 
-        WorldCreator worldCreator = new WorldCreator(worldName);
-
         Environment env = getEnvironment(dimension);
         if (env == null) {
-            WorldManager.langConfig.sendError(sender, "load.invalid_dimension");
-            WorldManager.langConfig.sendWaiting(sender, "load.available_dimensions");
-            for (Environment env2 : Environment.values()) {
-                if (env2 != Environment.CUSTOM)
-                    WorldManager.langConfig.sendWaiting(sender, "load.dimension_list", env2.toString().toLowerCase());
-            }
+            sendInvalidDimension();
             return;
-        } else {
-            worldCreator.environment(env);
+        }
+
+        WorldCreator worldCreator = new WorldCreator(worldName).environment(env);
+        if (generator != null && !generator.isEmpty()) {
+            worldCreator.generator(generator);
         }
 
         world = Bukkit.createWorld(worldCreator);
 
         if (world != null) {
-
             WorldManager.langConfig.sendSuccess(sender, "load.success", worldName);
             WorldManager.addWorld(sender, worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);
-
         } else {
             WorldManager.langConfig.sendError(sender, "load.failed", worldName);
         }
     }
 
+    private void sendInvalidDimension() {
+        WorldManager.langConfig.sendError(sender, "load.invalid_dimension");
+        WorldManager.langConfig.sendWaiting(sender, "load.available_dimensions");
+        for (Environment env : Environment.values()) {
+            if (env != Environment.CUSTOM) {
+                WorldManager.langConfig.sendWaiting(sender, "load.dimension_list", env.toString().toLowerCase());
+            }
+        }
+    }
 
     private Environment getEnvironment(String dimension) {
         return switch (dimension.toLowerCase()) {

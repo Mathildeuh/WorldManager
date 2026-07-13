@@ -34,6 +34,7 @@ delete:
   kicked_players: "Die Spieler in dieser Welt wurden wegteleportiert."
   failed: "Fehler beim Löschen der Welt {0}."
   success: "Erfolg!"
+  async_failed: "Der Weltordner für {0} konnte nicht gelöscht werden. Details in der Server-Konsole."
 
 list:
   world_list: "<green>Liste der Welten :</green> \n<aqua>Klicke zum Teleportieren\n</aqua>"
@@ -50,6 +51,7 @@ restore:
   started: "Wiederherstellung gestartet..."
   finished: "Wiederherstellung erfolgreich abgeschlossen!"
   world_not_found: "Die angegebene Welt existiert nicht."
+  failed: "Die Welt {0} konnte nicht wiederhergestellt werden. Details in der Server-Konsole."
 
 load:
   world_already_loaded: "Die Welt {0} ist bereits geladen."
@@ -64,6 +66,7 @@ unload:
   players_in_world: "Die Welt, in der du warst, wurde entladen."
   success: "Welt {0} erfolgreich entladen!"
   failed: "Beim Entladen der Welt ist ein Fehler aufgetreten: {0}"
+  rejected: "Der Server hat das Entladen der Welt {0} abgelehnt."
 
 teleport:
   player_not_found: "Spieler nicht gefunden."
@@ -82,6 +85,12 @@ pregen:
   not_running: "Pre-Generation läuft nicht für Welt \"{0}\"."
   invalid_radius: "Ungültiger Radiuswert."
   invalid_center: "Ungültige Zentrum-Koordinaten."
+  usage: "Verwendung: /wm pregen start|stop|pause|resume <Welt> [center:x,z] [radius:n]"
+  unknown_action: "Unbekannte Pregen-Aktion: {0}"
+
+general:
+  players_only: "Dieser Befehl kann nur von einem Spieler verwendet werden."
+  invalid_world_name: "Ungültiger Weltname: {0}. Verwende nur Buchstaben, Zahlen, Bindestriche und Unterstriche."
 
 permission:
   no_permission: "Du hast keine Berechtigung, diesen Befehl zu verwenden."
@@ -93,9 +102,56 @@ permission:
   backup: "Du hast keine Berechtigung, ein Backup dieser Welt zu erstellen."
   restore: "Du hast keine Berechtigung, diese Welt wiederherzustellen."
 
-# GUI messages
-gui:
-  not_initialized: "GUI ist nicht initialisiert."
-  enter_game_rule_value: "Bitte gib einen neuen Wert für {0} ein:"
-  game_rule_set: "Spielregel {0} auf {1} gesetzt"
-  invalid_number: "Ungültige Nummer. Bitte gib eine gültige Ganzzahl ein."
+# Dialog-basierte Oberfläche (native Minecraft-Dialoge, 3.0.0+)
+dialog:
+  back: "<gray>◀ Zurück</gray>"
+  cancel: "<red>Abbrechen</red>"
+  confirm: "<green>Bestätigen</green>"
+  main:
+    title: "<color:#7d66ff><b>World Manager</b></color>"
+    create: "<green><b>Welt erstellen</b></green>"
+    create_tooltip: "Erstelle eine neue, voll anpassbare Welt"
+    edit: "<green><b>Welten verwalten</b></green>"
+    edit_tooltip: "Verwalte deine geladenen Welten"
+    load: "<green><b>Welt laden</b></green>"
+    load_tooltip: "Lade eine Welt aus den Serverordnern"
+  creator:
+    title: "Welt erstellen"
+    name_label: "Weltname"
+    name_required: "Du musst einen Weltnamen eingeben."
+    type_label: "Typ / Dimension"
+    seed_label: "Seed (optional)"
+    generator_label: "Generator-Plugin (optional)"
+    empty_label: "Leere Welt erzeugen"
+    confirm: "<green>Erstellen</green>"
+  editor:
+    title: "Welteneditor"
+    title_paged: "Welteneditor - Seite {0}/{1}"
+    empty: "<gray>Keine Welten auf diesem Server gefunden.</gray>"
+    created_by: "<gray>Erstellt von:</gray> <aqua>{0}</aqua>"
+    previous: "<gold>◀ Vorherige Seite</gold>"
+    next: "<gold>Nächste Seite ▶</gold>"
+  options:
+    title: "Optionen für {0}"
+    game_rules: "<red><b>Spielregeln</b></red>"
+    teleport: "<light_purple><b>Teleportieren</b></light_purple>"
+    unload: "<yellow><b>Entladen</b></yellow>"
+    backup: "<green><b>Backup</b></green>"
+    restore: "<aqua><b>Wiederherstellen</b></aqua>"
+    delete: "<dark_red><b>Löschen</b></dark_red>"
+    default_world_notice: "<red>Dies ist die Standardwelt - destruktive Aktionen sind deaktiviert.</red>"
+    not_loaded: "<yellow>Diese Welt ist derzeit nicht geladen.</yellow>"
+    confirm_unload: "<yellow>Welt {0} entladen?</yellow>"
+    confirm_delete: "<red>Welt {0} und ihren Ordner endgültig löschen?</red>"
+    confirm_restore: "<aqua>Welt {0} aus dem letzten Backup wiederherstellen? Dies ersetzt die aktuelle Welt.</aqua>"
+  gamerules:
+    title: "Spielregeln für {0}"
+    title_paged: "Spielregeln für {0} - Seite {1}/{2}"
+    current_value: "<gray>Aktueller Wert:</gray> <aqua>{0}</aqua>"
+    "true": "<green>Wahr</green>"
+    "false": "<red>Falsch</red>"
+    not_available: "<gray>Diese Spielregel ist in dieser Version nicht verfügbar.</gray>"
+  loader:
+    title: "Weltenlader"
+    title_paged: "Weltenlader - Seite {0}/{1}"
+    empty: "<gray>Keine entladenen Welten gefunden.</gray>"

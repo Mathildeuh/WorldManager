@@ -21,7 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class WorldManagerCommand implements CommandExecutor, TabCompleter {
-    public static ChunkGenerator generator;
+    /** One pre-generation run per world, keyed by world name, so multiple worlds can pre-generate concurrently. */
+    public static final java.util.Map<String, ChunkGenerator> activeGenerators = new java.util.concurrent.ConcurrentHashMap<>();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {

@@ -10,11 +10,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class ChunkGenerator {
 
@@ -22,7 +18,6 @@ public class ChunkGenerator {
     private final int totalChunks; // Total number of chunks to generate
     private final Location center;
     private final BossBar bossBar;
-    private final Set<Chunk> generatedChunks = new HashSet<>();
     private final Player player;
     private final int chunksPerTick = 10; // Number of chunks to generate per tick
     private boolean paused = false;
@@ -56,23 +51,26 @@ public class ChunkGenerator {
         int centerZ = center.getBlockZ() >> 4;
 
         // Calculate the grid size needed to cover the totalChunks
-        gridSize = (int) Math.ceil(Math.sqrt(totalChunks));
+        gridSize = (int) Math.ceil(Math.sqrt(Math.max(totalChunks, 1)));
         currentX = -gridSize / 2;
         currentZ = -gridSize / 2;
 
-        new ChunkGenerationTask(centerX, centerZ, gridSize).runTaskTimer(JavaPlugin.getPlugin(WorldManager.class), 0, 5);
+        WorldManagerCommand.activeGenerators.put(world.getName(), this);
+        new ChunkGenerationTask(centerX, centerZ, gridSize).runTaskTimer(WorldManager.getInstance(), 0, 5);
     }
 
     public void stop() {
         generating = false;
         bossBar.removeAll();
-        WorldManagerCommand.generator = null;
+        WorldManagerCommand.activeGenerators.remove(world.getName(), this);
         WorldManager.langConfig.sendSuccess(player, "pregen.finished", generatedChunkCount);
-        System.out.println("Chunk generation completed! " + generatedChunkCount + "/" + totalChunks + " chunks generated.");
-        System.out.println("Elapsed time: " + elapsedTime + "ms");
-        System.out.println("Average time per chunk: " + (elapsedTime / (double) generatedChunkCount) + "ms");
-        System.out.println("Average chunks per second: " + (generatedChunkCount / (double) elapsedTime) + "chunks/s");
-        System.out.println(Bukkit.getWorlds().get(0).getLoadedChunks().length + " chunks loaded.");
+        Bukkit.getLogger().info("[WorldManager] Chunk generation for " + world.getName() + " completed! "
+                + generatedChunkCount + "/" + totalChunks + " chunks generated.");
+        if (generatedChunkCount > 0) {
+            Bukkit.getLogger().info("[WorldManager] Elapsed time: " + elapsedTime + "ms, average "
+                    + (elapsedTime / (double) generatedChunkCount) + "ms/chunk, "
+                    + (generatedChunkCount / Math.max(elapsedTime, 1) * 1000.0) + " chunks/s.");
+        }
     }
 
     public void pause() {
@@ -120,13 +118,9 @@ public class ChunkGenerator {
                 int chunkZ = centerZ + currentZ;
 
                 Chunk chunk = world.getChunkAt(chunkX, chunkZ);
-
-                if (!generatedChunks.contains(chunk)) {
-                    chunk.load(true);
-                    generatedChunks.add(chunk);
-                    generatedChunkCount++;
-                    updateBossBar();
-                }
+                chunk.load(true);
+                generatedChunkCount++;
+                updateBossBar();
 
                 currentZ++;
                 if (currentZ > gridSize / 2) {
@@ -141,7 +135,7 @@ public class ChunkGenerator {
 
         private void updateBossBar() {
             elapsedTime = System.currentTimeMillis() - startTime;
-            double progress = (double) generatedChunkCount / totalChunks;
+            double progress = Math.min(1.0, (double) generatedChunkCount / totalChunks);
             bossBar.setProgress(progress);
 
             long remainingTime = (long) ((elapsedTime / (double) generatedChunkCount) * (totalChunks - generatedChunkCount));

@@ -27,6 +27,19 @@ create:
   name_unusable: "Ta nazwa świata nie może być używana!"
   exists_but_not_loaded: "<click:suggest_command:'/wm load {0} (typ)'>Ten świat już istnieje, kliknij, aby załadować.</click>"
 
+delete:
+  world_not_found: "Określony świat nie istnieje."
+  default_world: "Nie możesz usunąć domyślnego świata."
+  warning: "Uwaga: Świat {0} i jego folder zostaną usunięte."
+  kicked_players: "Gracze w tym świecie zostali teleportowani."
+  failed: "Nie udało się usunąć świata {0}."
+  success: "Sukces!"
+  async_failed: "Nie udało się usunąć folderu świata {0}. Sprawdź konsolę serwera, aby uzyskać szczegóły."
+
+list:
+  world_list: "<green>Lista światów:</green> \n<aqua>Kliknij, aby się teleportować\n</aqua>"
+  world_item: "<hover:show_text:'<blue>Teleportuj do</blue> <yellow> {0} </yellow>'><click:run_command:'/wm tp {0} '><color:#19cdff> <color:#7471b0>➥</color> {0} </color></click></hover>"
+
 backup:
   started: "Rozpoczynanie tworzenia kopii zapasowej..."
   finished: "Tworzenie kopii zapasowej zakończone pomyślnie!"
@@ -38,6 +51,7 @@ restore:
   started: "Rozpoczynanie przywracania..."
   finished: "Przywracanie zakończone pomyślnie!"
   world_not_found: "Określony świat nie istnieje."
+  failed: "Nie udało się przywrócić świata {0}. Sprawdź konsolę serwera, aby uzyskać szczegóły."
 
 load:
   world_already_loaded: "Świat {0} jest już załadowany."
@@ -52,6 +66,7 @@ unload:
   players_in_world: "Świat, w którym byłeś, został wyładowany."
   success: "Świat {0} został pomyślnie wyładowany!"
   failed: "Wystąpił błąd podczas wyładowywania świata: {0}"
+  rejected: "Serwer odmówił wyładowania świata {0}."
 
 teleport:
   player_not_found: "Gracz nie został znaleziony."
@@ -70,6 +85,12 @@ pregen:
   not_running: "Pre-generacja nie jest uruchomiona dla świata \"{0}\"."
   invalid_radius: "Nieprawidłowa wartość promienia."
   invalid_center: "Nieprawidłowe współrzędne centrum."
+  usage: "Użycie: /wm pregen start|stop|pause|resume <świat> [center:x,z] [radius:n]"
+  unknown_action: "Nieznana akcja pregen: {0}"
+
+general:
+  players_only: "Tej komendy może użyć tylko gracz."
+  invalid_world_name: "Nieprawidłowa nazwa świata: {0}. Używaj tylko liter, cyfr, myślników i podkreśleń."
 
 permission:
   no_permission: "Nie masz uprawnień do użycia tej komendy."
@@ -82,8 +103,56 @@ permission:
   restore: "Nie masz uprawnień do przywrócenia tego świata."
 
 # GUI messages
-gui:
-  not_initialized: "GUI nie jest zainicjalizowany."
-  enter_game_rule_value: "Wpisz nową wartość dla {0}:"
-  game_rule_set: "Reguła {0} ustawiona na {1}"
-  invalid_number: "Nieprawidłowa liczba. Wpisz poprawne całkowite."
+# Interfejs dialogowy (natywne dialogi Minecrafta, 3.0.0+)
+dialog:
+  back: "<gray>◀ Wstecz</gray>"
+  cancel: "<red>Anuluj</red>"
+  confirm: "<green>Potwierdź</green>"
+  main:
+    title: "<color:#7d66ff><b>World Manager</b></color>"
+    create: "<green><b>Stwórz świat</b></green>"
+    create_tooltip: "Stwórz nowy, w pełni konfigurowalny świat"
+    edit: "<green><b>Zarządzaj światami</b></green>"
+    edit_tooltip: "Zarządzaj swoimi wczytanymi światami"
+    load: "<green><b>Wczytaj świat</b></green>"
+    load_tooltip: "Wczytaj świat znajdujący się w folderach serwera"
+  creator:
+    title: "Stwórz świat"
+    name_label: "Nazwa świata"
+    name_required: "Musisz podać nazwę świata."
+    type_label: "Typ / wymiar"
+    seed_label: "Ziarno (opcjonalnie)"
+    generator_label: "Plugin generatora (opcjonalnie)"
+    empty_label: "Wygeneruj pusty świat"
+    confirm: "<green>Stwórz</green>"
+  editor:
+    title: "Edytor światów"
+    title_paged: "Edytor światów - Strona {0}/{1}"
+    empty: "<gray>Nie znaleziono żadnych światów na tym serwerze.</gray>"
+    created_by: "<gray>Stworzony przez:</gray> <aqua>{0}</aqua>"
+    previous: "<gold>◀ Poprzednia strona</gold>"
+    next: "<gold>Następna strona ▶</gold>"
+  options:
+    title: "Opcje dla {0}"
+    game_rules: "<red><b>Reguły gry</b></red>"
+    teleport: "<light_purple><b>Teleportacja</b></light_purple>"
+    unload: "<yellow><b>Wyładuj</b></yellow>"
+    backup: "<green><b>Kopia zapasowa</b></green>"
+    restore: "<aqua><b>Przywróć</b></aqua>"
+    delete: "<dark_red><b>Usuń</b></dark_red>"
+    default_world_notice: "<red>To jest domyślny świat - destrukcyjne akcje są wyłączone.</red>"
+    not_loaded: "<yellow>Ten świat nie jest obecnie wczytany.</yellow>"
+    confirm_unload: "<yellow>Wyładować świat {0}?</yellow>"
+    confirm_delete: "<red>Trwale usunąć świat {0} i jego folder?</red>"
+    confirm_restore: "<aqua>Przywrócić świat {0} z ostatniej kopii zapasowej? To zastąpi obecny świat.</aqua>"
+  gamerules:
+    title: "Reguły gry dla {0}"
+    title_paged: "Reguły gry dla {0} - Strona {1}/{2}"
+    current_value: "<gray>Obecna wartość:</gray> <aqua>{0}</aqua>"
+    "true": "<green>Prawda</green>"
+    "false": "<red>Fałsz</red>"
+    not_available: "<gray>Ta reguła gry nie jest dostępna w tej wersji.</gray>"
+  loader:
+    title: "Ładowarka światów"
+    title_paged: "Ładowarka światów - Strona {0}/{1}"
+    empty: "<gray>Nie znaleziono żadnych wyładowanych światów.</gray>"

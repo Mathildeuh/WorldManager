@@ -34,6 +34,7 @@ delete:
   kicked_players: "Игроки в этом мире были перемещены."
   failed: "Не удалось удалить мир {0}."
   success: "Успешно!"
+  async_failed: "Не удалось удалить папку мира {0}. Подробности в консоли сервера."
 
 list:
   world_list: "Список миров: \nНажмите для телепортации\n"
@@ -50,6 +51,7 @@ restore:
   started: "Начался процесс восстановления..."
   finished: "Восстановление успешно завершено!"
   world_not_found: "Указанный мир не существует."
+  failed: "Не удалось восстановить мир {0}. Подробности в консоли сервера."
 
 load:
   world_already_loaded: "Мир {0} уже загружен."
@@ -64,12 +66,13 @@ unload:
   players_in_world: "Ваш мир был выгружен."
   success: "Мир {0} успешно выгружен!"
   failed: "При выгрузке мира произошла ошибка: {0}"
+  rejected: "Сервер отказался выгружать мир {0}."
 
 teleport:
   player_not_found: "Игрок не найден."
   world_not_found: "Указанный мир не существует."
   success: "{0} телепортирован в мир {1}."
-  errorFromConsole: "Вы должны указать игрока при выполнении из консоли."
+  console_need_player: "Вы должны указать игрока при выполнении из консоли."
 
 pregen:
   finished: "Предгенерация успешно завершена! Сгенерировано {0} чанков."
@@ -82,6 +85,12 @@ pregen:
   not_running: "Предгенерация не запущена для мира \"{0}\"."
   invalid_radius: "Неверное значение радиуса."
   invalid_center: "Неверные координаты центра."
+  usage: "Использование: /wm pregen start|stop|pause|resume <мир> [center:x,z] [radius:n]"
+  unknown_action: "Неизвестное действие pregen: {0}"
+
+general:
+  players_only: "Эта команда может быть использована только игроком."
+  invalid_world_name: "Недопустимое название мира: {0}. Используйте только буквы, цифры, дефисы и подчёркивания."
 
 permission:
   no_permission: "У вас нет разрешения на использование этой команды."
@@ -93,9 +102,56 @@ permission:
   backup: "У вас нет разрешения на создание резервной копии этого мира."
   restore: "У вас нет разрешения на восстановление этого мира."
 
-# GUI messages
-gui:
-  not_initialized: "GUI не инициализирована."
-  enter_game_rule_value: "Введите новое значение для {0}:"
-  game_rule_set: "Правило {0} установлено в {1}"
-  invalid_number: "Неверное число. Введите целое число."
+# Интерфейс на диалогах (нативные диалоги Minecraft, 3.0.0+)
+dialog:
+  back: "<gray>◀ Назад</gray>"
+  cancel: "<red>Отмена</red>"
+  confirm: "<green>Подтвердить</green>"
+  main:
+    title: "<color:#7d66ff><b>World Manager</b></color>"
+    create: "<green><b>Создать мир</b></green>"
+    create_tooltip: "Создать новый полностью настраиваемый мир"
+    edit: "<green><b>Управление мирами</b></green>"
+    edit_tooltip: "Управляйте своими загруженными мирами"
+    load: "<green><b>Загрузить мир</b></green>"
+    load_tooltip: "Загрузить мир, найденный в папках сервера"
+  creator:
+    title: "Создать мир"
+    name_label: "Название мира"
+    name_required: "Вы должны указать название мира."
+    type_label: "Тип / измерение"
+    seed_label: "Сид (необязательно)"
+    generator_label: "Плагин-генератор (необязательно)"
+    empty_label: "Сгенерировать пустой мир"
+    confirm: "<green>Создать</green>"
+  editor:
+    title: "Редактор миров"
+    title_paged: "Редактор миров - Страница {0}/{1}"
+    empty: "<gray>На этом сервере миры не найдены.</gray>"
+    created_by: "<gray>Создан:</gray> <aqua>{0}</aqua>"
+    previous: "<gold>◀ Предыдущая страница</gold>"
+    next: "<gold>Следующая страница ▶</gold>"
+  options:
+    title: "Настройки для {0}"
+    game_rules: "<red><b>Правила игры</b></red>"
+    teleport: "<light_purple><b>Телепортация</b></light_purple>"
+    unload: "<yellow><b>Выгрузить</b></yellow>"
+    backup: "<green><b>Резервная копия</b></green>"
+    restore: "<aqua><b>Восстановить</b></aqua>"
+    delete: "<dark_red><b>Удалить</b></dark_red>"
+    default_world_notice: "<red>Это мир по умолчанию - разрушительные действия отключены.</red>"
+    not_loaded: "<yellow>Этот мир сейчас не загружен.</yellow>"
+    confirm_unload: "<yellow>Выгрузить мир {0}?</yellow>"
+    confirm_delete: "<red>Безвозвратно удалить мир {0} и его папку?</red>"
+    confirm_restore: "<aqua>Восстановить мир {0} из последней резервной копии? Это заменит текущий мир.</aqua>"
+  gamerules:
+    title: "Правила игры для {0}"
+    title_paged: "Правила игры для {0} - Страница {1}/{2}"
+    current_value: "<gray>Текущее значение:</gray> <aqua>{0}</aqua>"
+    "true": "<green>Истина</green>"
+    "false": "<red>Ложь</red>"
+    not_available: "<gray>Это правило игры недоступно в этой версии.</gray>"
+  loader:
+    title: "Загрузчик миров"
+    title_paged: "Загрузчик миров - Страница {0}/{1}"
+    empty: "<gray>Выгруженные миры не найдены.</gray>"

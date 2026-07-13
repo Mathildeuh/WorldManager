@@ -1,10 +1,12 @@
 package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.database.DatabaseManager;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages player inventory saving and restoring for different world groups.
@@ -13,7 +15,7 @@ import java.util.*;
 public class PlayerInventoryManager {
 
     // Structure: UUID -> GroupName -> InventoryData (in-memory cache)
-    private static final Map<UUID, Map<String, InventoryData>> playerInventories = new HashMap<>();
+    private static final Map<UUID, Map<String, InventoryData>> playerInventories = new ConcurrentHashMap<>();
     private static DatabaseManager databaseManager;
 
     /**
@@ -36,7 +38,7 @@ public class PlayerInventoryManager {
         InventoryData data = new InventoryData(player);
 
         // Save to memory cache immediately
-        playerInventories.computeIfAbsent(playerId, k -> new HashMap<>()).put(groupName, data);
+        playerInventories.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(groupName, data);
 
         // Save to database SYNCHRONOUSLY - do not use async
         if (databaseManager != null) {
@@ -75,12 +77,12 @@ public class PlayerInventoryManager {
                 if (dbData != null) {
                     // Apply and cache
                     InventoryData data = new InventoryData(dbData);
-                    playerInventories.computeIfAbsent(playerId, k -> new HashMap<>()).put(groupName, data);
+                    playerInventories.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(groupName, data);
                     data.apply(player);
                     return true;
                 }
             } catch (Exception e) {
-                // Fall through to return false
+                Bukkit.getLogger().warning("[WorldManager] Failed to load inventory for group '" + groupName + "': " + e.getMessage());
             }
         }
 

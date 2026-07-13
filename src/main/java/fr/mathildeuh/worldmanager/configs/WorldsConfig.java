@@ -134,16 +134,7 @@ public class WorldsConfig {
 
             for (String gameRuleName : ruleNames) {
                 try {
-                    // Use GameRule.values() to find GameRule by key
-                    GameRule<?> gameRule = null;
-                    @SuppressWarnings("removal")
-                    GameRule<?>[] allRules = GameRule.values();
-                    for (GameRule<?> rule : allRules) {
-                        if (rule.key().asString().equalsIgnoreCase(gameRuleName)) {
-                            gameRule = rule;
-                            break;
-                        }
-                    }
+                    GameRule<?> gameRule = GameRule.getByName(gameRuleName);
 
                     if (gameRule == null) {
                         logger.warning("GameRule '" + gameRuleName + "' not recognized (may be from a mod or newer MC version)");

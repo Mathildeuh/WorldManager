@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -28,19 +27,28 @@ public class JoinListener implements Listener {
     @EventHandler
     private void onJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
-        if (!player.isOp() || JavaPlugin.getPlugin(WorldManager.class).isUpdated()) return;
+        if (!player.isOp() || WorldManager.getInstance().isUpdated()) return;
 
         final String name = player.getName();
         if (this.updateInfoSent.contains(name)) return;
+        this.updateInfoSent.add(name);
 
+        // The release-note fetch is a network call; never do it on the main thread.
+        Bukkit.getScheduler().runTaskAsynchronously(WorldManager.getInstance(), () -> {
+            String releaseNote = getLatestReleaseNote();
+            Bukkit.getScheduler().runTask(WorldManager.getInstance(), () -> sendUpdateNotice(player, releaseNote));
+        });
+    }
+
+    private void sendUpdateNotice(Player player, String releaseNote) {
+        if (!player.isOnline()) return;
         MessageUtils.sendMini(player, "<color:#7d66ff>{</color><color:#6258a6>------</color> <color:#02a876>World Manager</color> <color:#6258a6>------</color><color:#7d66ff>}</color>\n");
         MessageUtils.sendMini(player, "");
         MessageUtils.sendMini(player, "<dark_red> ⚠</dark_red><color:#ffa1f9> A new update is available !</color> <dark_red>⚠</dark_red>");
         MessageUtils.sendMini(player, "<click:open_url:' " + UpdateChecker.getURL() + "'>   <color:#7471b0>➥</color> <color:#ff9900>Click here to download</color></click>");
         MessageUtils.sendMini(player, "");
-        MessageUtils.sendMini(player, "<gray>Patch note: </gray> <green>" + getLatestReleaseNote() + "</green>");
+        MessageUtils.sendMini(player, "<gray>Patch note: </gray> <green>" + releaseNote + "</green>");
         MessageUtils.sendMini(player, "<color:#7d66ff>{</color><color:#6258a6>--------------------------</color><color:#7d66ff>}</color>");
-        this.updateInfoSent.add(name);
     }
 
     public String getLatestReleaseNote() {
@@ -73,7 +81,11 @@ public class JoinListener implements Listener {
                 return "";
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
+            Bukkit.getLogger().log(Level.INFO, "Could not fetch the latest release note.");
+            return "";
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             Bukkit.getLogger().log(Level.INFO, "Could not fetch the latest release note.");
             return "";
         }

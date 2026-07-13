@@ -1,14 +1,12 @@
 package fr.mathildeuh.worldmanager.commands.subcommands.pregenerator;
 
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.messages.MessageUtils;
+import fr.mathildeuh.worldmanager.commands.WorldManagerCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import static fr.mathildeuh.worldmanager.commands.WorldManagerCommand.generator;
 
 public class Pregen {
     private final CommandSender sender;
@@ -20,10 +18,13 @@ public class Pregen {
 
     public void execute(String[] args) {
 
-        if (!(sender instanceof Player player)) return;
+        if (!(sender instanceof Player player)) {
+            WorldManager.langConfig.sendError(sender, "general.players_only");
+            return;
+        }
 
         if (args.length < 3) {
-            MessageUtils.sendMini(sender, "&c/wm pregen start|stop|pause|resume <world> [center:x,z] [radius:n]");
+            WorldManager.langConfig.sendError(sender, "pregen.usage");
             return;
         }
 
@@ -41,7 +42,7 @@ public class Pregen {
             case "stop" -> handleStop(world);
             case "pause" -> handlePause(world);
             case "resume" -> handleResume(world);
-            default -> MessageUtils.sendMini(sender, "Unknown action: " + action);
+            default -> WorldManager.langConfig.sendError(sender, "pregen.unknown_action", action);
         }
     }
 
@@ -50,8 +51,7 @@ public class Pregen {
         int centerZ = 0;
         int totalChunks = 200;
 
-
-        if (generator != null) {
+        if (WorldManagerCommand.activeGenerators.containsKey(world.getName())) {
             WorldManager.langConfig.sendError(sender, "pregen.already_running", world.getName());
             return;
         }
@@ -72,6 +72,10 @@ public class Pregen {
             } else if (args[i].startsWith("radius:")) {
                 try {
                     totalChunks = Integer.parseInt(args[i].substring("radius:".length()));
+                    if (totalChunks <= 0) {
+                        WorldManager.langConfig.sendError(sender, "pregen.invalid_radius");
+                        return;
+                    }
                 } catch (NumberFormatException e) {
                     WorldManager.langConfig.sendError(sender, "pregen.invalid_radius");
                     return;
@@ -79,23 +83,22 @@ public class Pregen {
             }
         }
 
-        generator = new ChunkGenerator(world, player, totalChunks, new Location(world, centerX, 0, centerZ));
+        ChunkGenerator generator = new ChunkGenerator(world, player, totalChunks, new Location(world, centerX, 0, centerZ));
         generator.start();
         WorldManager.langConfig.sendWaiting(sender, "pregen.start", world.getName(), centerX, centerZ, totalChunks);
     }
 
     private void handleStop(World world) {
-
+        ChunkGenerator generator = WorldManagerCommand.activeGenerators.get(world.getName());
         if (generator == null) {
             WorldManager.langConfig.sendError(sender, "pregen.not_running", world.getName());
             return;
         }
         generator.stop();
-        generator = null;
     }
 
     private void handlePause(World world) {
-
+        ChunkGenerator generator = WorldManagerCommand.activeGenerators.get(world.getName());
         if (generator == null) {
             WorldManager.langConfig.sendError(sender, "pregen.not_running", world.getName());
             return;
@@ -106,7 +109,7 @@ public class Pregen {
     }
 
     private void handleResume(World world) {
-
+        ChunkGenerator generator = WorldManagerCommand.activeGenerators.get(world.getName());
         if (generator == null) {
             WorldManager.langConfig.sendError(sender, "pregen.not_running", world.getName());
             return;

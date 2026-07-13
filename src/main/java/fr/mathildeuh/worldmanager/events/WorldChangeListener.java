@@ -37,6 +37,12 @@ public class WorldChangeListener implements Listener {
         String fromGroup = LinkedWorldsManager.getWorldGroup(fromWorld);
         String toGroup = LinkedWorldsManager.getWorldGroup(toWorld);
 
+        if (fromGroup == null && toGroup == null) {
+            // Neither world is part of a configured group: this feature doesn't manage
+            // this transition at all, so leave the inventory untouched (vanilla behavior).
+            return;
+        }
+
         // Save current inventory for the group they're leaving
         if (fromGroup != null) {
             PlayerInventoryManager.saveInventory(player, fromGroup);
@@ -77,9 +83,10 @@ public class WorldChangeListener implements Listener {
     private boolean isFeatureEnabled() {
         try {
             return Bukkit.getPluginManager().getPlugin("WorldManager")
-                    .getConfig().getBoolean("enable-linked-inventory", true);
+                    .getConfig().getBoolean("enable-linked-inventory", false);
         } catch (Exception e) {
-            return true; // Default to enabled if error
+            // Fail closed: a config read error should never start touching player inventories.
+            return false;
         }
     }
 

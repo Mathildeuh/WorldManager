@@ -15,6 +15,14 @@ public class SQLiteConnection extends DatabaseConnection {
 
     private final File databaseFile;
 
+    static {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new ExceptionInInitializerError("SQLite JDBC driver not found: " + e.getMessage());
+        }
+    }
+
     public SQLiteConnection(File dataFolder, String databaseName) {
         super(databaseName);
         this.databaseFile = new File(dataFolder, databaseName + ".db");
@@ -22,12 +30,6 @@ public class SQLiteConnection extends DatabaseConnection {
 
     @Override
     public Connection getConnection() throws SQLException {
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("SQLite JDBC driver not found", e);
-        }
-
         return DriverManager.getConnection("jdbc:sqlite:" + databaseFile.getAbsolutePath());
     }
 

@@ -35,3 +35,16 @@ linked-worlds-inventory:
   group2:
     - world_nether
     - world_the_end
+
+# Linked portals
+# Points a world's Nether/End portals at specific worlds instead of Bukkit's
+# auto-derived "<world>_nether"/"<world>_the_end" pair. Both directions are handled:
+# entering a portal in the overworld world goes to the linked world, and entering a
+# portal back out of the linked nether/end world returns to the overworld world.
+# Leave empty (default) to keep vanilla per-world Nether/End pairing.
+#
+# linked-portals:
+#   TEST:
+#     nether: Nether_TEST
+#     end: End_TEST
+linked-portals: {}

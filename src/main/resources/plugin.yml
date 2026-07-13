@@ -1,5 +1,5 @@
 name: WorldManager
-version: '2.2.1'
+version: '${version}'
 main: fr.mathildeuh.worldmanager.WorldManager
 api-version: '1.21'
 author: Mathildeuh

@@ -6,11 +6,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
 public class UpdateChecker {
     public static String RESOURCE_URL = "";
+    private static final int TIMEOUT_MILLIS = 5000;
     private final JavaPlugin plugin;
     private final int resourceId;
 
@@ -25,14 +27,17 @@ public class UpdateChecker {
     }
 
     public void getVersion(final Consumer<String> consumer) {
-        Bukkit.getScheduler().runTask(this.plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
             try {
-                long timestamp = System.currentTimeMillis(); // Obtenez le timestamp actuel
+                long timestamp = System.currentTimeMillis();
                 String urlWithTimestamp = "https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId + "/~&timestamp=" + timestamp;
-                InputStream is = new URL(urlWithTimestamp).openStream();
-                try (Scanner scann = new Scanner(is)) {
+                URLConnection connection = new URL(urlWithTimestamp).openConnection();
+                connection.setConnectTimeout(TIMEOUT_MILLIS);
+                connection.setReadTimeout(TIMEOUT_MILLIS);
+                try (InputStream is = connection.getInputStream(); Scanner scann = new Scanner(is)) {
                     if (scann.hasNext()) {
-                        consumer.accept(scann.next());
+                        String version = scann.next();
+                        Bukkit.getScheduler().runTask(this.plugin, () -> consumer.accept(version));
                     }
                 }
             } catch (IOException e) {
@@ -42,4 +47,3 @@ public class UpdateChecker {
     }
 
 }
-

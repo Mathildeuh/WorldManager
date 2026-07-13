@@ -1,13 +1,13 @@
 package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.util.WorldNameValidator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.File;
@@ -25,99 +25,127 @@ public class BackupConfig {
     }
 
     public static void backupWorld(Player player, String name) {
-        World world = Bukkit.getWorld(name);
-        if (world != null) {
-            Bukkit.getLogger().info("Backing up world " + name);
-            WorldManager.langConfig.sendWaiting(player, "backup.started");
-
-            world.save();
-
-            File worldFolder = world.getWorldFolder();
-            File backupDir = new File(worldFolder.getParentFile(), "backups/WorldManager");
-            File backupFile = new File(backupDir, name.toLowerCase() + ".zip");
-
-            if (backupFile.exists()) {
-                backupFile.delete();
-            }
-
-            if (!backupDir.exists()) {
-                backupDir.mkdirs();
-            }
-
-            Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), () -> {
-                try {
-                    ZipUtil.pack(worldFolder, backupFile);
-                    Bukkit.getLogger().info("World " + name + " has been backed up to " + backupFile.getAbsolutePath());
-
-                    config.set("backups." + name + ".env", world.getEnvironment().name());
-                    config.set("backups." + name + ".type", world.getWorldType().getName().equalsIgnoreCase("DEFAULT") ? "NORMAL" : world.getWorldType().getName());
-                    config.set("backups." + name + ".generator", world.getGenerator());
-                    config.save(configFile);
-
-                    WorldManager.langConfig.sendSuccess(player, "backup.finished");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    WorldManager.langConfig.sendError(player, "backup.failed");
-                }
-            });
-
-        } else {
-            WorldManager.langConfig.sendError(player, "backup.world_not_found");
+        if (!WorldNameValidator.isValid(name)) {
+            WorldManager.langConfig.sendError(player, "general.invalid_world_name", name);
+            return;
         }
+
+        World world = Bukkit.getWorld(name);
+        if (world == null) {
+            WorldManager.langConfig.sendError(player, "backup.world_not_found");
+            return;
+        }
+
+        Bukkit.getLogger().info("Backing up world " + name);
+        WorldManager.langConfig.sendWaiting(player, "backup.started");
+
+        world.save();
+
+        File worldFolder = world.getWorldFolder();
+        File backupDir = new File(worldFolder.getParentFile(), "backups/WorldManager");
+        File backupFile = new File(backupDir, name.toLowerCase() + ".zip");
+        World.Environment environment = world.getEnvironment();
+        String worldType = world.getWorldType().getName().equalsIgnoreCase("DEFAULT") ? "NORMAL" : world.getWorldType().getName();
+        org.bukkit.generator.ChunkGenerator generator = world.getGenerator();
+
+        Bukkit.getScheduler().runTaskAsynchronously(WorldManager.getInstance(), () -> {
+            try {
+                if (backupFile.exists()) {
+                    backupFile.delete();
+                }
+                if (!backupDir.exists()) {
+                    backupDir.mkdirs();
+                }
+
+                ZipUtil.pack(worldFolder, backupFile);
+                Bukkit.getLogger().info("World " + name + " has been backed up to " + backupFile.getAbsolutePath());
+
+                config.set("backups." + name + ".env", environment.name());
+                config.set("backups." + name + ".type", worldType);
+                config.set("backups." + name + ".generator", generator);
+                config.save(configFile);
+
+                Bukkit.getScheduler().runTask(WorldManager.getInstance(), () ->
+                        WorldManager.langConfig.sendSuccess(player, "backup.finished"));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[WorldManager] Backup failed for " + name + ": " + e.getMessage());
+                Bukkit.getScheduler().runTask(WorldManager.getInstance(), () ->
+                        WorldManager.langConfig.sendError(player, "backup.failed"));
+            }
+        });
     }
 
     public static void restoreWorld(Player player, String name) {
+        if (!WorldNameValidator.isValid(name)) {
+            WorldManager.langConfig.sendError(player, "general.invalid_world_name", name);
+            return;
+        }
+
         File worldFolder = new File(Bukkit.getWorldContainer(), name);
-        List<Player> worldPlayers = new ArrayList<>();
         File backupFile = new File(worldFolder.getParentFile(), "backups/WorldManager/" + name.toLowerCase() + ".zip");
 
-        if (backupFile.exists()) {
-            World world = Bukkit.getWorld(name);
-            if (world != null) {
-                worldPlayers = new ArrayList<>(world.getPlayers());
-                for (Player players : worldPlayers) {
-                    players.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+        if (!backupFile.exists()) {
+            WorldManager.langConfig.sendError(player, "restore.world_not_found");
+            return;
+        }
+
+        List<Player> worldPlayers = new ArrayList<>();
+        World world = Bukkit.getWorld(name);
+        if (world != null) {
+            worldPlayers = new ArrayList<>(world.getPlayers());
+            for (Player p : worldPlayers) {
+                p.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+            }
+            Bukkit.unloadWorld(world, false);
+        }
+
+        WorldManager.langConfig.sendWaiting(player, "restore.started");
+
+        List<Player> finalWorldPlayers = worldPlayers;
+        Bukkit.getScheduler().runTaskAsynchronously(WorldManager.getInstance(), () -> {
+            try {
+                if (worldFolder.exists()) {
+                    deleteFolder(worldFolder);
                 }
-                Bukkit.unloadWorld(world, false);
-
-            }
-
-            WorldManager.langConfig.sendWaiting(player, "restore.started");
-
-            if (worldFolder.exists()) {
-                deleteFolder(worldFolder);
-            }
-
-            List<Player> finalWorldPlayers = worldPlayers;
-            Bukkit.getScheduler().runTaskLater(JavaPlugin.getPlugin(WorldManager.class), () -> {
                 ZipUtil.unpack(backupFile, worldFolder);
 
                 World.Environment env = World.Environment.valueOf(config.getString("backups." + name + ".env"));
                 WorldType type = WorldType.valueOf(config.getString("backups." + name + ".type"));
                 String generator = config.getString("backups." + name + ".generator");
 
-                WorldCreator worldCreator = new WorldCreator(name).environment(env).type(type);
-                if (generator != null && !generator.isEmpty()) {
-                    worldCreator.generator(generator);
-                }
-
-                Bukkit.createWorld(worldCreator);
-
-                Bukkit.getScheduler().runTaskLater(JavaPlugin.getPlugin(WorldManager.class), () -> {
-                    World restoredWorld = Bukkit.getWorld(name);
-                    if (restoredWorld != null) {
-                        for (Player players : finalWorldPlayers) {
-                            players.teleport(restoredWorld.getSpawnLocation());
+                Bukkit.getScheduler().runTask(WorldManager.getInstance(), () -> {
+                    try {
+                        WorldCreator worldCreator = new WorldCreator(name).environment(env).type(type);
+                        if (generator != null && !generator.isEmpty()) {
+                            worldCreator.generator(generator);
                         }
+
+                        World restoredWorld = Bukkit.createWorld(worldCreator);
+                        if (restoredWorld == null) {
+                            WorldManager.langConfig.sendError(player, "restore.failed", name);
+                            return;
+                        }
+
+                        WorldManager.langConfig.sendSuccess(player, "restore.finished");
+
+                        Bukkit.getScheduler().runTaskLater(WorldManager.getInstance(), () -> {
+                            for (Player p : finalWorldPlayers) {
+                                if (p.isOnline()) {
+                                    p.teleport(restoredWorld.getSpawnLocation());
+                                }
+                            }
+                        }, 20L * 2L);
+                    } catch (Exception e) {
+                        Bukkit.getLogger().warning("[WorldManager] Restore failed for " + name + ": " + e.getMessage());
+                        WorldManager.langConfig.sendError(player, "restore.failed", name);
                     }
-                }, 20L * 2L);
-            }, 20L * 2L);
-
-            WorldManager.langConfig.sendSuccess(player, "restore.finished");
-
-        } else {
-            WorldManager.langConfig.sendError(player, "restore.world_not_found");
-        }
+                });
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[WorldManager] Restore failed for " + name + ": " + e.getMessage());
+                Bukkit.getScheduler().runTask(WorldManager.getInstance(), () ->
+                        WorldManager.langConfig.sendError(player, "restore.failed", name));
+            }
+        });
     }
 
 
