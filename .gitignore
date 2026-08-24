@@ -3,3 +3,6 @@
 /build/
 /build/classes/java/main/
 server/
+# Artefacts locaux (IntelliJ build alternatif, config perso d'outil DB)
+/out/
+/.idea/db-forest-config.xml

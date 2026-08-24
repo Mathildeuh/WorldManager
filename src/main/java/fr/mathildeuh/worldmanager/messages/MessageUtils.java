@@ -1,14 +1,14 @@
 package fr.mathildeuh.worldmanager.messages;
 
-import fr.mathildeuh.worldmanager.WorldManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 public final class MessageUtils {
     private static final MiniMessage MINI = MiniMessage.miniMessage();
     private static final String SOURCE = "World Manager";
+    private static final TextColor ERROR_COLOR = TextColor.fromHexString("#ff2e1f");
 
     private MessageUtils() { }
 
@@ -17,9 +17,10 @@ public final class MessageUtils {
     }
 
     public static Component wrapError(Component message) {
-        return MINI.deserialize("<color:#aa3e00>☠</color> <color:#7d66ff>{" + SOURCE + "}</color> <color:#ff2e1f>")
-                .append(message)
-                .append(MINI.deserialize("</color>"));
+        // colorIfAbsent (not color()) so lang strings that already embed their own
+        // color tags (e.g. "<red>Error:</red> ...") aren't overridden.
+        return MINI.deserialize("<color:#aa3e00>☠</color> <color:#7d66ff>{" + SOURCE + "}</color> ")
+                .append(message.colorIfAbsent(ERROR_COLOR));
     }
 
     public static Component wrapSuccess(Component message) {
@@ -30,11 +31,18 @@ public final class MessageUtils {
         return MINI.deserialize("<gold>⌛</gold> <color:#7d66ff>{" + SOURCE + "}</color> ").append(message);
     }
 
+    /**
+     * Sends directly via {@link CommandSender#sendMessage(Component)} - on Paper,
+     * CommandSender (Player, ConsoleCommandSender, ...) implements Adventure's
+     * Audience natively. Do NOT route this through the adventure-platform-bukkit
+     * BukkitAudiences bridge: that library exists for legacy Spigot/CraftBukkit
+     * servers without native Adventure support, and going through it on a modern
+     * Paper server behind a signed-chat-enforcing proxy (e.g. Velocity +
+     * SignedVelocity) can produce messages that silently fail signature
+     * verification and never reach the client, with no server-side exception.
+     */
     public static void send(CommandSender target, Component component) {
-        if (target instanceof Player player)
-            WorldManager.adventure().player(player).sendMessage(component);
-        else
-            WorldManager.adventure().console().sendMessage(component);
+        target.sendMessage(component);
     }
 
     public static void sendMini(CommandSender target, String miniMessageString) {

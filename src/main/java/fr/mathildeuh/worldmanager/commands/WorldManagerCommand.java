@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,14 +55,14 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 if (args.length > 1 && hasPermission(sender, "worldmanager.backup")) {
                     new Backup(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_backup");
+                    WorldManager.langConfig.sendError(sender, "permission.backup");
                 }
                 break;
             case "restore":
                 if (args.length > 1 && hasPermission(sender, "worldmanager.restore")) {
                     new Restore(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_restore");
+                    WorldManager.langConfig.sendError(sender, "permission.restore");
                 }
                 break;
             case "c":
@@ -75,7 +74,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     String gen = args.length > 4 ? args[4] : null;
                     new Create(sender).execute(name, type, seed, gen);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_create");
+                    WorldManager.langConfig.sendError(sender, "permission.create");
                 }
                 break;
             case "del":
@@ -83,7 +82,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 if (args.length > 1 && hasPermission(sender, "worldmanager.delete")) {
                     new Delete(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_delete");
+                    WorldManager.langConfig.sendError(sender, "permission.delete");
                 }
                 break;
             case "l":
@@ -95,7 +94,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     String gen = args.length > 3 ? args[3] : null;
                     new Load(sender).execute(name, type, gen);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_load");
+                    WorldManager.langConfig.sendError(sender, "permission.load");
                 }
                 break;
             case "u":
@@ -103,7 +102,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 if (args.length > 1 && hasPermission(sender, "worldmanager.unload")) {
                     new Unload(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_unload");
+                    WorldManager.langConfig.sendError(sender, "permission.unload");
                 }
                 break;
             case "tp":
@@ -111,7 +110,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 if (hasPermission(sender, "worldmanager.teleport")) {
                     new Teleport(sender).execute(args);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.no_permission_to_teleport");
+                    WorldManager.langConfig.sendError(sender, "permission.teleport");
                 }
                 break;
             case "pregen":
@@ -215,26 +214,6 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
     }
 
     public static List<String> getUnloadedWorlds() {
-        List<String> unloadedWorlds = new ArrayList<>();
-        List<String> loadedWorldNames = new ArrayList<>();
-        for (World world : Bukkit.getWorlds()) {
-            loadedWorldNames.add(world.getName());
-        }
-
-        File[] worldFolders = Bukkit.getServer().getWorldContainer().listFiles();
-        if (worldFolders != null) {
-            for (File worldFolder : worldFolders) {
-                if (worldFolder.isDirectory() && containsLevelDat(worldFolder) && !loadedWorldNames.contains(worldFolder.getName())) {
-                    unloadedWorlds.add(worldFolder.getName());
-                }
-            }
-        }
-
-        return unloadedWorlds;
-    }
-
-    private static boolean containsLevelDat(File folder) {
-        File levelDat = new File(folder, "level.dat");
-        return levelDat.exists();
+        return fr.mathildeuh.worldmanager.util.WorldFolders.listUnloadedWorldFolders();
     }
 }

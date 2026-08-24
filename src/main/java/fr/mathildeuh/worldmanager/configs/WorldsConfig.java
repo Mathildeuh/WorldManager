@@ -68,7 +68,11 @@ public class WorldsConfig {
             }
         }
 
-        if (generator != null) {
+        if ("Empty".equals(generator)) {
+            // Marker used by the empty-world creation flow (CreatorDialog) - not an actual
+            // plugin-provided generator name, so it can't go through WorldCreator#generator(String).
+            worldCreator.generator(new fr.mathildeuh.worldmanager.worlds.EmptyWorldGenerator());
+        } else if (generator != null) {
             worldCreator.generator(generator);
         }
         Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), worldCreator::createWorld);

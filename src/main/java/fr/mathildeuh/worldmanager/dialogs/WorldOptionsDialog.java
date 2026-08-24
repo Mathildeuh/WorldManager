@@ -33,7 +33,7 @@ public final class WorldOptionsDialog {
 
         List<ActionButton> buttons = new ArrayList<>();
         buttons.add(DialogUtils.button(DialogUtils.miniFromLang("dialog.options.game_rules"),
-                (response, audience) -> DialogUtils.show(player, GameRuleListDialog.build(player, worldName, 0))));
+                (response, audience) -> DialogUtils.show(player, GameRuleListDialog.build(player, worldName))));
         buttons.add(DialogUtils.button(DialogUtils.miniFromLang("dialog.options.teleport"),
                 (response, audience) -> new Teleport(player).execute(player.getName(), worldName)));
 
@@ -56,9 +56,7 @@ public final class WorldOptionsDialog {
             baseBuilder.body(List.of(DialogBody.plainMessage(DialogUtils.miniFromLang("dialog.options.default_world_notice"))));
         }
 
-        return Dialog.create(factory -> factory.empty()
-                .base(baseBuilder.build())
-                .type(DialogType.multiAction(buttons, back, 2)));
+        return DialogUtils.listOrNotice(baseBuilder.build(), buttons, back, 2);
     }
 
     private static Dialog buildUnloadedNotice(Player player, String worldName) {

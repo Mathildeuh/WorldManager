@@ -50,7 +50,7 @@ restore:
   players_in_world: "Świat, w którym byłeś, został przywrócony."
   started: "Rozpoczynanie przywracania..."
   finished: "Przywracanie zakończone pomyślnie!"
-  world_not_found: "Określony świat nie istnieje."
+  world_not_found: "Nie znaleziono kopii zapasowej dla tego świata. Najpierw użyj /wm backup <świat>."
   failed: "Nie udało się przywrócić świata {0}. Sprawdź konsolę serwera, aby uzyskać szczegóły."
 
 load:
@@ -152,6 +152,15 @@ dialog:
     "true": "<green>Prawda</green>"
     "false": "<red>Fałsz</red>"
     not_available: "<gray>Ta reguła gry nie jest dostępna w tej wersji.</gray>"
+    category_title: "Reguły gry dla {0}"
+    category_title_paged: "{0} - Strona {1}/{2}"
+    category:
+      player: "<light_purple><b>Gracz</b></light_purple>"
+      mobs: "<red><b>Stworzenia</b></red>"
+      world: "<green><b>Świat</b></green>"
+      chat: "<aqua><b>Czat / Komendy</b></aqua>"
+      misc: "<gray><b>Różne</b></gray>"
+      other: "<white><b>Inne</b></white>"
   loader:
     title: "Ładowarka światów"
     title_paged: "Ładowarka światów - Strona {0}/{1}"

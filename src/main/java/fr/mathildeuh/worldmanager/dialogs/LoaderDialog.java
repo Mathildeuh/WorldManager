@@ -6,7 +6,6 @@ import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.body.DialogBody;
-import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
@@ -60,8 +59,6 @@ public final class LoaderDialog {
             baseBuilder.body(List.of(DialogBody.plainMessage(DialogUtils.miniFromLang("dialog.loader.empty"))));
         }
 
-        return Dialog.create(factory -> factory.empty()
-                .base(baseBuilder.build())
-                .type(DialogType.multiAction(buttons, back, 2)));
+        return DialogUtils.listOrNotice(baseBuilder.build(), buttons, back, 2);
     }
 }

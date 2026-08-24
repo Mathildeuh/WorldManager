@@ -48,7 +48,7 @@ public class Delete {
 
         boolean unloadSuccess = WorldManager.getInstance().getServer().unloadWorld(targetWorld, false);
         if (!unloadSuccess) {
-            WorldManager.langConfig.sendError(sender, "delete.failed_to_delete");
+            WorldManager.langConfig.sendError(sender, "delete.failed", name);
             return;
         }
 

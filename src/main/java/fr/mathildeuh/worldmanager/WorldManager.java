@@ -13,7 +13,6 @@ import fr.mathildeuh.worldmanager.events.JoinListener;
 import fr.mathildeuh.worldmanager.events.WorldChangeListener;
 import fr.mathildeuh.worldmanager.placeholder.Placeholders;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -34,8 +33,6 @@ import java.util.logging.Level;
 
 public final class WorldManager extends JavaPlugin {
 
-    public static BukkitAudiences adventure;
-
     // Fichiers de configuration séparés
     public static File configFile;
     public static FileConfiguration worldsConfig;
@@ -55,13 +52,6 @@ public final class WorldManager extends JavaPlugin {
             throw new IllegalStateException("Tried to access WorldManager instance before the plugin was enabled!");
         }
         return instance;
-    }
-
-    public static BukkitAudiences adventure() {
-        if (adventure == null) {
-            throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
-        }
-        return adventure;
     }
 
     public static void addWorld(CommandSender player, String name, String type, World.Environment environement, String generator) {
@@ -87,7 +77,6 @@ public final class WorldManager extends JavaPlugin {
         loadLangFile();
 
         new Metrics(this, 22073);
-        adventure = BukkitAudiences.create(this);
 
         var worldManagerCommand = getCommand("worldmanager");
         if (worldManagerCommand != null) {
@@ -209,11 +198,6 @@ public final class WorldManager extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (adventure != null) {
-            adventure.close();
-            adventure = null;
-        }
-
         // Clean up player inventory data
         PlayerInventoryManager.clearAllData();
 

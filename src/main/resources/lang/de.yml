@@ -50,7 +50,7 @@ restore:
   players_in_world: "Die Welt, in der du warst, wurde wiederhergestellt."
   started: "Wiederherstellung gestartet..."
   finished: "Wiederherstellung erfolgreich abgeschlossen!"
-  world_not_found: "Die angegebene Welt existiert nicht."
+  world_not_found: "Kein Backup für diese Welt gefunden. Verwende zuerst /wm backup <Welt>."
   failed: "Die Welt {0} konnte nicht wiederhergestellt werden. Details in der Server-Konsole."
 
 load:
@@ -151,6 +151,15 @@ dialog:
     "true": "<green>Wahr</green>"
     "false": "<red>Falsch</red>"
     not_available: "<gray>Diese Spielregel ist in dieser Version nicht verfügbar.</gray>"
+    category_title: "Spielregeln für {0}"
+    category_title_paged: "{0} - Seite {1}/{2}"
+    category:
+      player: "<light_purple><b>Spieler</b></light_purple>"
+      mobs: "<red><b>Kreaturen</b></red>"
+      world: "<green><b>Welt</b></green>"
+      chat: "<aqua><b>Chat / Befehle</b></aqua>"
+      misc: "<gray><b>Sonstiges</b></gray>"
+      other: "<white><b>Andere</b></white>"
   loader:
     title: "Weltenlader"
     title_paged: "Weltenlader - Seite {0}/{1}"

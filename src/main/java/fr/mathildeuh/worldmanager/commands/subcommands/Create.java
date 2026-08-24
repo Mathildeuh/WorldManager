@@ -8,8 +8,6 @@ import org.bukkit.WorldType;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -137,6 +135,10 @@ public class Create {
 
 
     public void execute(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
+        if (name == null || name.isBlank()) {
+            WorldManager.langConfig.sendError(sender, "dialog.creator.name_required");
+            return;
+        }
         if (!fr.mathildeuh.worldmanager.util.WorldNameValidator.isValid(name)) {
             WorldManager.langConfig.sendError(sender, "general.invalid_world_name", name);
             return;
@@ -167,26 +169,6 @@ public class Create {
      }
 
     private List<String> getUnloadedWorlds() {
-        List<String> unloadedWorlds = new ArrayList<>();
-        List<String> loadedWorldNames = new ArrayList<>();
-        for (World world : Bukkit.getWorlds()) {
-            loadedWorldNames.add(world.getName());
-        }
-
-        File[] worldFolders = Bukkit.getServer().getWorldContainer().listFiles();
-        if (worldFolders != null) {
-            for (File worldFolder : worldFolders) {
-                if (worldFolder.isDirectory() && containsLevelDat(worldFolder) && !loadedWorldNames.contains(worldFolder.getName())) {
-                    unloadedWorlds.add(worldFolder.getName());
-                }
-            }
-        }
-
-        return unloadedWorlds;
-    }
-
-    private boolean containsLevelDat(File folder) {
-        File levelDat = new File(folder, "level.dat");
-        return levelDat.exists();
+        return fr.mathildeuh.worldmanager.util.WorldFolders.listUnloadedWorldFolders();
     }
 }

@@ -23,7 +23,7 @@ public class Load {
 
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
-            WorldManager.langConfig.sendError(sender, "load.already_loaded", worldName);
+            WorldManager.langConfig.sendError(sender, "load.world_already_loaded", worldName);
             return;
         }
 

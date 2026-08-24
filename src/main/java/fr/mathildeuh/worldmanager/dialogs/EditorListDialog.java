@@ -6,7 +6,6 @@ import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.body.DialogBody;
-import io.papermc.paper.registry.data.dialog.type.DialogType;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -61,8 +60,6 @@ public final class EditorListDialog {
             titleBuilder.body(List.of(DialogBody.plainMessage(DialogUtils.miniFromLang("dialog.editor.empty"))));
         }
 
-        return Dialog.create(factory -> factory.empty()
-                .base(titleBuilder.build())
-                .type(DialogType.multiAction(buttons, back, 2)));
+        return DialogUtils.listOrNotice(titleBuilder.build(), buttons, back, 2);
     }
 }

@@ -50,7 +50,7 @@ restore:
   players_in_world: "The world you were in has been restored."
   started: "Restore started..."
   finished: "Restore finished successfully!"
-  world_not_found: "The specified world does not exist."
+  world_not_found: "No backup was found for this world. Use /wm backup <world> first."
   failed: "Failed to restore the world {0}. Check the server console for details."
 
 load:
@@ -147,10 +147,19 @@ dialog:
   gamerules:
     title: "Game Rules for {0}"
     title_paged: "Game Rules for {0} - Page {1}/{2}"
+    category_title: "Game Rules for {0}"
+    category_title_paged: "{0} - Page {1}/{2}"
     current_value: "<gray>Current value:</gray> <aqua>{0}</aqua>"
     "true": "<green>True</green>"
     "false": "<red>False</red>"
     not_available: "<gray>This game rule is not available on this version.</gray>"
+    category:
+      player: "<light_purple><b>Player</b></light_purple>"
+      mobs: "<red><b>Mobs</b></red>"
+      world: "<green><b>World</b></green>"
+      chat: "<aqua><b>Chat / Commands</b></aqua>"
+      misc: "<gray><b>Miscellaneous</b></gray>"
+      other: "<white><b>Other</b></white>"
   loader:
     title: "World Loader"
     title_paged: "World Loader - Page {0}/{1}"

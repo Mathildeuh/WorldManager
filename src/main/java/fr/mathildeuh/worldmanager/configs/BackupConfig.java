@@ -19,6 +19,12 @@ public class BackupConfig {
     public static File configFile;
     public static FileConfiguration config;
 
+    /** Single source of truth for where a world's backup zip lives - both backup and restore must agree exactly. */
+    private static File backupFileFor(String name) {
+        File backupDir = new File(Bukkit.getWorldContainer(), "backups/WorldManager");
+        return new File(backupDir, name.toLowerCase() + ".zip");
+    }
+
     public BackupConfig(File configFile, FileConfiguration config) {
         BackupConfig.configFile = configFile;
         BackupConfig.config = config;
@@ -42,8 +48,10 @@ public class BackupConfig {
         world.save();
 
         File worldFolder = world.getWorldFolder();
-        File backupDir = new File(worldFolder.getParentFile(), "backups/WorldManager");
-        File backupFile = new File(backupDir, name.toLowerCase() + ".zip");
+        File backupFile = backupFileFor(name);
+        File backupDir = backupFile.getParentFile();
+        Bukkit.getLogger().info("[WorldManager] Backing up " + name + " (folder=" + worldFolder.getAbsolutePath()
+                + ") to " + backupFile.getAbsolutePath());
         World.Environment environment = world.getEnvironment();
         String worldType = world.getWorldType().getName().equalsIgnoreCase("DEFAULT") ? "NORMAL" : world.getWorldType().getName();
         org.bukkit.generator.ChunkGenerator generator = world.getGenerator();
@@ -82,7 +90,9 @@ public class BackupConfig {
         }
 
         File worldFolder = new File(Bukkit.getWorldContainer(), name);
-        File backupFile = new File(worldFolder.getParentFile(), "backups/WorldManager/" + name.toLowerCase() + ".zip");
+        File backupFile = backupFileFor(name);
+        Bukkit.getLogger().info("[WorldManager] Looking for backup of " + name + " at " + backupFile.getAbsolutePath()
+                + " (exists=" + backupFile.exists() + ")");
 
         if (!backupFile.exists()) {
             WorldManager.langConfig.sendError(player, "restore.world_not_found");

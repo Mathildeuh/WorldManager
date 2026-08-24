@@ -36,7 +36,6 @@ dependencies {
     compileOnly "io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT"
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
-    implementation "net.kyori:adventure-platform-bukkit:4.3.2"
 
     implementation 'org.zeroturnaround:zt-zip:1.17'
 
@@ -45,7 +44,11 @@ dependencies {
 
     // Database drivers
     implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
-    implementation 'mysql:mysql-connector-java:8.0.33'
+    // Only classic JDBC (jdbc:mysql://) is used, never X DevAPI (mysqlx://), so the
+    // protobuf-java transitive dependency X DevAPI needs is excluded entirely.
+    implementation('com.mysql:mysql-connector-j:9.7.0') {
+        exclude group: 'com.google.protobuf', module: 'protobuf-java'
+    }
 
     compileOnly 'me.clip:placeholderapi:2.11.6'
 

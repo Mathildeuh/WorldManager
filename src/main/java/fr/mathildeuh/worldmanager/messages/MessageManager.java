@@ -3,7 +3,6 @@ package fr.mathildeuh.worldmanager.messages;
 import fr.mathildeuh.worldmanager.WorldManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +23,8 @@ public class MessageManager {
     }
 
     public void sendHelp() {
-        if (!(sender instanceof Player player)) return;
         for (String message : helpMessage) {
-            MessageUtils.sendMini(player, message);
+            MessageUtils.sendMini(sender, message);
         }
     }
 

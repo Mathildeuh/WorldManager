@@ -50,7 +50,7 @@ restore:
   players_in_world: "El mundo en el que estabas ha sido restaurado."
   started: "Comenzando restauración..."
   finished: "¡Restauración completada con éxito!"
-  world_not_found: "El mundo especificado no existe."
+  world_not_found: "No se encontró ninguna copia de seguridad para este mundo. Usa /wm backup <mundo> primero."
   failed: "Error al restaurar el mundo {0}. Consulta la consola del servidor para más detalles."
 
 load:
@@ -151,6 +151,15 @@ dialog:
     "true": "<green>Verdadero</green>"
     "false": "<red>Falso</red>"
     not_available: "<gray>Esta regla del juego no está disponible en esta versión.</gray>"
+    category_title: "Reglas del juego para {0}"
+    category_title_paged: "{0} - Página {1}/{2}"
+    category:
+      player: "<light_purple><b>Jugador</b></light_purple>"
+      mobs: "<red><b>Criaturas</b></red>"
+      world: "<green><b>Mundo</b></green>"
+      chat: "<aqua><b>Chat / Comandos</b></aqua>"
+      misc: "<gray><b>Varios</b></gray>"
+      other: "<white><b>Otro</b></white>"
   loader:
     title: "Cargador de mundos"
     title_paged: "Cargador de mundos - Página {0}/{1}"

@@ -32,7 +32,7 @@ public class LangConfig {
         String message = getString(path);
         if (message == null) return null;
         for (int i = 0; i < objects.length; i++) {
-            message = message.replace("{" + i + "}", objects[i].toString());
+            message = message.replace("{" + i + "}", String.valueOf(objects[i]));
         }
         return message;
     }
