@@ -2,6 +2,7 @@ package fr.mathildeuh.worldmanager.commands.subcommands.pregenerator;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.commands.WorldManagerCommand;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -10,7 +11,6 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class ChunkGenerator {
 
@@ -19,7 +19,6 @@ public class ChunkGenerator {
     private final Location center;
     private final BossBar bossBar;
     private final Player player;
-    private final int chunksPerTick = 10; // Number of chunks to generate per tick
     private boolean paused = false;
     private boolean generating = false;
     private long startTime;
@@ -56,7 +55,7 @@ public class ChunkGenerator {
         currentZ = -gridSize / 2;
 
         WorldManagerCommand.activeGenerators.put(world.getName(), this);
-        new ChunkGenerationTask(centerX, centerZ, gridSize).runTaskTimer(WorldManager.getInstance(), 0, 5);
+        scheduleNextChunk(centerX, centerZ);
     }
 
     public void stop() {
@@ -85,72 +84,71 @@ public class ChunkGenerator {
         return generating;
     }
 
-    private class ChunkGenerationTask extends BukkitRunnable {
-        private final int centerX;
-        private final int centerZ;
-        private final int gridSize;
-
-        public ChunkGenerationTask(int centerX, int centerZ, int gridSize) {
-            this.centerX = centerX;
-            this.centerZ = centerZ;
-            this.gridSize = gridSize;
+    private void scheduleNextChunk(int centerX, int centerZ) {
+        if (!generating) {
+            return;
+        }
+        if (paused) {
+            SchedulerUtil.runGlobalDelayed(() -> scheduleNextChunk(centerX, centerZ), 5L);
+            return;
+        }
+        if (generatedChunkCount >= totalChunks) {
+            stop();
+            return;
         }
 
-        @Override
-        public void run() {
+        int chunkX = centerX + currentX;
+        int chunkZ = centerZ + currentZ;
+        SchedulerUtil.runAtRegion(world, chunkX, chunkZ, () -> {
             if (!generating) {
-                cancel();
                 return;
             }
-
             if (paused) {
+                SchedulerUtil.runGlobalDelayed(() -> scheduleNextChunk(centerX, centerZ), 5L);
                 return;
             }
 
-            for (int i = 0; i < chunksPerTick; i++) {
-                if (generatedChunkCount >= totalChunks) {
-                    stop();
-                    cancel();
-                    return;
-                }
+            Chunk chunk = world.getChunkAt(chunkX, chunkZ);
+            chunk.load(true);
+            generatedChunkCount++;
+            updateBossBar();
+            advancePointers();
 
-                int chunkX = centerX + currentX;
-                int chunkZ = centerZ + currentZ;
+            if (generatedChunkCount >= totalChunks) {
+                stop();
+                return;
+            }
+            SchedulerUtil.runGlobalDelayed(() -> scheduleNextChunk(centerX, centerZ), 1L);
+        });
+    }
 
-                Chunk chunk = world.getChunkAt(chunkX, chunkZ);
-                chunk.load(true);
-                generatedChunkCount++;
-                updateBossBar();
-
-                currentZ++;
-                if (currentZ > gridSize / 2) {
-                    currentZ = -gridSize / 2;
-                    currentX++;
-                    if (currentX > gridSize / 2) {
-                        currentX = -gridSize / 2;
-                    }
-                }
+    private void advancePointers() {
+        currentZ++;
+        if (currentZ > gridSize / 2) {
+            currentZ = -gridSize / 2;
+            currentX++;
+            if (currentX > gridSize / 2) {
+                currentX = -gridSize / 2;
             }
         }
+    }
 
-        private void updateBossBar() {
-            elapsedTime = System.currentTimeMillis() - startTime;
-            double progress = Math.min(1.0, (double) generatedChunkCount / totalChunks);
-            bossBar.setProgress(progress);
+    private void updateBossBar() {
+        elapsedTime = System.currentTimeMillis() - startTime;
+        double progress = Math.min(1.0, (double) generatedChunkCount / totalChunks);
+        bossBar.setProgress(progress);
 
-            long remainingTime = (long) ((elapsedTime / (double) generatedChunkCount) * (totalChunks - generatedChunkCount));
+        long remainingTime = (long) ((elapsedTime / (double) generatedChunkCount) * (totalChunks - generatedChunkCount));
 
-            long seconds = remainingTime / 1000;
-            long hours = seconds / 3600;
-            seconds %= 3600;
-            long minutes = seconds / 60;
-            seconds %= 60;
+        long seconds = remainingTime / 1000;
+        long hours = seconds / 3600;
+        seconds %= 3600;
+        long minutes = seconds / 60;
+        seconds %= 60;
 
-            String remainingTimeFormatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        String remainingTimeFormatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
 
-            bossBar.setTitle(String.format("Chunk Generation: %d/%d - ETA: %s",
-                    generatedChunkCount, totalChunks, remainingTimeFormatted));
-        }
-
+        bossBar.setTitle(String.format("Chunk Generation: %d/%d - ETA: %s",
+                generatedChunkCount, totalChunks, remainingTimeFormatted));
     }
 }

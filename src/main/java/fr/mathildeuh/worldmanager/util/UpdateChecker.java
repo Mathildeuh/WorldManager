@@ -27,7 +27,7 @@ public class UpdateChecker {
     }
 
     public void getVersion(final Consumer<String> consumer) {
-        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+        SchedulerUtil.runAsync(() -> {
             try {
                 long timestamp = System.currentTimeMillis();
                 String urlWithTimestamp = "https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId + "/~&timestamp=" + timestamp;
@@ -37,7 +37,7 @@ public class UpdateChecker {
                 try (InputStream is = connection.getInputStream(); Scanner scann = new Scanner(is)) {
                     if (scann.hasNext()) {
                         String version = scann.next();
-                        Bukkit.getScheduler().runTask(this.plugin, () -> consumer.accept(version));
+                        SchedulerUtil.runGlobal(() -> consumer.accept(version));
                     }
                 }
             } catch (IOException e) {

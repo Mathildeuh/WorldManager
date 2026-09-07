@@ -6,7 +6,7 @@ Create issue for suggestions or bug reports
 Easily create worlds and manage it !
 
 **3.0.0**: the entire GUI has been rebuilt from scratch on Minecraft's native Dialog UI
-(requires Paper 1.21.7+ — Spigot/CraftBukkit are no longer supported). See
+(requires Paper/Folia 1.21.7+ — Spigot/CraftBukkit are no longer supported). See
 [`AUDIT.md`](AUDIT.md) for the full list of fixes and changes in this release.
 
 ![image](https://github.com/Mathildeuh/WorldManager/assets/76065396/b266563a-8893-4e43-b74c-75badcde9471)

@@ -2,6 +2,7 @@ package fr.mathildeuh.worldmanager.events;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.messages.MessageUtils;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -34,9 +35,9 @@ public class JoinListener implements Listener {
         this.updateInfoSent.add(name);
 
         // The release-note fetch is a network call; never do it on the main thread.
-        Bukkit.getScheduler().runTaskAsynchronously(WorldManager.getInstance(), () -> {
+        SchedulerUtil.runAsync(() -> {
             String releaseNote = getLatestReleaseNote();
-            Bukkit.getScheduler().runTask(WorldManager.getInstance(), () -> sendUpdateNotice(player, releaseNote));
+            SchedulerUtil.runGlobal(() -> sendUpdateNotice(player, releaseNote));
         });
     }
 

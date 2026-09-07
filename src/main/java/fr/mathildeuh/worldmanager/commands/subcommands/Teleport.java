@@ -45,7 +45,7 @@ public class Teleport {
             targetPlayer = (Player) sender;
         }
 
-        targetPlayer.teleport(targetWorld.getSpawnLocation());
+        targetPlayer.teleportAsync(targetWorld.getSpawnLocation());
         WorldManager.langConfig.sendSuccess(sender, "teleport.success", targetPlayer.getName(), targetWorld.getName());
 
     }
