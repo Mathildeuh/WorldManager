@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 
 import java.io.*;
 import java.sql.Connection;
@@ -117,9 +118,7 @@ public class DatabaseManager {
      * Delete player inventory from database
      */
     public void deleteInventory(UUID playerUUID, String groupName) {
-        Bukkit.getScheduler().runTaskAsynchronously(
-                Bukkit.getPluginManager().getPlugin("WorldManager"),
-                () -> {
+        SchedulerUtil.runAsync(() -> {
                     String sql = "DELETE FROM player_inventories WHERE player_uuid = ? AND group_name = ?";
 
                     try (Connection conn = dbConnection.getConnection();
@@ -139,9 +138,7 @@ public class DatabaseManager {
      * Delete all player inventories
      */
     public void deleteAllPlayerInventories(UUID playerUUID) {
-        Bukkit.getScheduler().runTaskAsynchronously(
-                Bukkit.getPluginManager().getPlugin("WorldManager"),
-                () -> {
+        SchedulerUtil.runAsync(() -> {
                     String sql = "DELETE FROM player_inventories WHERE player_uuid = ?";
 
                     try (Connection conn = dbConnection.getConnection();
@@ -249,4 +246,3 @@ public class DatabaseManager {
         }
     }
 }
-

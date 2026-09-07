@@ -1,10 +1,15 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class Unload {
 
@@ -22,26 +27,29 @@ public class Unload {
         }
 
         boolean hadPlayers = false;
+        List<CompletableFuture<Boolean>> teleports = new ArrayList<>();
         for (Player player : world.getPlayers()) {
             hadPlayers = true;
-            player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+            teleports.add(player.teleportAsync(Bukkit.getWorlds().get(0).getSpawnLocation()));
         }
         if (hadPlayers) {
             WorldManager.langConfig.sendError(sender, "unload.players_in_world");
         }
 
-        try {
-            boolean unloaded = Bukkit.unloadWorld(world, true);
+        CompletableFuture.allOf(teleports.toArray(new CompletableFuture[0])).thenRun(() -> SchedulerUtil.runGlobal(() -> {
+            try {
+                boolean unloaded = Bukkit.unloadWorld(world, true);
 
-            if (unloaded) {
-                WorldManager.langConfig.sendSuccess(sender, "unload.success", worldName);
-                WorldManager.removeWorld(worldName);
-            } else {
-                WorldManager.langConfig.sendError(sender, "unload.rejected", worldName);
+                if (unloaded) {
+                    WorldManager.langConfig.sendSuccess(sender, "unload.success", worldName);
+                    WorldManager.removeWorld(worldName);
+                } else {
+                    WorldManager.langConfig.sendError(sender, "unload.rejected", worldName);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                WorldManager.langConfig.sendError(sender, "unload.failed", worldName);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            WorldManager.langConfig.sendError(sender, "unload.failed", worldName);
-        }
+        }));
     }
 }

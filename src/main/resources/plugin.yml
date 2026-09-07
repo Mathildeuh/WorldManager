@@ -2,6 +2,7 @@ name: WorldManager
 version: '${version}'
 main: fr.mathildeuh.worldmanager.WorldManager
 api-version: '1.21'
+folia-supported: true
 author: Mathildeuh
 softdepend: [PlaceholderAPI]
 commands:

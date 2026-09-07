@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import fr.mathildeuh.worldmanager.util.WorldNameValidator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -43,14 +44,15 @@ public class Load {
             worldCreator.generator(generator);
         }
 
-        world = Bukkit.createWorld(worldCreator);
-
-        if (world != null) {
-            WorldManager.langConfig.sendSuccess(sender, "load.success", worldName);
-            WorldManager.addWorld(sender, worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);
-        } else {
-            WorldManager.langConfig.sendError(sender, "load.failed", worldName);
-        }
+        SchedulerUtil.runGlobal(() -> {
+            World loadedWorld = Bukkit.createWorld(worldCreator);
+            if (loadedWorld != null) {
+                WorldManager.langConfig.sendSuccess(sender, "load.success", worldName);
+                WorldManager.addWorld(sender, worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);
+            } else {
+                WorldManager.langConfig.sendError(sender, "load.failed", worldName);
+            }
+        });
     }
 
     private void sendInvalidDimension() {

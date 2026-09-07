@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
@@ -8,7 +9,6 @@ import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -42,7 +42,7 @@ public class WorldsConfig {
         }
 
         // Charger les game rules après que les mondes soient créés
-        Bukkit.getScheduler().scheduleSyncDelayedTask(JavaPlugin.getPlugin(WorldManager.class), WorldsConfig::loadGameRules, 20L);
+        SchedulerUtil.runGlobalDelayed(WorldsConfig::loadGameRules, 20L);
     }
 
     private static void createWorld(String name, String type, String environment, String generator) {
@@ -75,7 +75,7 @@ public class WorldsConfig {
         } else if (generator != null) {
             worldCreator.generator(generator);
         }
-        Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(WorldManager.class), worldCreator::createWorld);
+        SchedulerUtil.runGlobal(worldCreator::createWorld);
     }
 
     // Méthode pour ajouter un monde au fichier de configuration

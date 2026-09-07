@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -121,16 +122,19 @@ public class Create {
             }
         }
 
-        World world = creator.createWorld();
-        if (world == null) {
-            WorldManager.langConfig.sendError(sender, "create.error", name);
-        } else {
-            WorldManager.langConfig.sendSuccess(sender, "create.success", name);
-            try {
-                world.save();
-            } catch (Exception ignored) { }
-            WorldManager.addWorld(player, creator.name(), creator.type().name(), creator.environment(), generator);
-        }
+        SchedulerUtil.runGlobal(() -> {
+            World world = creator.createWorld();
+            if (world == null) {
+                WorldManager.langConfig.sendError(sender, "create.error", name);
+            } else {
+                WorldManager.langConfig.sendSuccess(sender, "create.success", name);
+                try {
+                    world.save();
+                } catch (Exception ignored) {
+                }
+                WorldManager.addWorld(player, creator.name(), creator.type().name(), creator.environment(), generator);
+            }
+        });
     }
 
 
