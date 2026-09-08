@@ -7,65 +7,84 @@ on:
     branches: [ "master" ]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build project with alt.gradle
+        run: ./gradlew -b alt.gradle shadowJar --no-daemon
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WorldManager-jar
+          path: out/WorldManager*.jar
+          retention-days: 7
+
   create_release:
+    needs: build
+    # Only cut a GitHub release from a real push to master, never from a pull request
+    # (a fork PR has no write access to create one anyway, and a same-repo PR shouldn't
+    # publish a release before it's actually merged).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
-      - name: Set up JDK
-        uses: actions/setup-java@v2
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
-          distribution: 'adopt'
-          java-version: '21'  # Spécifiez la version de Java si nécessaire
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build project with alt.gradle
-        #        env:
-        #          # Make sure you have added a repository secret in the repository's settings
-        #          HANGAR_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}
-        run: ./gradlew -b alt.gradle shadowJar --no-daemon # publishPluginPublicationToHangar --stacktrace
+          name: WorldManager-jar
+          path: out
 
       - name: Extract version from build.gradle
         id: extract_version
         run: |
-          version=$(grep '^version' build.gradle | awk -F'=' '{ print $2 }' | xargs)
-          echo "::set-output name=VERSION::$version"
+          version=$(sed -n "s/^version = '\(.*\)'/\1/p" build.gradle)
+          if [ -z "$version" ]; then
+            echo "::error::Could not extract version from build.gradle"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_OUTPUT"
 
       - name: Get last commit message
         id: get_commit_message
         run: |
-          commit_message=$(git log -1 --pretty=%B)
-          echo "::set-output name=COMMIT_MESSAGE::$commit_message"
+          {
+            echo "COMMIT_MESSAGE<<EOF"
+            git log -1 --pretty=%B
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Rename JAR file with version
         run: |
-          version=${{ steps.extract_version.outputs.VERSION }}
-          mv ./out/WorldManager*.jar ./out/WorldManager-${version}.jar
+          version="${{ steps.extract_version.outputs.VERSION }}"
+          mv ./out/WorldManager*.jar "./out/WorldManager-${version}.jar"
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release and upload asset
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.extract_version.outputs.VERSION }}
-          release_name: V${{ steps.extract_version.outputs.VERSION }}
+          name: V${{ steps.extract_version.outputs.VERSION }}
           body: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
           draft: false
           prerelease: false
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./out/WorldManager-${{ steps.extract_version.outputs.VERSION }}.jar  # Chemin vers le fichier .jar généré
-          asset_name: WorldManager-${{ steps.extract_version.outputs.VERSION }}.jar  # Nom du fichier dans la release
-          asset_content_type: application/java-archive  # Type de contenu MIME du fichier .jar
+          files: ./out/WorldManager-${{ steps.extract_version.outputs.VERSION }}.jar

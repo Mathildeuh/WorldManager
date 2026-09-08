@@ -1,0 +1,9 @@
+version: 2
+updates:
+  # Keeps the actions used in .github/workflows/*.yml current - this is what would have
+  # caught actions/checkout@v2, actions/setup-java@v2, and the archived actions/create-release
+  # + actions/upload-release-asset before they became a security advisory instead.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
