@@ -27,11 +27,18 @@ database:
 enable-linked-inventory: false
 
 # Linked worlds configuration
-# Players will keep their inventory when traveling between worlds in the same group
+# Players get a separate, persistent profile per group as they travel between worlds in it.
+# Two forms are supported:
+#   - A flat list of world names (legacy format, still fully supported): shares inventory,
+#     health and hunger - exactly what every version before "share" supported.
+#   - A "worlds" + "share" section: pick exactly which aspects this group manages. Valid share
+#     values: inventory, health, hunger, experience, bed-spawn, location. Anything left out is
+#     never touched by a world change in this group - it just persists normally, the same as it
+#     would in a world that isn't part of any group at all.
 linked-worlds-inventory:
   group1:
-    - world
-    - test
+    worlds: [world, test]
+    share: [inventory, health, hunger, experience]
   group2:
     - world_nether
     - world_the_end
@@ -43,8 +50,15 @@ linked-worlds-inventory:
 # portal back out of the linked nether/end world returns to the overworld world.
 # Leave empty (default) to keep vanilla per-world Nether/End pairing.
 #
+# nether-scale (optional, default 8.0) overrides the overworld:nether coordinate ratio
+# for that link - e.g. 1.0 for a 1:1 custom "twin world" instead of a squeezed nether.
+# There is no End equivalent: vanilla never derives End coordinates from the player's
+# position (entering always lands on the End's fixed exit platform, returning always
+# goes back to the player's last overworld position), so only the world is swapped.
+#
 # linked-portals:
 #   TEST:
 #     nether: Nether_TEST
 #     end: End_TEST
+#     nether-scale: 8.0
 linked-portals: {}

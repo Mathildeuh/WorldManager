@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.database.DatabaseManager;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -9,171 +10,262 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Manages player inventory saving and restoring for different world groups.
- * Uses both in-memory cache and database persistence.
+ * Manages per-group player profiles (inventory and, per {@link ProfileType}, optionally
+ * health/hunger/experience/bed-spawn/last-location) for the linked-worlds-inventory feature.
+ * Uses both an in-memory cache and database persistence.
  */
 public class PlayerInventoryManager {
 
-    // Structure: UUID -> GroupName -> InventoryData (in-memory cache)
-    private static final Map<UUID, Map<String, InventoryData>> playerInventories = new ConcurrentHashMap<>();
+    // Structure: UUID -> GroupName -> ProfileData (in-memory cache)
+    private static final Map<UUID, Map<String, ProfileData>> profiles = new ConcurrentHashMap<>();
     private static DatabaseManager databaseManager;
 
-    /**
-     * Initialize with database manager
-     */
     public static void setDatabaseManager(DatabaseManager dbManager) {
         databaseManager = dbManager;
     }
 
     /**
-     * Save a player's inventory for a specific group
-     * SYNCHRONOUS - ensures data is saved to database immediately
+     * Captures the player's current state for every {@code shares}-listed aspect and stores it
+     * under {@code groupName} (memory immediately, database asynchronously). Aspects not in
+     * {@code shares} are left completely untouched in storage.
      */
-    public static void saveInventory(Player player, String groupName) {
-        if (player == null || groupName == null) {
+    public static void saveProfile(Player player, String groupName, Set<ProfileType> shares) {
+        if (player == null || groupName == null || shares.isEmpty()) {
             return;
         }
 
         UUID playerId = player.getUniqueId();
-        InventoryData data = new InventoryData(player);
+        ProfileData data = profiles
+                .computeIfAbsent(playerId, k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(groupName, k -> new ProfileData());
+        data.captureFrom(player, shares);
 
-        // Save to memory cache immediately
-        playerInventories.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(groupName, data);
-
-        // Save to database SYNCHRONOUSLY - do not use async
         if (databaseManager != null) {
-            databaseManager.saveInventory(playerId, groupName,
-                    player.getInventory().getContents(),
-                    player.getInventory().getArmorContents(),
-                    player.getInventory().getItemInOffHand(),
-                    (float) player.getHealth(),
-                    player.getFoodLevel(),
-                    player.getSaturation());
+            ProfileData snapshot = data.copy();
+            SchedulerUtil.runAsync(() -> databaseManager.saveProfile(playerId, groupName, snapshot));
         }
     }
 
     /**
-     * Restore a player's inventory for a specific group
+     * Records where the player was standing, for {@code groupName}'s "last location" - called
+     * when they leave that group (see {@code events/WorldChangeListener}), separately from
+     * {@link #saveProfile} since by the time a world change is observed the player's prior exact
+     * position is already gone.
      */
-    public static boolean restoreInventory(Player player, String groupName) {
-        if (player == null || groupName == null) {
+    public static void saveLastLocation(Player player, String groupName, org.bukkit.Location location) {
+        if (player == null || groupName == null || location == null) {
+            return;
+        }
+        UUID playerId = player.getUniqueId();
+        ProfileData data = profiles
+                .computeIfAbsent(playerId, k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(groupName, k -> new ProfileData());
+        data.lastLocation = SavedLocation.of(location);
+        data.captured.add(ProfileType.LOCATION);
+
+        if (databaseManager != null) {
+            ProfileData snapshot = data.copy();
+            SchedulerUtil.runAsync(() -> databaseManager.saveProfile(playerId, groupName, snapshot));
+        }
+    }
+
+    /**
+     * Applies every {@code shares}-listed aspect that's actually available in storage for
+     * {@code groupName} to the player. Returns whether any data existed at all for this group
+     * (not just whether every requested aspect was found) - callers use this to decide whether
+     * a "first time in this group" reset is needed.
+     */
+    public static boolean restoreProfile(Player player, String groupName, Set<ProfileType> shares) {
+        if (player == null || groupName == null || shares.isEmpty()) {
             return false;
         }
 
         UUID playerId = player.getUniqueId();
+        Map<String, ProfileData> playerData = profiles.get(playerId);
+        ProfileData data = playerData == null ? null : playerData.get(groupName);
 
-        // Try to get from memory cache first
-        Map<String, InventoryData> playerData = playerInventories.get(playerId);
-        if (playerData != null && playerData.containsKey(groupName)) {
-            InventoryData data = playerData.get(groupName);
-            data.apply(player);
-            return true;
-        }
-
-        // Try to load from database
-        if (databaseManager != null) {
+        if (data == null && databaseManager != null) {
             try {
-                DatabaseManager.InventoryData dbData = databaseManager.loadInventory(playerId, groupName);
-                if (dbData != null) {
-                    // Apply and cache
-                    InventoryData data = new InventoryData(dbData);
-                    playerInventories.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(groupName, data);
-                    data.apply(player);
-                    return true;
+                ProfileData loaded = databaseManager.loadProfile(playerId, groupName);
+                if (loaded != null) {
+                    data = loaded;
+                    profiles.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(groupName, data);
                 }
             } catch (Exception e) {
-                Bukkit.getLogger().warning("[WorldManager] Failed to load inventory for group '" + groupName + "': " + e.getMessage());
+                Bukkit.getLogger().warning("[WorldManager] Failed to load profile for group '" + groupName + "': " + e.getMessage());
             }
         }
 
-        return false;
+        if (data == null) {
+            return false;
+        }
+        data.applyTo(player, shares);
+        return true;
+    }
+
+    /** The stored "last location" for a group, or {@code null} if none is recorded (or the aspect isn't shared). */
+    public static SavedLocation getLastLocation(Player player, String groupName, Set<ProfileType> shares) {
+        if (!shares.contains(ProfileType.LOCATION)) {
+            return null;
+        }
+        Map<String, ProfileData> playerData = profiles.get(player.getUniqueId());
+        ProfileData data = playerData == null ? null : playerData.get(groupName);
+        if (data == null && databaseManager != null) {
+            try {
+                data = databaseManager.loadProfile(player.getUniqueId(), groupName);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[WorldManager] Failed to load last location for group '" + groupName + "': " + e.getMessage());
+            }
+        }
+        return (data != null && data.captured.contains(ProfileType.LOCATION)) ? data.lastLocation : null;
     }
 
     /**
-     * Clear all saved inventories for a player (called on logout or plugin disable)
+     * Resets the player's shared aspects to sensible defaults for "first time in this group"
+     * (only the aspects actually shared by the group are touched).
+     */
+    public static void resetProfile(Player player, Set<ProfileType> shares) {
+        if (shares.contains(ProfileType.INVENTORY)) {
+            player.getInventory().clear();
+            player.getInventory().setHelmet(null);
+            player.getInventory().setChestplate(null);
+            player.getInventory().setLeggings(null);
+            player.getInventory().setBoots(null);
+            player.getInventory().setItemInOffHand(null);
+        }
+        if (shares.contains(ProfileType.HEALTH)) {
+            player.setHealth(player.getMaxHealth());
+        }
+        if (shares.contains(ProfileType.HUNGER)) {
+            player.setFoodLevel(20);
+            player.setSaturation(20);
+        }
+        if (shares.contains(ProfileType.EXPERIENCE)) {
+            player.setLevel(0);
+            player.setExp(0f);
+        }
+        if (shares.contains(ProfileType.BED_SPAWN)) {
+            player.setBedSpawnLocation(null, true);
+        }
+        // LOCATION: nothing to reset - no stored location just means "stay wherever the world change put you".
+    }
+
+    /**
+     * Drops a player's in-memory profile cache (called on logout). Never touches the database -
+     * the whole point of this feature is that per-group profiles persist across sessions.
      */
     public static void clearPlayerData(UUID playerId) {
-        playerInventories.remove(playerId);
-
-        // Delete from database asynchronously
-        if (databaseManager != null) {
-            databaseManager.deleteAllPlayerInventories(playerId);
-        }
+        profiles.remove(playerId);
     }
 
     /**
-     * Clear all saved inventories (called on plugin disable)
+     * Clear all cached profiles (called on plugin disable)
      */
     public static void clearAllData() {
-        playerInventories.clear();
+        profiles.clear();
     }
 
     /**
      * Get memory usage statistics
      */
     public static String getStatistics() {
-        int totalPlayers = playerInventories.size();
-        int totalGroups = playerInventories.values().stream()
+        int totalPlayers = profiles.size();
+        int totalGroups = profiles.values().stream()
                 .mapToInt(Map::size)
                 .sum();
-        return "Cached inventories: " + totalPlayers + " players, " + totalGroups + " group inventories";
+        return "Cached profiles: " + totalPlayers + " players, " + totalGroups + " group profiles";
     }
 
     /**
-     * Inner class to store inventory data
+     * Mutable per-(player,group) snapshot; {@link #captured} tracks which aspects actually hold
+     * real data. Public (with public fields) so {@code database.DatabaseManager} can serialize/
+     * deserialize it directly as the DB round-trip DTO, matching how this class's predecessor
+     * exposed its own DB transfer object.
      */
-    private static class InventoryData {
-        private final ItemStack[] mainInventory;
-        private final ItemStack[] armorContents;
-        private final ItemStack offHandItem;
-        private final int heldItemSlot;
-        private final float health;
-        private final int foodLevel;
-        private final float saturation;
+    public static final class ProfileData {
+        public ItemStack[] mainInventory;
+        public ItemStack[] armorContents;
+        public ItemStack offHandItem;
+        public int heldItemSlot;
+        public float health;
+        public int foodLevel;
+        public float saturation;
+        public int level;
+        public float exp;
+        public SavedLocation bedSpawn;
+        public SavedLocation lastLocation;
+        public final EnumSet<ProfileType> captured = EnumSet.noneOf(ProfileType.class);
 
-        /**
-         * Create inventory data from a player
-         */
-        InventoryData(Player player) {
-            this.mainInventory = player.getInventory().getContents().clone();
-            this.armorContents = player.getInventory().getArmorContents().clone();
-            this.offHandItem = player.getInventory().getItemInOffHand() != null ?
-                    player.getInventory().getItemInOffHand().clone() : null;
-            this.heldItemSlot = player.getInventory().getHeldItemSlot();
-            this.health = (float) player.getHealth();
-            this.foodLevel = player.getFoodLevel();
-            this.saturation = player.getSaturation();
-        }
-
-        /**
-         * Create inventory data from database data
-         */
-        InventoryData(DatabaseManager.InventoryData dbData) {
-            this.mainInventory = dbData.mainInventory;
-            this.armorContents = dbData.armorContents;
-            this.offHandItem = dbData.offHandItem;
-            this.heldItemSlot = 0;
-            this.health = dbData.health;
-            this.foodLevel = dbData.foodLevel;
-            this.saturation = dbData.saturation;
-        }
-
-        /**
-         * Apply inventory data to a player
-         */
-        void apply(Player player) {
-            player.getInventory().setContents(this.mainInventory.clone());
-            player.getInventory().setArmorContents(this.armorContents.clone());
-            if (this.offHandItem != null) {
-                player.getInventory().setItemInOffHand(this.offHandItem.clone());
-            } else {
-                player.getInventory().setItemInOffHand(null);
+        void captureFrom(Player player, Set<ProfileType> shares) {
+            if (shares.contains(ProfileType.INVENTORY)) {
+                mainInventory = player.getInventory().getContents().clone();
+                armorContents = player.getInventory().getArmorContents().clone();
+                ItemStack offHand = player.getInventory().getItemInOffHand();
+                offHandItem = offHand.getType().isAir() ? null : offHand.clone();
+                heldItemSlot = player.getInventory().getHeldItemSlot();
+                captured.add(ProfileType.INVENTORY);
             }
-            player.getInventory().setHeldItemSlot(this.heldItemSlot);
-            player.setHealth(Math.min(this.health, player.getMaxHealth()));
-            player.setFoodLevel(Math.min(this.foodLevel, 20));
-            player.setSaturation(Math.min(this.saturation, 20));
+            if (shares.contains(ProfileType.HEALTH)) {
+                health = (float) player.getHealth();
+                captured.add(ProfileType.HEALTH);
+            }
+            if (shares.contains(ProfileType.HUNGER)) {
+                foodLevel = player.getFoodLevel();
+                saturation = player.getSaturation();
+                captured.add(ProfileType.HUNGER);
+            }
+            if (shares.contains(ProfileType.EXPERIENCE)) {
+                level = player.getLevel();
+                exp = player.getExp();
+                captured.add(ProfileType.EXPERIENCE);
+            }
+            if (shares.contains(ProfileType.BED_SPAWN)) {
+                org.bukkit.Location bed = player.getBedSpawnLocation();
+                bedSpawn = bed == null ? null : SavedLocation.of(bed);
+                captured.add(ProfileType.BED_SPAWN);
+            }
+        }
+
+        void applyTo(Player player, Set<ProfileType> shares) {
+            if (shares.contains(ProfileType.INVENTORY) && captured.contains(ProfileType.INVENTORY)) {
+                player.getInventory().setContents(mainInventory.clone());
+                player.getInventory().setArmorContents(armorContents.clone());
+                player.getInventory().setItemInOffHand(offHandItem != null ? offHandItem.clone() : null);
+                player.getInventory().setHeldItemSlot(heldItemSlot);
+            }
+            if (shares.contains(ProfileType.HEALTH) && captured.contains(ProfileType.HEALTH)) {
+                player.setHealth(Math.min(health, (float) player.getMaxHealth()));
+            }
+            if (shares.contains(ProfileType.HUNGER) && captured.contains(ProfileType.HUNGER)) {
+                player.setFoodLevel(Math.min(foodLevel, 20));
+                player.setSaturation(Math.min(saturation, 20f));
+            }
+            if (shares.contains(ProfileType.EXPERIENCE) && captured.contains(ProfileType.EXPERIENCE)) {
+                player.setLevel(level);
+                player.setExp(exp);
+            }
+            if (shares.contains(ProfileType.BED_SPAWN) && captured.contains(ProfileType.BED_SPAWN)) {
+                player.setBedSpawnLocation(bedSpawn == null ? null : bedSpawn.toLocation(), true);
+            }
+            // LOCATION is applied by the caller via getLastLocation() + a teleport, not here -
+            // it needs to happen after the normal world-change teleport has fully settled.
+        }
+
+        ProfileData copy() {
+            ProfileData copy = new ProfileData();
+            copy.mainInventory = mainInventory == null ? null : mainInventory.clone();
+            copy.armorContents = armorContents == null ? null : armorContents.clone();
+            copy.offHandItem = offHandItem == null ? null : offHandItem.clone();
+            copy.heldItemSlot = heldItemSlot;
+            copy.health = health;
+            copy.foodLevel = foodLevel;
+            copy.saturation = saturation;
+            copy.level = level;
+            copy.exp = exp;
+            copy.bedSpawn = bedSpawn;
+            copy.lastLocation = lastLocation;
+            copy.captured.addAll(captured);
+            return copy;
         }
     }
 }
-

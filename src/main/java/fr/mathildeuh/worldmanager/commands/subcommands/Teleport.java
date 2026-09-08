@@ -1,8 +1,10 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.messages.MessageManager;
+import fr.mathildeuh.worldmanager.configs.WorldsConfig;
+import fr.mathildeuh.worldmanager.messages.MessageUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,7 +19,10 @@ public class Teleport {
 
     public void execute(String... args) {
         if (args.length < 2) {
-            new MessageManager(sender).sendHelp();
+            WorldManager.langConfig.sendError(sender, "teleport.usage");
+            for (World world : Bukkit.getWorlds()) {
+                MessageUtils.sendMini(sender, WorldManager.langConfig.formatMessage("list.world_item", world.getName()));
+            }
             return;
         }
 
@@ -45,7 +50,8 @@ public class Teleport {
             targetPlayer = (Player) sender;
         }
 
-        targetPlayer.teleportAsync(targetWorld.getSpawnLocation());
+        Location spawn = WorldsConfig.getSpawn(targetWorld);
+        targetPlayer.teleportAsync(spawn != null ? spawn : targetWorld.getSpawnLocation());
         WorldManager.langConfig.sendSuccess(sender, "teleport.success", targetPlayer.getName(), targetWorld.getName());
 
     }

@@ -58,6 +58,7 @@ public class MySQLConnection extends DatabaseConnection {
                         player_uuid VARCHAR(36) NOT NULL,
                         group_name VARCHAR(50) NOT NULL,
                         inventory_data LONGBLOB NOT NULL,
+                        held_item_slot INT NOT NULL DEFAULT 0,
                         health FLOAT NOT NULL,
                         food_level INT NOT NULL,
                         saturation FLOAT NOT NULL,
@@ -70,6 +71,17 @@ public class MySQLConnection extends DatabaseConnection {
 
             stmt.execute(createTableSQL);
             Bukkit.getLogger().info("[WorldManager] MySQL table 'player_inventories' created/verified");
+
+            // Migration for databases created before held_item_slot existed. Older MySQL/MariaDB
+            // versions don't support "ADD COLUMN IF NOT EXISTS", so fall back to catching the
+            // duplicate-column error instead.
+            try {
+                stmt.execute("ALTER TABLE player_inventories ADD COLUMN held_item_slot INT NOT NULL DEFAULT 0");
+            } catch (SQLException e) {
+                if (!"42S21".equals(e.getSQLState())) { // duplicate column name
+                    throw e;
+                }
+            }
 
         } catch (SQLException e) {
             Bukkit.getLogger().severe("[WorldManager] Failed to create MySQL tables: " + e.getMessage());

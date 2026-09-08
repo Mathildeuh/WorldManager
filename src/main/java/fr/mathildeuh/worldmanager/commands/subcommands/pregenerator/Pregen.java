@@ -2,6 +2,8 @@ package fr.mathildeuh.worldmanager.commands.subcommands.pregenerator;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.commands.WorldManagerCommand;
+import fr.mathildeuh.worldmanager.messages.MessageUtils;
+import fr.mathildeuh.worldmanager.util.WorldOperationLock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -24,7 +26,7 @@ public class Pregen {
         }
 
         if (args.length < 3) {
-            WorldManager.langConfig.sendError(sender, "pregen.usage");
+            sendGuide();
             return;
         }
 
@@ -42,14 +44,24 @@ public class Pregen {
             case "stop" -> handleStop(world);
             case "pause" -> handlePause(world);
             case "resume" -> handleResume(world);
-            default -> WorldManager.langConfig.sendError(sender, "pregen.unknown_action", action);
+            default -> {
+                WorldManager.langConfig.sendError(sender, "pregen.unknown_action", action);
+                sendGuide();
+            }
+        }
+    }
+
+    /** Guided explanation, shown for bare {@code /wm pregen} or an unrecognized action. */
+    private void sendGuide() {
+        for (String line : WorldManager.langConfig.getStringList("pregen.guide")) {
+            MessageUtils.sendMini(sender, line);
         }
     }
 
     private void handleStart(String[] args, Player player, World world) {
         int centerX = 0;
         int centerZ = 0;
-        int totalChunks = 200;
+        int radius = 7; // (2*7+1)^2 = 225 chunks, close to the old flat default of 200
 
         if (WorldManagerCommand.activeGenerators.containsKey(world.getName())) {
             WorldManager.langConfig.sendError(sender, "pregen.already_running", world.getName());
@@ -71,8 +83,8 @@ public class Pregen {
                 }
             } else if (args[i].startsWith("radius:")) {
                 try {
-                    totalChunks = Integer.parseInt(args[i].substring("radius:".length()));
-                    if (totalChunks <= 0) {
+                    radius = Integer.parseInt(args[i].substring("radius:".length()));
+                    if (radius <= 0) {
                         WorldManager.langConfig.sendError(sender, "pregen.invalid_radius");
                         return;
                     }
@@ -83,9 +95,16 @@ public class Pregen {
             }
         }
 
-        ChunkGenerator generator = new ChunkGenerator(world, player, totalChunks, new Location(world, centerX, 0, centerZ));
+        // Pregen holds this world exclusively for its whole run - a concurrent backup/restore/
+        // unload/delete on the same world would otherwise race against chunks being written.
+        if (!WorldOperationLock.tryLock(world.getName())) {
+            WorldManager.langConfig.sendError(sender, "general.operation_in_progress", world.getName());
+            return;
+        }
+
+        ChunkGenerator generator = new ChunkGenerator(world, player, radius, new Location(world, centerX, 0, centerZ));
         generator.start();
-        WorldManager.langConfig.sendWaiting(sender, "pregen.start", world.getName(), centerX, centerZ, totalChunks);
+        WorldManager.langConfig.sendWaiting(sender, "pregen.start", world.getName(), centerX, centerZ, radius);
     }
 
     private void handleStop(World world) {

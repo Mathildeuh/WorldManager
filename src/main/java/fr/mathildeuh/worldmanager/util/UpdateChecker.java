@@ -5,7 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.net.URLConnection;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -31,7 +31,7 @@ public class UpdateChecker {
             try {
                 long timestamp = System.currentTimeMillis();
                 String urlWithTimestamp = "https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId + "/~&timestamp=" + timestamp;
-                URLConnection connection = new URL(urlWithTimestamp).openConnection();
+                URLConnection connection = URI.create(urlWithTimestamp).toURL().openConnection();
                 connection.setConnectTimeout(TIMEOUT_MILLIS);
                 connection.setReadTimeout(TIMEOUT_MILLIS);
                 try (InputStream is = connection.getInputStream(); Scanner scann = new Scanner(is)) {

@@ -11,6 +11,7 @@ import fr.mathildeuh.worldmanager.database.DatabaseFactory;
 import fr.mathildeuh.worldmanager.database.DatabaseManager;
 import fr.mathildeuh.worldmanager.events.JoinListener;
 import fr.mathildeuh.worldmanager.events.WorldChangeListener;
+import fr.mathildeuh.worldmanager.guis.GuiListener;
 import fr.mathildeuh.worldmanager.placeholder.Placeholders;
 import fr.mathildeuh.worldmanager.util.UpdateChecker;
 import org.bstats.bukkit.Metrics;
@@ -89,6 +90,11 @@ public final class WorldManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
         getServer().getPluginManager().registerEvents(new WorldChangeListener(), this);
         getServer().getPluginManager().registerEvents(new fr.mathildeuh.worldmanager.events.PortalLinkListener(), this);
+        getServer().getPluginManager().registerEvents(new fr.mathildeuh.worldmanager.events.WorldFlagsListener(), this);
+        getServer().getPluginManager().registerEvents(new fr.mathildeuh.worldmanager.events.SignPortalListener(), this);
+        getServer().getPluginManager().registerEvents(new fr.mathildeuh.worldmanager.events.CustomPortalListener(), this);
+        getServer().getPluginManager().registerEvents(new GuiListener(), this);
+        fr.mathildeuh.worldmanager.guis.GuiAnimator.start();
 
         loadBackupFile();
         loadWorldsFile();
@@ -98,6 +104,12 @@ public final class WorldManager extends JavaPlugin {
 
         LinkedWorldsManager.loadLinkedWorlds();
         fr.mathildeuh.worldmanager.configs.LinkedPortalsManager.load();
+        fr.mathildeuh.worldmanager.configs.SignPortalsManager.load();
+        fr.mathildeuh.worldmanager.configs.CustomPortalsManager.load();
+
+        if (fr.mathildeuh.worldmanager.util.EconomyHook.setup()) {
+            getLogger().info("Vault economy hook enabled - custom portals can charge a price.");
+        }
 
         if (getConfig().getBoolean("update-checker"))
             update();
@@ -119,7 +131,7 @@ public final class WorldManager extends JavaPlugin {
         String lang = getConfig().getString("lang");
         File langFile = new File(getDataFolder(), "lang/" + lang + ".yml");
 
-        List<String> defaultLangs = Arrays.asList("en", "es", "fr", "ru", "de");
+        List<String> defaultLangs = Arrays.asList("en", "es", "fr", "ru", "de", "pl");
 
         if (!langFile.getParentFile().mkdirs() && !langFile.getParentFile().exists()) {
             getLogger().warning("Could not create lang directory!");
@@ -149,8 +161,47 @@ public final class WorldManager extends JavaPlugin {
             }
         }
 
+        mergeMissingLangKeys(lang, langFile);
+
         // Charger le fichier de langue spécifié
         langConfig = new LangConfig(langFile);
+    }
+
+    /**
+     * An on-disk lang file only gets created once, the very first time the plugin ever runs -
+     * after that it's the server owner's file, and this plugin has no scripted launch task that
+     * would ever recreate it. Without this, upgrading to a version that adds new lang keys (as
+     * 4.0.0 did, replacing the whole {@code dialog.*} namespace with {@code gui.*}) leaves every
+     * existing install logging "Missing GUI message key" forever, since the bundled resource is
+     * never consulted again once the file exists. This adds only the keys the on-disk file is
+     * missing, from the jar's bundled default for that locale - any key the server owner already
+     * customized is left untouched.
+     */
+    private void mergeMissingLangKeys(String lang, File langFile) {
+        try (var bundledStream = getResource("lang/" + lang + ".yml")) {
+            if (bundledStream == null) {
+                return;
+            }
+            YamlConfiguration bundled = YamlConfiguration.loadConfiguration(
+                    new java.io.InputStreamReader(bundledStream, java.nio.charset.StandardCharsets.UTF_8));
+            YamlConfiguration onDisk = YamlConfiguration.loadConfiguration(langFile);
+
+            boolean changed = false;
+            for (String key : bundled.getKeys(true)) {
+                if (bundled.isConfigurationSection(key) || onDisk.contains(key)) {
+                    continue;
+                }
+                onDisk.set(key, bundled.get(key));
+                changed = true;
+            }
+
+            if (changed) {
+                onDisk.save(langFile);
+                getLogger().info("Added new translation keys to lang/" + lang + ".yml (introduced in this version).");
+            }
+        } catch (IOException e) {
+            getLogger().warning("Failed to merge new keys into lang/" + lang + ".yml: " + e.getMessage());
+        }
     }
 
     private void loadWorldsFile() {
@@ -198,6 +249,8 @@ public final class WorldManager extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        fr.mathildeuh.worldmanager.guis.GuiAnimator.stop();
+
         // Clean up player inventory data
         PlayerInventoryManager.clearAllData();
 

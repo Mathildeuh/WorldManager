@@ -1,7 +1,7 @@
 [CENTER][SIZE=6][COLOR=#02a876]WorldManager[/COLOR][/SIZE]
 [SIZE=3]Create, load, unload, delete, back up, restore, teleport between, and pre-generate Minecraft worlds — all from one command.[/SIZE]
 
-[COLOR=#7d66ff][B]Version 3.0.0[/B][/COLOR] — the entire GUI is now built on Minecraft's native [B]Dialog[/B] UI. No more chest-inventory menus.
+[COLOR=#7d66ff][B]Version 4.0.0[/B][/COLOR] — a modern in-game menu, per-world flags, and support down to Paper 1.20.1. One plugin covering the same ground as Multiverse-Core plus its Inventories and NetherPortals addons.
 
 [URL='https://github.com/Mathildeuh/WorldManager/issues'][B]Report a bug / suggest a feature[/B][/URL]
 [/CENTER]
@@ -17,7 +17,8 @@
 [*][B]Game rules[/B] — browse and edit every GameRule supported by a world, per-world, from the in-game menu.
 [*][B]Linked-worlds inventories[/B] [I](optional)[/I] — group worlds together so players keep one shared inventory across the group, backed by SQLite or MySQL/MariaDB.
 [*][B]Linked Nether/End portals[/B] [I](optional)[/I] — point a world's Nether/End portals at specific worlds instead of Bukkit's auto-derived <world>_nether/<world>_the_end pair.
-[*][B]In-game Dialog UI[/B] — [ICODE]/wm gui[/ICODE] opens a native Dialog menu: create a world through a single form, browse and manage loaded worlds, edit game rules with real sliders and toggles, and confirm destructive actions through a proper Yes/No dialog.
+[*][B]In-game menu[/B] — [ICODE]/wm gui[/ICODE] opens a modern chest-inventory menu: create a world through a single form, browse and manage loaded worlds, edit game rules with click-to-toggle/±1/±10 controls, and confirm destructive actions through a proper Yes/No screen.
+[*][B]Per-world flags[/B] — PvP, mob spawning, animal spawning, a weather lock, and a custom spawn point per world, editable from the same menu.
 [*][B]PlaceholderAPI support[/B] — [ICODE]%worldmanager_current_world%[/ICODE], [ICODE]%worldmanager_loaded%[/ICODE], [ICODE]%worldmanager_total_player_amount%[/ICODE], and more.
 [*][B]Six languages out of the box[/B] — English, French, Spanish, German, Polish, Russian.
 [/LIST]
@@ -28,7 +29,7 @@
 
 [TABLE]
 [TR][TH]Command[/TH][TH]Description[/TH][/TR]
-[TR][TD][ICODE]/wm[/ICODE] or [ICODE]/wm gui[/ICODE][/TD][TD]Open the main Dialog menu[/TD][/TR]
+[TR][TD][ICODE]/wm[/ICODE] or [ICODE]/wm gui[/ICODE][/TD][TD]Open the main menu[/TD][/TR]
 [TR][TD][ICODE]/wm create <name> [type] [seed] [generator][/ICODE][/TD][TD]Create a new world[/TD][/TR]
 [TR][TD][ICODE]/wm load <name> [dimension] [generator][/ICODE][/TD][TD]Load an existing world folder[/TD][/TR]
 [TR][TD][ICODE]/wm unload <name>[/ICODE][/TD][TD]Unload a world[/TD][/TR]
@@ -46,7 +47,7 @@
 [TABLE]
 [TR][TH]Permission[/TH][TH]Grants[/TH][/TR]
 [TR][TD][ICODE]worldmanager.command[/ICODE][/TD][TD]Base access to /worldmanager[/TD][/TR]
-[TR][TD][ICODE]worldmanager.gui[/ICODE][/TD][TD]Open the Dialog menu[/TD][/TR]
+[TR][TD][ICODE]worldmanager.gui[/ICODE][/TD][TD]Open the menu[/TD][/TR]
 [TR][TD][ICODE]worldmanager.create[/ICODE][/TD][TD]Create worlds[/TD][/TR]
 [TR][TD][ICODE]worldmanager.load[/ICODE][/TD][TD]Load worlds[/TD][/TR]
 [TR][TD][ICODE]worldmanager.unload[/ICODE][/TD][TD]Unload worlds[/TD][/TR]
@@ -60,18 +61,25 @@
 
 [HR][/HR]
 [SIZE=4][B]Supported versions[/B][/SIZE]
-[COLOR=#02a876][B]Paper 1.21.7 → 26.2.[/B][/COLOR] Dialogs first shipped client-side in Minecraft 1.21.6 and became available to plugins in Paper 1.21.7 — that's the floor 3.0.0 targets, while staying current with the latest release.
-[COLOR=red][B]Spigot/CraftBukkit are not supported from 3.0.0 onward[/B][/COLOR] — the Dialog API is Paper-exclusive.
+[COLOR=#02a876][B]Paper 1.20.1 → 26.2.[/B][/COLOR] Compiled against the 1.20.1 API (Paper's Bukkit-facing API is backward-additive, so building against the floor rather than the latest keeps it running on every release in between) and boot-tested against a real 1.20.1 server.
+[COLOR=red][B]Spigot/CraftBukkit are not supported[/B][/COLOR] — a shaded chest-GUI library the plugin depended on before 3.0.0 was dropped and hasn't been reintroduced.
 
 [HR][/HR]
-[SIZE=4][B]What's new in 3.0.0[/B][/SIZE]
+[SIZE=4][B]What's new in 4.0.0[/B][/SIZE]
 [LIST]
-[*][COLOR=red][B]Critical fix[/B][/COLOR]: a bug (present since 2.2.0) where players could lose their inventory when changing worlds even with linked-worlds-inventory disabled, or between two worlds neither of which was in a configured group.
+[*][B]Much wider version support[/B]: 3.0.0's menu required Paper 1.21.7+ (built on Minecraft's Dialog UI, which doesn't exist before then). 4.0.0 moves back to a chest-inventory menu — redesigned, not a revert — specifically to bring the floor down to 1.20.1.
+[*][COLOR=red][B]Critical fix[/B][/COLOR]: disconnecting could wipe a player's entire linked-inventory history (every group, not just the current one) from the database. Fixed — quitting now only clears the in-memory cache.
+[*]New: per-world flags — PvP, mob/animal spawning, a weather lock, and a custom spawn point, editable from each world's menu screen.
+[*]A world-operation lock now prevents pre-generation from racing a concurrent unload/delete/backup/restore on the same world.
+[*][ICODE]worldmanager.*[/ICODE] permissions are now properly declared (default: op), and an operator's explicit permission negation (via a permissions plugin) is now actually respected.
+[*]Numerous smaller correctness fixes across pre-generation, backups, and command feedback.
+[/LIST]
+
+[SIZE=4][B]Earlier: what changed in 3.0.0[/B][/SIZE]
+[LIST]
+[*][B]Critical fix[/B]: a bug (present since 2.2.0) where players could lose their inventory when changing worlds even with linked-worlds-inventory disabled, or between two worlds neither of which was in a configured group.
 [*]New: linked Nether/End portals (see Features above).
-[*]Entire GUI rebuilt from scratch on the Dialog API, replacing the old chest-inventory menus.
-[*]World creation is now a single form instead of a multi-step chat-capture flow.
-[*]Integer game rules are edited with a proper slider instead of ±1 buttons or typing in chat.
-[*]Numerous other correctness and reliability fixes: main-thread-blocking I/O moved off the main thread (backups, the update checker, join-time release-note fetch), a bug where custom generators passed to /wm load were silently ignored, a double-teleport bug on /wm unload, and "success" messages that could fire before the underlying async work actually finished.
+[*]Numerous correctness and reliability fixes: main-thread-blocking I/O moved off the main thread, a bug where custom generators passed to /wm load were silently ignored, a double-teleport bug on /wm unload, and "success" messages that could fire before the underlying async work actually finished.
 [/LIST]
 
 [HR][/HR]

@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.configs.WorldsConfig;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import fr.mathildeuh.worldmanager.util.WorldNameValidator;
 import org.bukkit.Bukkit;
@@ -17,6 +18,10 @@ public class Load {
     }
 
     public void execute(String worldName, String dimension, String generator) {
+        if (worldName == null || worldName.isBlank()) {
+            sendUsageWithUnloadedWorlds();
+            return;
+        }
         if (!WorldNameValidator.isValid(worldName)) {
             WorldManager.langConfig.sendError(sender, "general.invalid_world_name", worldName);
             return;
@@ -47,6 +52,7 @@ public class Load {
         SchedulerUtil.runGlobal(() -> {
             World loadedWorld = Bukkit.createWorld(worldCreator);
             if (loadedWorld != null) {
+                WorldsConfig.applyFlags(loadedWorld);
                 WorldManager.langConfig.sendSuccess(sender, "load.success", worldName);
                 WorldManager.addWorld(sender, worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);
             } else {
@@ -62,6 +68,19 @@ public class Load {
             if (env != Environment.CUSTOM) {
                 WorldManager.langConfig.sendWaiting(sender, "load.dimension_list", env.toString().toLowerCase());
             }
+        }
+    }
+
+    /** Missing world name: point at the usage, and list what's actually loadable right now. */
+    private void sendUsageWithUnloadedWorlds() {
+        WorldManager.langConfig.sendError(sender, "load.usage");
+        java.util.List<String> unloaded = fr.mathildeuh.worldmanager.util.WorldFolders.listUnloadedWorldFolders();
+        if (unloaded.isEmpty()) {
+            return;
+        }
+        WorldManager.langConfig.sendWaiting(sender, "load.unloaded_header");
+        for (String name : unloaded) {
+            WorldManager.langConfig.sendWaiting(sender, "load.unloaded_item", name);
         }
     }
 

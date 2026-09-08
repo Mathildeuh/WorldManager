@@ -52,17 +52,21 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 }
                 break;
             case "backup":
-                if (args.length > 1 && hasPermission(sender, "worldmanager.backup")) {
+                if (!hasPermission(sender, "worldmanager.backup")) {
+                    WorldManager.langConfig.sendError(sender, "permission.backup");
+                } else if (args.length > 1) {
                     new Backup(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.backup");
+                    WorldManager.langConfig.sendError(sender, "backup.usage");
                 }
                 break;
             case "restore":
-                if (args.length > 1 && hasPermission(sender, "worldmanager.restore")) {
+                if (!hasPermission(sender, "worldmanager.restore")) {
+                    WorldManager.langConfig.sendError(sender, "permission.restore");
+                } else if (args.length > 1) {
                     new Restore(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.restore");
+                    WorldManager.langConfig.sendError(sender, "restore.usage");
                 }
                 break;
             case "c":
@@ -79,10 +83,12 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 break;
             case "del":
             case "delete":
-                if (args.length > 1 && hasPermission(sender, "worldmanager.delete")) {
+                if (!hasPermission(sender, "worldmanager.delete")) {
+                    WorldManager.langConfig.sendError(sender, "permission.delete");
+                } else if (args.length > 1) {
                     new Delete(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.delete");
+                    WorldManager.langConfig.sendError(sender, "delete.usage");
                 }
                 break;
             case "l":
@@ -99,10 +105,12 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 break;
             case "u":
             case "unload":
-                if (args.length > 1 && hasPermission(sender, "worldmanager.unload")) {
+                if (!hasPermission(sender, "worldmanager.unload")) {
+                    WorldManager.langConfig.sendError(sender, "permission.unload");
+                } else if (args.length > 1) {
                     new Unload(sender).execute(args[1]);
                 } else {
-                    WorldManager.langConfig.sendError(sender, "permission.unload");
+                    WorldManager.langConfig.sendError(sender, "unload.usage");
                 }
                 break;
             case "tp":
@@ -120,8 +128,25 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     WorldManager.langConfig.sendError(sender, "permission.no_permission");
                 }
                 break;
+            case "sign":
+                if (hasPermission(sender, "worldmanager.sign.create")) {
+                    new SignPortalCommand(sender).execute(args);
+                } else {
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission");
+                }
+                break;
+            case "portal":
+                if (hasPermission(sender, "worldmanager.portal")) {
+                    new PortalCommand(sender).execute(args);
+                } else {
+                    WorldManager.langConfig.sendError(sender, "permission.no_permission");
+                }
+                break;
             case "help":
+                new MessageManager(sender).sendHelp();
+                break;
             default:
+                WorldManager.langConfig.sendError(sender, "general.unknown_command", subCommand);
                 new MessageManager(sender).sendHelp();
                 break;
         }
@@ -129,7 +154,10 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean hasPermission(CommandSender sender, String permission) {
-        return sender.hasPermission(permission) || sender.isOp();
+        // Bukkit already grants every permission declared "default: op" in plugin.yml to
+        // operators, and respects explicit negations set by a permissions plugin - so this must
+        // not also fall back to sender.isOp(), or an explicit negation could never take effect.
+        return sender.hasPermission(permission);
     }
 
     @Nullable
@@ -137,7 +165,7 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            String[] commands = {"create", "delete", "list", "load", "teleport", "unload", "pregen", "gui", "open", "help", "restore", "backup"};
+            String[] commands = {"create", "delete", "list", "load", "teleport", "unload", "pregen", "gui", "open", "help", "restore", "backup", "sign", "portal"};
             Arrays.sort(commands);
             String partialName = args[0].toLowerCase();
 
@@ -172,6 +200,12 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     completions.add("pause");
                     completions.add("resume");
                     break;
+                case "sign":
+                    completions.add("list");
+                    break;
+                case "portal":
+                    completions.addAll(List.of("pos1", "pos2", "create", "remove", "destination", "permission", "price", "launch", "list"));
+                    break;
                 default:
                     break;
             }
@@ -185,7 +219,12 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                     break;
+                case "create":
+                case "c":
+                    completions.addAll(List.of("normal", "flat", "amplified", "large_biomes", "the_end", "the_nether"));
+                    break;
                 case "teleport":
+                case "tp":
                     String partialName = args[2].toLowerCase();
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         if (player.getName().toLowerCase().startsWith(partialName)) {
@@ -198,16 +237,24 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                         completions.add(world.getName());
                     }
                     break;
+                case "portal":
+                    if (List.of("remove", "destination", "permission", "price", "launch").contains(args[1].toLowerCase())) {
+                        for (fr.mathildeuh.worldmanager.configs.CustomPortal portal : fr.mathildeuh.worldmanager.configs.CustomPortalsManager.all()) {
+                            completions.add(portal.name);
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
-        } else if (args.length == 4 && args[0].equalsIgnoreCase("pregen")) {
-            String partialName = args[2].toLowerCase();
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player.getName().toLowerCase().startsWith(partialName)) {
-                    completions.add(player.getName());
-                }
+        } else if (args.length == 4 && args[0].equalsIgnoreCase("portal") && "destination".equalsIgnoreCase(args[1])) {
+            for (World world : Bukkit.getWorlds()) {
+                completions.add(world.getName());
             }
+        } else if (args.length >= 4 && args[0].equalsIgnoreCase("pregen") && "start".equalsIgnoreCase(args[1])) {
+            // handleStart() reads center:x,z / radius:n tokens from here onward, in any order.
+            completions.add("center:");
+            completions.add("radius:");
         }
 
         return completions;

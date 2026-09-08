@@ -5,9 +5,9 @@ plugins {
 
 
 group = 'fr.Mathildeuh'
-version = '3.0.1'
+version = '4.0.0'
 
-def mcVersion = '1.21.7-R0.1-SNAPSHOT'
+def mcVersion = '1.20.1-R0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -28,6 +28,10 @@ repositories {
     }
     maven {
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
+    maven {
+        name = "jitpack-vault"
+        url = "https://jitpack.io"
     }
 }
 
@@ -51,6 +55,9 @@ dependencies {
     }
 
     compileOnly 'me.clip:placeholderapi:2.11.6'
+    // Soft dependency: only used to price custom portals (util/EconomyHook) - the plugin
+    // runs fully without it, every portal is simply free.
+    compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
 
     // JetBrains annotations for nullability hints (compileOnly)
     compileOnly 'org.jetbrains:annotations:24.0.1'
@@ -90,7 +97,7 @@ shadowJar {
     relocate 'org.bstats', 'fr.mathildeuh.bstats'
 
     doLast {
-        def pluginDir = file("C:\\Users\\Mathilde\\IdeaProjects\\WorldManager\\server\\plugins")
+        def pluginDir = layout.projectDirectory.dir("server/plugins").asFile
         if (!pluginDir.exists()) {
             pluginDir.mkdirs()
         }

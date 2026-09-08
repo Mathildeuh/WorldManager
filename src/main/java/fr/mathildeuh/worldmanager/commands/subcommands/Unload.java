@@ -2,6 +2,7 @@ package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
+import fr.mathildeuh.worldmanager.util.WorldOperationLock;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -23,6 +24,11 @@ public class Unload {
         World world = Bukkit.getWorld(worldName);
         if (world == null) {
             WorldManager.langConfig.sendError(sender, "unload.world_not_loaded", worldName);
+            return;
+        }
+
+        if (!WorldOperationLock.tryLock(worldName)) {
+            WorldManager.langConfig.sendError(sender, "general.operation_in_progress", worldName);
             return;
         }
 
@@ -49,6 +55,8 @@ public class Unload {
             } catch (Exception e) {
                 e.printStackTrace();
                 WorldManager.langConfig.sendError(sender, "unload.failed", worldName);
+            } finally {
+                WorldOperationLock.unlock(worldName);
             }
         }));
     }

@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.util;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
@@ -18,6 +19,11 @@ public final class SchedulerUtil {
 
     public static void runGlobalDelayed(Runnable runnable, long delayTicks) {
         Bukkit.getGlobalRegionScheduler().runDelayed(WorldManager.getInstance(), task -> runnable.run(), delayTicks);
+    }
+
+    /** Repeating main-thread task (e.g. an animation heartbeat). Cancel via the returned handle. */
+    public static ScheduledTask runGlobalTimer(Runnable runnable, long delayTicks, long periodTicks) {
+        return Bukkit.getGlobalRegionScheduler().runAtFixedRate(WorldManager.getInstance(), task -> runnable.run(), delayTicks, periodTicks);
     }
 
     public static void runAtRegion(World world, int chunkX, int chunkZ, Runnable runnable) {

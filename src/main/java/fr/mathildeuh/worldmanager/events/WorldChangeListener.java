@@ -2,23 +2,66 @@ package fr.mathildeuh.worldmanager.events;
 
 import fr.mathildeuh.worldmanager.configs.LinkedWorldsManager;
 import fr.mathildeuh.worldmanager.configs.PlayerInventoryManager;
+import fr.mathildeuh.worldmanager.configs.ProfileType;
+import fr.mathildeuh.worldmanager.configs.SavedLocation;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+
+import java.util.Set;
 
 /**
- * Handles inventory management when players change worlds.
- * - If worlds are in the same group: inventory is preserved
- * - If worlds are in different groups: inventory is saved/restored per group
+ * Handles per-group player profiles (see {@link ProfileType}) as players travel between worlds:
+ * - Same group (or same world): nothing is touched.
+ * - Leaving a group: every aspect that group shares is saved; if it also shares "location", the
+ *   player's exact pre-teleport position is captured here (in {@link #onPlayerTeleport}, since by
+ *   the time {@link PlayerChangedWorldEvent} fires that position is already gone).
+ * - Entering a group: every aspect it shares is restored (or reset to a default, first time in
+ *   that group); if "location" is shared and a last position is on record, the player is
+ *   teleported there right after.
+ * - Entering an ungrouped world from a group: whatever that group shared is reset to default
+ *   (this is load-bearing - a bug here in 2.2.0-2.2.1 wiped inventories on every world change
+ *   between two ungrouped worlds, regardless of whether the feature was even enabled; see
+ *   AUDIT.md). Two ungrouped worlds are never touched at all.
  */
 public class WorldChangeListener implements Listener {
 
     @EventHandler
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
+        if (!isFeatureEnabled()) {
+            return;
+        }
+        Location from = event.getFrom();
+        Location to = event.getTo();
+        if (from == null || to == null || from.getWorld() == null || to.getWorld() == null
+                || from.getWorld().equals(to.getWorld())) {
+            return;
+        }
+
+        String fromWorld = from.getWorld().getName();
+        String toWorld = to.getWorld().getName();
+        if (LinkedWorldsManager.areWorldsLinked(fromWorld, toWorld)) {
+            return;
+        }
+
+        String fromGroup = LinkedWorldsManager.getWorldGroup(fromWorld);
+        if (fromGroup == null) {
+            return;
+        }
+
+        Set<ProfileType> shares = LinkedWorldsManager.getShares(fromGroup);
+        if (shares.contains(ProfileType.LOCATION)) {
+            PlayerInventoryManager.saveLastLocation(event.getPlayer(), fromGroup, from);
+        }
+    }
+
+    @EventHandler
     public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
-        // Feature disabled check
         if (!isFeatureEnabled()) {
             return;
         }
@@ -27,50 +70,63 @@ public class WorldChangeListener implements Listener {
         String fromWorld = event.getFrom().getName();
         String toWorld = player.getWorld().getName();
 
-        // Check if the worlds are in the same linked group
         if (LinkedWorldsManager.areWorldsLinked(fromWorld, toWorld)) {
-            // Worlds are linked, keep inventory as-is
             return;
         }
 
-        // Worlds are in different groups, need to swap inventories
         String fromGroup = LinkedWorldsManager.getWorldGroup(fromWorld);
         String toGroup = LinkedWorldsManager.getWorldGroup(toWorld);
 
         if (fromGroup == null && toGroup == null) {
-            // Neither world is part of a configured group: this feature doesn't manage
-            // this transition at all, so leave the inventory untouched (vanilla behavior).
             return;
         }
 
-        // Save current inventory for the group they're leaving
         if (fromGroup != null) {
-            PlayerInventoryManager.saveInventory(player, fromGroup);
+            Set<ProfileType> fromShares = LinkedWorldsManager.getShares(fromGroup);
+            if (!fromShares.isEmpty()) {
+                PlayerInventoryManager.saveProfile(player, fromGroup, fromShares);
+            }
         }
 
-        // Try to restore inventory for the group they're entering
         if (toGroup != null) {
-            boolean restored = PlayerInventoryManager.restoreInventory(player, toGroup);
+            Set<ProfileType> toShares = LinkedWorldsManager.getShares(toGroup);
+            if (toShares.isEmpty()) {
+                return;
+            }
+            boolean restored = PlayerInventoryManager.restoreProfile(player, toGroup, toShares);
             if (!restored) {
-                // First time in this group, clear inventory
-                clearPlayerInventory(player);
+                PlayerInventoryManager.resetProfile(player, toShares);
+            }
+
+            SavedLocation lastLocation = PlayerInventoryManager.getLastLocation(player, toGroup, toShares);
+            if (lastLocation != null) {
+                Location target = lastLocation.toLocation();
+                if (target != null) {
+                    player.teleportAsync(target);
+                }
             }
         } else {
-            // Entering a world not in any group, clear inventory
-            clearPlayerInventory(player);
+            // Leaving a group into a world that isn't part of any group: reset whatever that
+            // group was managing, exactly as before (see class doc for why this must never
+            // touch a player moving between two ungrouped worlds).
+            PlayerInventoryManager.resetProfile(player, LinkedWorldsManager.getShares(fromGroup));
         }
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        // Save current inventory before cleanup when player leaves
         Player player = event.getPlayer();
         String currentWorld = player.getWorld().getName();
         String currentGroup = LinkedWorldsManager.getWorldGroup(currentWorld);
 
-        // Save the player's current inventory if in a configured group
         if (currentGroup != null && isFeatureEnabled()) {
-            PlayerInventoryManager.saveInventory(player, currentGroup);
+            Set<ProfileType> shares = LinkedWorldsManager.getShares(currentGroup);
+            if (!shares.isEmpty()) {
+                PlayerInventoryManager.saveProfile(player, currentGroup, shares);
+            }
+            if (shares.contains(ProfileType.LOCATION)) {
+                PlayerInventoryManager.saveLastLocation(player, currentGroup, player.getLocation());
+            }
         }
 
         // Clean up memory when player leaves
@@ -89,22 +145,4 @@ public class WorldChangeListener implements Listener {
             return false;
         }
     }
-
-    /**
-     * Clear the player's entire inventory
-     */
-    private void clearPlayerInventory(Player player) {
-        player.getInventory().clear();
-        player.getInventory().setHelmet(null);
-        player.getInventory().setChestplate(null);
-        player.getInventory().setLeggings(null);
-        player.getInventory().setBoots(null);
-        player.getInventory().setItemInOffHand(null);
-
-        // Reset health and food
-        player.setHealth(player.getMaxHealth());
-        player.setFoodLevel(20);
-        player.setSaturation(20);
-    }
 }
-

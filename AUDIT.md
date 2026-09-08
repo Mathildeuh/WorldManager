@@ -1,3 +1,255 @@
+# WorldManager 4.0.0 — Audit
+
+This document covers the full review and rewrite performed for the 4.0.0 release: a ground-up
+audit of the entire codebase, a GUI rewrite (back to a chest inventory, this time built to run
+from Paper 1.20.1), every bug found and fixed, a new per-world-flags feature, and full parity with
+Multiverse's Inventories/NetherPortals/SignPortals/Portals addons (granular per-group player
+profiles, custom Nether portal scaling, sign portals, and custom portal regions). The 3.0.0 audit
+below this section is kept as-is for history.
+
+## Methodology
+
+Three parallel passes covered the whole codebase: the Dialog-based `dialogs/` package and
+`messages/`, every subcommand plus `commands/WorldManagerCommand`'s dispatch/tab-completion, and
+`configs/`/`database/`/`events/`/`plugin.yml`/the Gradle build files. Every finding was verified
+against the actual file before being called a bug, and every version-sensitive API decision (the
+text-input mechanism's actual runtime behavior, `ChunkGenerator`'s legacy generation methods,
+`GameRule.getByName`, `SignChangeEvent`'s deprecated line accessors) was checked against real
+Paper Javadoc for both the 1.20.1 floor and the 26.2 ceiling — not assumed from memory, and in one
+case (see "Text input" below) not trusted even after confirming it compiled.
+
+## Critical fix: linked-inventory history wiped on every disconnect
+
+`events/WorldChangeListener.onPlayerQuit` correctly saved the player's current group's inventory
+on quit, then called `PlayerInventoryManager.clearPlayerData(uuid)` — which, despite its name
+suggesting a memory-cache clear, also called `DatabaseManager.deleteAllPlayerInventories(uuid)`,
+deleting **every** linked-inventory row for that player from the database, across **every**
+group, not just the one just saved. On a server using `enable-linked-inventory` with more than
+one group, a player's inventory in any group other than the one they most recently occupied was
+permanently lost the moment they disconnected — directly contradicting the point of the feature
+(inventories that persist across sessions, not just across a single online session).
+
+**Fix**: `clearPlayerData` now only removes the in-memory cache entry
+(`configs/PlayerInventoryManager.java`); the database is never touched on quit.
+`DatabaseManager.deleteAllPlayerInventories` (now unreferenced) was removed. Inventory
+saves/loads were also moved off the main thread (`SchedulerUtil.runAsync`) while this code was
+already open, since a linked-worlds server calls `saveInventory` on every relevant world change.
+
+## Version / compatibility strategy
+
+- Compiled against `paper-api:1.20.1-R0.1-SNAPSHOT` — the plugin's new floor — rather than the
+  newest, for the same reason as 3.0.0: Paper's Bukkit-facing API is backward-additive, so
+  building against the floor is the only way to honestly advertise a "1.20.1 → 26.2" range with
+  one jar.
+- This is a **lower** floor than 3.0.0's 1.21.7, specifically to undo the compatibility loss that
+  release caused: the Dialog API used for the whole 3.0.0 GUI simply doesn't exist before Paper
+  1.21.7, so the plugin could not load at all on 1.20.x–1.21.6. Moving the GUI back to a chest
+  inventory removes that constraint entirely.
+- Verified end-to-end beyond just compiling: downloaded a real Paper 1.20.1 server build (build
+  196, the last one published for that version) and boot-tested the actual built jar against it
+  twice (once after the GUI rewrite + version floor change, once again after the per-world-flags
+  feature) — both times the server reached `Done` with the plugin fully enabled and zero
+  exceptions, and shut down cleanly afterward. See Verification below.
+- `EmptyWorldGenerator`'s use of the legacy `ChunkGenerator.generateChunkData`/`createChunkData`
+  methods was flagged as a version-compatibility risk during the commands audit (they're
+  deprecated). Checked against Paper's 26.2 Javadoc: still present, not removed, just deprecated
+  in favor of a newer split-up generation API — no change needed.
+
+## GUI rewrite: back to a chest inventory, redesigned
+
+The `dialogs/` package (9 files, built on `io.papermc.paper.dialog.Dialog`) is gone, replaced by
+`guis/` (`fr.mathildeuh.worldmanager.guis`) — a small custom chest-inventory GUI framework, no
+external dependency:
+
+- `WMGui` is the per-screen contract (`getInventory()` / `onClick` / `onClose`); `GuiManager`
+  tracks the one `WMGui` each player has open; a single `GuiListener` cancels all inventory
+  interaction while a `WMGui` is open and routes clicks on the GUI's own inventory to it — no
+  per-screen event registration, matching the "each screen owns its handling" spirit of the old
+  Dialog callbacks.
+- Every screen except one is stateless (a static `open(...)` that rebuilds the `Inventory` from
+  live state each time): `MainMenuGui`, `EditorListGui`, `LoaderGui`, `WorldOptionsGui`,
+  `WorldFlagsGui`, `GameRuleCategoryGui`, `GameRuleListGui`, `GameRuleEditGui`, `ConfirmGui`.
+  **`CreatorGui`** is the deliberate exception: a chest inventory has no native multi-field form,
+  so it holds its draft (name/type/seed/generator/empty) as instance state across the several
+  round trips needed to fill it in.
+- **Text input** (world name, seed, generator, an exact game-rule value) goes through `ChatInput`:
+  closes the menu, prompts in chat, and captures the player's next chat message (`cancel` aborts),
+  registering itself as a short-lived `Listener` per prompt and unregistering on confirm/cancel/
+  quit. **This took three attempts to get right, and none of them involved chat at first.** The
+  original design used a virtual anvil inventory (`AnvilInput`) reading typed text via
+  `AnvilInventory#getRenameText()` — deliberately the plain, pre-`AnvilView` methods, confirmed
+  present all the way through 26.2 via Paper's own Javadoc. That never reflected what the player
+  actually typed, so a second attempt read the value from `PrepareAnvilEvent#getResult()` instead;
+  when that also never fired, a third attempt read the clicked result item directly at click time.
+  All three failed for the same underlying reason, root-caused with an unconditional diagnostic
+  listener across two separate real in-game tests: `PrepareAnvilEvent` **never fires at all** for a
+  virtual, non-block-backed anvil inventory (`Bukkit.createInventory(null, InventoryType.ANVIL,
+  ...)`) on this server, even though the client-side rename text field itself visibly accepts
+  input and the API used to read it is valid, documented, and compiles cleanly. This is the
+  clearest example in this audit of compiling successfully proving nothing about runtime behavior
+  — the fix was to abandon anvils entirely and capture text via `AsyncChatEvent` instead, which
+  the project owner confirmed working in-game.
+- **Confirmations** use a generic reusable `ConfirmGui` (green/red concrete Yes/No) instead of a
+  bespoke screen per destructive action.
+- **Integer game rules** are edited with immediate-apply ±1/±10 buttons plus a "set exact value"
+  button that opens an `AnvilInput`, instead of the old slider-then-confirm flow — a small UX
+  improvement (immediate feedback) that also happens to be simpler to build on a chest inventory.
+- **Visual design**: every screen fills unused slots with a light-gray glass-pane border,
+  outcome-colored action items (green = create/confirm, red = cancel/destructive), and a
+  representative `Material` icon per world type/action (grass block for a normal world,
+  netherrack for Nether, end stone for The End, a compass for "set spawn", etc.) instead of the
+  old Dialog screens, which had no icon support at all (`ActionButton` has no item-icon slot in
+  that API).
+- Found and fixed while porting: `CreatorDialog`'s "empty world" creation path never called
+  `WorldNameValidator.isValid(name)` before building a `WorldCreator` directly — a path-traversal
+  gap that the regular (non-empty) creation path already guarded against via `Create.execute`.
+  `CreatorGui.submit()` now validates the name the same way on both paths.
+
+## Bugs found and fixed
+
+| # | File | Bug | Fix |
+|---|---|---|---|
+| 1 | `configs/PlayerInventoryManager` / `events/WorldChangeListener` | Player disconnect wiped *all* linked-inventory groups from the database, not just the current one (see Critical fix above) | `clearPlayerData` now only clears the memory cache |
+| 2 | `commands/WorldManagerCommand.hasPermission` | `sender.hasPermission(permission) \|\| sender.isOp()` meant an operator's explicit permission negation (set by a permissions plugin) could never take effect | Removed the `isOp()` fallback; `plugin.yml` now declares every `worldmanager.*` permission with `default: op`, which already grants operators access without the redundant/unsafe OR |
+| 3 | `commands/subcommands/pregenerator/Pregen` + `Delete`/`Unload`/`BackupConfig` | Pre-generation could keep writing chunks into a world folder that `delete`/`unload`/`backup`/`restore` was simultaneously acting on — no shared lock between them | New `util/WorldOperationLock` (a `tryLock`/`unlock` per-world-name mutex), acquired by all five operations before doing real work |
+| 4 | `commands/subcommands/pregenerator/ChunkGenerator.stop` | `generatedChunkCount / Math.max(elapsedTime, 1) * 1000.0` divided as integers before the `* 1000.0`, so the logged chunks/s was `0` whenever `elapsedTime > generatedChunkCount` (almost always) | Cast to `double` before dividing |
+| 5 | `commands/subcommands/pregenerator/Pregen`/`ChunkGenerator` | `radius:n` was actually a *total chunk count*, not a radius — `radius:64` generated an ~8×8 square, not a radius-64 one | `ChunkGenerator` now takes a real chunk radius and computes a `(2n+1)²` square from it |
+| 6 | `commands/WorldManagerCommand` | `backup`/`restore`/`delete`/`unload` with a missing world argument showed a *permission* error even when the sender had permission, because the args-length and permission checks were combined in one `&&` | Split into permission-check-first, then a proper `<cmd>.usage` message on missing args |
+| 7 | `commands/WorldManagerCommand#onTabComplete` | `pregen`'s 4th+ argument suggested online player names (leftover/wrong — `pregen` never takes a player argument); `create`'s 3rd argument (world type) had no completion at all, unlike `load` | Fixed to suggest `center:`/`radius:` tokens for pregen, and the actual accepted type list for `create` |
+| 8 | `commands/subcommands/Create.createWorld` | `catch (Exception ignored) {}` around the post-creation `world.save()` — a real save failure was silently swallowed while the command still reported success | Logged at `WARNING` |
+| 9 | `configs/BackupConfig.restoreWorld` | `World.Environment.valueOf(config.getString(...))` would throw an unclear `NullPointerException` if a backup zip existed but its `backups.yml` metadata entry didn't | Explicit null-check with a new `restore.missing_metadata` message before attempting to parse |
+| 10 | `build.gradle` | `shadowJar`'s `doLast` copied the built jar to a Windows path hardcoded to one developer's home directory — broken on any other machine/OS/CI | Now `layout.projectDirectory.dir("server/plugins")` |
+| 11 | `util/UpdateChecker.getVersion` | Used the deprecated `new URL(...).openConnection()` | `URI.create(...).toURL().openConnection()` |
+| 12 | `WorldManager.loadLangFile` | `defaultLangs` fallback list omitted `"pl"` despite `lang/pl.yml` existing and being a documented supported locale | Added |
+| 13 | `commands/subcommands/Create` (empty-world path, via `guis/CreatorGui`) | Missing `WorldNameValidator` check on the empty-world creation path (see GUI rewrite section above) | Added |
+| 14 | Database schema (`SQLiteConnection`/`MySQLConnection`/`DatabaseManager`) | A player's held hotbar slot wasn't persisted, silently resetting to slot 0 after a server restart | New `held_item_slot` column, with a defensive `ALTER TABLE ... ADD COLUMN` migration for existing databases |
+| 15 | `guis/AnvilInput` (removed) | `PrepareAnvilEvent` never fires for a virtual, non-block-backed anvil inventory on this server, despite using valid, documented, compiling API (see "Text input" above) | Replaced entirely with `ChatInput` (chat-message-based text capture), confirmed working in-game |
+| 16 | `lang/*.yml` (`gui.confirm.yes`/`gui.confirm.no`) | Both keys were written as unquoted YAML mapping keys (`yes:`/`no:`); YAML 1.1's implicit-typing resolver coerces unquoted `yes`/`no`/`true`/`false`/`on`/`off` to booleans even as a *key*, so the real parsed path became `gui.confirm.true`/`gui.confirm.false` — silently different from what `ConfirmGui.java` actually looks up. Caught via a live "Missing GUI message key" warning, not by the lang-parity script, which uses the same parser and has the identical blind spot across all 6 languages | Quoted (`"yes":`/`"no":`) in all 6 `lang/*.yml` files; the on-disk upgrade-merge mechanism (`WorldManager.mergeMissingLangKeys`) patches existing installs automatically on next restart |
+
+## New feature: per-world flags
+
+`configs/WorldsConfig` gained `getFlag`/`setFlag`/`applyFlags`, storing named boolean flags per
+world in `worlds.yml` (`worlds.<name>.flags.<flag>`) in the spirit of Multiverse-Core's per-world
+properties: `pvp` (`World#setPVP`), `mobSpawning`/`animalSpawning` (`World#setSpawnFlags`), and
+`weatherLocked` (forces clear weather and cancels any `WeatherChangeEvent` trying to start a
+storm, via the new `events/WorldFlagsListener`). A custom per-world spawn point
+(`getSpawn`/`setSpawn`) is also stored there and consumed by `Teleport`, falling back to the
+world's vanilla spawn when unset. All of it is reachable from a new `WorldFlagsGui` screen off
+each world's options menu. Flags are re-applied any time a world transitions from unloaded to
+loaded (server startup recreation and manual `/wm load`), matching how game rules are already
+handled.
+
+Deliberately *not* added as a separate flag: a "time lock." `doDaylightCycle` is already an
+editable game rule via the existing Game Rules screens, and a second, parallel way to achieve the
+same effect would just be a confusing duplicate.
+
+## Multiverse-addon parity: granular profiles, portal scaling, sign portals, custom portal regions
+
+Four more features, closing the remaining gaps against the Multiverse addon ecosystem this plugin
+folds into one jar. Each was compiled and boot-tested independently before moving to the next;
+none required a database schema migration or a change to the 1.20.1 API floor.
+
+### Granular per-group player profiles (Multiverse-Inventories parity)
+
+`configs/ProfileType` is a new enum (`INVENTORY`/`HEALTH`/`HUNGER`/`EXPERIENCE`/`BED_SPAWN`/
+`LOCATION`) replacing the previous all-or-nothing inventory+health+hunger bundle.
+`LinkedWorldsManager.getShares(group)` resolves a group's configured `Set<ProfileType>`, reading
+either the legacy flat world-list shape (mapped to `DEFAULT_SHARES` =
+`{INVENTORY, HEALTH, HUNGER}`, byte-for-byte the old behavior) or a new `worlds:`+`share:` shape —
+detected via `FileConfiguration#isList`, so both shapes coexist across different groups in the
+same file. `configs/PlayerInventoryManager.ProfileData` carries a `captured: EnumSet<ProfileType>`
+recording which aspects a given snapshot actually holds, so `restoreProfile`/`applyTo` never
+apply a stale or absent aspect. `location` sharing needed a new capture point:
+`PlayerChangedWorldEvent` fires *after* a cross-world move completes and only exposes the
+destination `World`, not the player's prior coordinates, so the plugin also listens for
+`PlayerTeleportEvent` (which fires before the move, with the real `getFrom()` location) purely to
+snapshot "last position in this group" the instant a shared-location group is left.
+`database/DatabaseManager` serializes the new fields (`level`/`exp`/`bedSpawn.*`/
+`lastLocation.*`) plus the `captured` list into the existing YAML blob column — the SQL schema
+(`health`/`food_level`/`saturation`/`held_item_slot` columns) is untouched, avoiding a migration
+entirely.
+
+### Custom Nether portal scaling (Multiverse-NetherPortals parity)
+
+`configs/LinkedPortalsManager` gained an optional `nether-scale` per link (default `8.0`, vanilla's
+own ratio - untouched configs see zero behavior change). `events/PortalLinkListener` only
+recomputes Nether X/Z coordinates by hand (scaling the origin position and doing a
+`getHighestBlockYAt` safe-Y lookup) when a link's scale differs from the vanilla default;
+otherwise it keeps trusting vanilla's own already-correct `PlayerPortalEvent#getTo()`, exactly as
+before. No equivalent was added for the End: confirmed vanilla never derives End coordinates from
+the player's position in the first place (entry always lands on the fixed exit platform, return
+always goes to the player's last overworld position), so there is nothing there to scale.
+
+### Sign portals (Multiverse-SignPortals parity)
+
+New `configs/SignPortalsManager` (persistence, `signportals.yml`) and
+`events/SignPortalListener` (`SignChangeEvent` to register, `PlayerInteractEvent` right-click to
+use, `BlockBreakEvent` to clean up). Deliberately kept to the deprecated `String`-based
+`SignChangeEvent#getLine`/`Sign#setLine` accessors rather than the newer per-side `Component` API
+— confirmed via Context7 against Paper's 26.2 javadoc that they're deprecated but still fully
+functional at the ceiling, and they're the only sign-text API available at all on the 1.20.1
+floor, so this is the same "compile against the floor" strategy already used elsewhere in this
+plugin, not an oversight.
+
+### Custom portal regions (Multiverse-Portals parity)
+
+New `configs/CustomPortal`/`CustomPortalsManager` (`portals.yml`) and
+`events/CustomPortalListener`. Selection is a WorldEdit-wand-style two-point flow
+(`/wm portal pos1`/`pos2`, held only in memory, never persisted) consumed by
+`/wm portal create <name>`; a portal's destination/permission/price/launch vector are each set
+independently afterward. Containment checks run on `PlayerMoveEvent` (short-circuited unless the
+mover's block position actually changed, since a server fires several same-block move events per
+tick from head rotation alone) and, for vehicles, `VehicleMoveEvent` — a player riding a vehicle
+is handled only through the vehicle path, never double-triggering through both. A short per-entity
+cooldown after any trigger prevents an overlapping or destination-side portal from immediately
+firing again. Pricing is backed by `util/EconomyHook`, a soft dependency on Vault
+(`compileOnly com.github.MilkBowl:VaultAPI` via JitPack, `softdepend` in `plugin.yml`) — modeled
+directly on the existing PlaceholderAPI optional-hook pattern in `WorldManager.java`; every portal
+is simply free whenever Vault or a registered economy plugin isn't present, so this never becomes
+a hard dependency.
+
+### Guided command UX
+
+`/wm sign`/`/wm pregen`/`/wm portal` invoked bare or with an unrecognized action now show a
+clickable step-by-step guide (a `<lang-key>.guide` string list, mirroring the top-level `help:`
+list's existing format) instead of a single terse usage line. `/wm load`/`/wm tp` with a missing
+required argument list loaded/loadable worlds as clickable suggestions instead of just erroring.
+`create`/`load` success messages suggest the natural next step (`/wm tp <world>`, `/wm gui`).
+Verified empirically (not assumed) that MiniMessage renders an unrecognized tag name as literal
+text rather than erroring, using the exact pinned `adventure-text-minimessage:4.17.0` dependency
+in an isolated standalone test, before relying on that behavior for placeholder text like
+`<world>`/`<amount>` inside these new guide strings.
+
+## Verification performed
+
+- `./gradlew compileJava` / `./gradlew shadowJar` clean at every stage (after the critical-bug
+  fixes, again after the GUI rewrite + version floor change, again after per-world flags, and
+  again after each of the four Multiverse-parity features and the guided-command-UX pass).
+- `./gradlew -b alt.gradle compileJava` also clean; `alt.gradle`'s `paper-api` version and
+  dependency list were kept in sync with `build.gradle` throughout, including the later addition
+  of the optional Vault dependency.
+- All 6 lang YAML files, `plugin.yml`, and `config.yml` parsed successfully with a YAML parser.
+  Every `lang/*.yml` file's flattened key set was diffed against `en.yml`'s after every batch of
+  new keys — all six stayed identical throughout (204 keys in the final release).
+- Downloaded a real Paper 1.20.1 server (build 196) and boot-tested the actual built jar multiple
+  times across the session: plugin loads and enables with **zero exceptions**, SQLite schema
+  (including the `held_item_slot` migration) initializes cleanly, linked-worlds-inventory
+  correctly reports disabled by default, the server reaches `Done`, and it shuts down cleanly on
+  `stop`. The Multiverse-parity features were additionally boot/shutdown-tested against the 26.2
+  ceiling jar with a clean enable/disable cycle and zero exceptions or errors anywhere in either
+  log.
+- Unlike the GUI rewrite itself (verified only by headless boot-testing at the time this document
+  was first written), the in-game interactive flow **was** subsequently verified by the project
+  owner by hand: every menu screen was opened, a world was created through it, world flags were
+  toggled, and the `ChatInput` text-entry flow (world name / seed / generator) was confirmed
+  working end-to-end — after replacing the anvil-based approach that turned out not to work in
+  practice (see bug #15 above). The Multiverse-parity features and guided-command-UX pass were
+  verified via compilation, boot-testing, and isolated dependency-level checks (the MiniMessage
+  tag-rendering test above); manual in-game click-through of those specific features is still
+  recommended before considering them fully proven.
+
+---
+
 # WorldManager 3.0.0 — Audit
 
 This document covers the full review performed for the 3.0.0 release: the version/compatibility

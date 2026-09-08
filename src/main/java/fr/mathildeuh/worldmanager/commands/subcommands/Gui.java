@@ -1,7 +1,7 @@
 package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
-import fr.mathildeuh.worldmanager.dialogs.MainMenuDialog;
+import fr.mathildeuh.worldmanager.guis.MainMenuGui;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -17,6 +17,6 @@ public class Gui {
             WorldManager.langConfig.sendError(sender, "general.players_only");
             return;
         }
-        MainMenuDialog.open(player);
+        MainMenuGui.open(player);
     }
 }

@@ -3,6 +3,7 @@ package fr.mathildeuh.worldmanager.commands.subcommands;
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import fr.mathildeuh.worldmanager.util.WorldNameValidator;
+import fr.mathildeuh.worldmanager.util.WorldOperationLock;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -41,6 +42,11 @@ public class Delete {
             return;
         }
 
+        if (!WorldOperationLock.tryLock(name)) {
+            WorldManager.langConfig.sendError(sender, "general.operation_in_progress", name);
+            return;
+        }
+
         WorldManager.langConfig.sendWaiting(sender, "delete.warning", name);
 
         File worldFolder = targetWorld.getWorldFolder();
@@ -57,6 +63,7 @@ public class Delete {
                 SchedulerUtil.runGlobal(() -> {
                     boolean unloadSuccess = WorldManager.getInstance().getServer().unloadWorld(targetWorld, false);
                     if (!unloadSuccess) {
+                        WorldOperationLock.unlock(worldName);
                         WorldManager.langConfig.sendError(sender, "delete.failed", name);
                         return;
                     }
@@ -65,12 +72,16 @@ public class Delete {
                         try {
                             FileUtils.deleteDirectory(worldFolder);
                             SchedulerUtil.runGlobal(() -> {
+                                WorldOperationLock.unlock(worldName);
                                 WorldManager.langConfig.sendSuccess(sender, "delete.success");
                                 WorldManager.removeWorld(worldName);
                             });
                         } catch (IOException e) {
                             Bukkit.getLogger().warning("[WorldManager] Failed to delete world folder for " + worldName + ": " + e.getMessage());
-                            SchedulerUtil.runGlobal(() -> WorldManager.langConfig.sendError(sender, "delete.async_failed", worldName));
+                            SchedulerUtil.runGlobal(() -> {
+                                WorldOperationLock.unlock(worldName);
+                                WorldManager.langConfig.sendError(sender, "delete.async_failed", worldName);
+                            });
                         }
                     });
                 }));

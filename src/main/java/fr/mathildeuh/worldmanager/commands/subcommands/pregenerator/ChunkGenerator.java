@@ -3,6 +3,7 @@ package fr.mathildeuh.worldmanager.commands.subcommands.pregenerator;
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.commands.WorldManagerCommand;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
+import fr.mathildeuh.worldmanager.util.WorldOperationLock;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -15,7 +16,8 @@ import org.bukkit.entity.Player;
 public class ChunkGenerator {
 
     private final World world;
-    private final int totalChunks; // Total number of chunks to generate
+    private final int radius; // Chunk radius around the center: a (2*radius+1) side square
+    private final int totalChunks; // Total number of chunks the square covers
     private final Location center;
     private final BossBar bossBar;
     private final Player player;
@@ -25,12 +27,12 @@ public class ChunkGenerator {
     private long elapsedTime;
     private int generatedChunkCount = 0;
     private int currentX, currentZ;
-    private int gridSize;
 
-    public ChunkGenerator(World world, Player player, Integer totalChunks, Location center) {
+    public ChunkGenerator(World world, Player player, int radius, Location center) {
 
         this.world = world;
-        this.totalChunks = totalChunks;
+        this.radius = Math.max(radius, 0);
+        this.totalChunks = (2 * this.radius + 1) * (2 * this.radius + 1);
         this.center = center;
         this.player = player;
 
@@ -49,10 +51,8 @@ public class ChunkGenerator {
         int centerX = center.getBlockX() >> 4;
         int centerZ = center.getBlockZ() >> 4;
 
-        // Calculate the grid size needed to cover the totalChunks
-        gridSize = (int) Math.ceil(Math.sqrt(Math.max(totalChunks, 1)));
-        currentX = -gridSize / 2;
-        currentZ = -gridSize / 2;
+        currentX = -radius;
+        currentZ = -radius;
 
         WorldManagerCommand.activeGenerators.put(world.getName(), this);
         scheduleNextChunk(centerX, centerZ);
@@ -62,13 +62,14 @@ public class ChunkGenerator {
         generating = false;
         bossBar.removeAll();
         WorldManagerCommand.activeGenerators.remove(world.getName(), this);
+        WorldOperationLock.unlock(world.getName());
         WorldManager.langConfig.sendSuccess(player, "pregen.finished", generatedChunkCount);
         Bukkit.getLogger().info("[WorldManager] Chunk generation for " + world.getName() + " completed! "
                 + generatedChunkCount + "/" + totalChunks + " chunks generated.");
         if (generatedChunkCount > 0) {
             Bukkit.getLogger().info("[WorldManager] Elapsed time: " + elapsedTime + "ms, average "
                     + (elapsedTime / (double) generatedChunkCount) + "ms/chunk, "
-                    + (generatedChunkCount / Math.max(elapsedTime, 1) * 1000.0) + " chunks/s.");
+                    + ((generatedChunkCount / (double) Math.max(elapsedTime, 1)) * 1000.0) + " chunks/s.");
         }
     }
 
@@ -124,11 +125,11 @@ public class ChunkGenerator {
 
     private void advancePointers() {
         currentZ++;
-        if (currentZ > gridSize / 2) {
-            currentZ = -gridSize / 2;
+        if (currentZ > radius) {
+            currentZ = -radius;
             currentX++;
-            if (currentX > gridSize / 2) {
-                currentX = -gridSize / 2;
+            if (currentX > radius) {
+                currentX = -radius;
             }
         }
     }

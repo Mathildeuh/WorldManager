@@ -3,6 +3,7 @@ package fr.mathildeuh.worldmanager.configs;
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import fr.mathildeuh.worldmanager.util.WorldNameValidator;
+import fr.mathildeuh.worldmanager.util.WorldOperationLock;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -44,6 +45,11 @@ public class BackupConfig {
             return;
         }
 
+        if (!WorldOperationLock.tryLock(name)) {
+            WorldManager.langConfig.sendError(player, "general.operation_in_progress", name);
+            return;
+        }
+
         Bukkit.getLogger().info("Backing up world " + name);
         WorldManager.langConfig.sendWaiting(player, "backup.started");
 
@@ -75,10 +81,16 @@ public class BackupConfig {
                 config.set("backups." + name + ".generator", generator);
                 config.save(configFile);
 
-                SchedulerUtil.runGlobal(() -> WorldManager.langConfig.sendSuccess(player, "backup.finished"));
+                SchedulerUtil.runGlobal(() -> {
+                    WorldOperationLock.unlock(name);
+                    WorldManager.langConfig.sendSuccess(player, "backup.finished");
+                });
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[WorldManager] Backup failed for " + name + ": " + e.getMessage());
-                SchedulerUtil.runGlobal(() -> WorldManager.langConfig.sendError(player, "backup.failed"));
+                SchedulerUtil.runGlobal(() -> {
+                    WorldOperationLock.unlock(name);
+                    WorldManager.langConfig.sendError(player, "backup.failed");
+                });
             }
         });
     }
@@ -96,6 +108,11 @@ public class BackupConfig {
 
         if (!backupFile.exists()) {
             WorldManager.langConfig.sendError(player, "restore.world_not_found");
+            return;
+        }
+
+        if (!WorldOperationLock.tryLock(name)) {
+            WorldManager.langConfig.sendError(player, "general.operation_in_progress", name);
             return;
         }
 
@@ -125,8 +142,19 @@ public class BackupConfig {
                     }
                     ZipUtil.unpack(backupFile, worldFolder);
 
-                    World.Environment env = World.Environment.valueOf(config.getString("backups." + name + ".env"));
-                    WorldType type = WorldType.valueOf(config.getString("backups." + name + ".type"));
+                    String envName = config.getString("backups." + name + ".env");
+                    String typeName = config.getString("backups." + name + ".type");
+                    if (envName == null || typeName == null) {
+                        Bukkit.getLogger().warning("[WorldManager] Restore failed for " + name + ": backup metadata missing from backups.yml");
+                        SchedulerUtil.runGlobal(() -> {
+                            WorldOperationLock.unlock(name);
+                            WorldManager.langConfig.sendError(player, "restore.missing_metadata", name);
+                        });
+                        return;
+                    }
+
+                    World.Environment env = World.Environment.valueOf(envName);
+                    WorldType type = WorldType.valueOf(typeName);
                     String generator = config.getString("backups." + name + ".generator");
 
                     SchedulerUtil.runGlobal(() -> {
@@ -154,11 +182,16 @@ public class BackupConfig {
                         } catch (Exception e) {
                             Bukkit.getLogger().warning("[WorldManager] Restore failed for " + name + ": " + e.getMessage());
                             WorldManager.langConfig.sendError(player, "restore.failed", name);
+                        } finally {
+                            WorldOperationLock.unlock(name);
                         }
                     });
                 } catch (Exception e) {
                     Bukkit.getLogger().warning("[WorldManager] Restore failed for " + name + ": " + e.getMessage());
-                    SchedulerUtil.runGlobal(() -> WorldManager.langConfig.sendError(player, "restore.failed", name));
+                    SchedulerUtil.runGlobal(() -> {
+                        WorldOperationLock.unlock(name);
+                        WorldManager.langConfig.sendError(player, "restore.failed", name);
+                    });
                 }
             });
         }));

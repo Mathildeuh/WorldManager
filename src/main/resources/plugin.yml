@@ -1,10 +1,10 @@
 name: WorldManager
 version: '${version}'
 main: fr.mathildeuh.worldmanager.WorldManager
-api-version: '1.21'
+api-version: '1.20'
 folia-supported: true
 author: Mathildeuh
-softdepend: [PlaceholderAPI]
+softdepend: [PlaceholderAPI, Vault]
 commands:
   worldmanager:
     permission: "worldmanager.command"
@@ -12,3 +12,46 @@ commands:
     description: Main command of WorldManager
     usage: /<command> <subcommand> [arguments]
     permission-message: "<red>Vous n'avez pas la permission requise : <gold>worldmanager.command</gold>"
+permissions:
+  worldmanager.command:
+    description: Allows running the base /worldmanager command
+    default: op
+  worldmanager.gui:
+    description: Allows opening the /wm menu
+    default: op
+  worldmanager.list:
+    description: Allows listing loaded worlds
+    default: op
+  worldmanager.create:
+    description: Allows creating new worlds
+    default: op
+  worldmanager.delete:
+    description: Allows permanently deleting a world
+    default: op
+  worldmanager.load:
+    description: Allows loading an existing world folder
+    default: op
+  worldmanager.unload:
+    description: Allows unloading a world
+    default: op
+  worldmanager.teleport:
+    description: Allows teleporting between worlds
+    default: op
+  worldmanager.backup:
+    description: Allows backing up a world
+    default: op
+  worldmanager.restore:
+    description: Allows restoring a world from backup
+    default: op
+  worldmanager.pregen:
+    description: Allows starting/stopping world pre-generation
+    default: op
+  worldmanager.sign.create:
+    description: Allows creating and listing sign portals
+    default: op
+  worldmanager.sign.use:
+    description: Allows using existing sign portals
+    default: true
+  worldmanager.portal:
+    description: Allows managing custom portal regions (pos1/pos2/create/remove/destination/permission/price/launch/list)
+    default: op

@@ -4,6 +4,7 @@ import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
@@ -69,13 +70,18 @@ public class WorldsConfig {
         }
 
         if ("Empty".equals(generator)) {
-            // Marker used by the empty-world creation flow (CreatorDialog) - not an actual
+            // Marker used by the empty-world creation flow (CreatorGui) - not an actual
             // plugin-provided generator name, so it can't go through WorldCreator#generator(String).
             worldCreator.generator(new fr.mathildeuh.worldmanager.worlds.EmptyWorldGenerator());
         } else if (generator != null) {
             worldCreator.generator(generator);
         }
-        SchedulerUtil.runGlobal(worldCreator::createWorld);
+        SchedulerUtil.runGlobal(() -> {
+            World world = worldCreator.createWorld();
+            if (world != null) {
+                applyFlags(world);
+            }
+        });
     }
 
     // Méthode pour ajouter un monde au fichier de configuration
@@ -103,6 +109,70 @@ public class WorldsConfig {
     public static String getCreator(String name) {
         String creator = WorldManager.worldsConfig.getString("worlds." + name + ".createdBy");
         return creator == null ? "Unknown" : creator;
+    }
+
+    /** Display alias for a world, falling back to its folder name when none is set. */
+    public static String getAlias(String name) {
+        String alias = WorldManager.worldsConfig.getString("worlds." + name + ".alias");
+        return (alias == null || alias.isBlank()) ? name : alias;
+    }
+
+    public static void setAlias(String name, String alias) {
+        WorldManager.worldsConfig.set("worlds." + name + ".alias", alias == null || alias.isBlank() ? null : alias);
+        save();
+    }
+
+    /** Stored custom spawn point for a world, or {@code null} if none has been set. */
+    public static Location getSpawn(World world) {
+        String path = "worlds." + world.getName() + ".spawn";
+        if (!WorldManager.worldsConfig.contains(path)) {
+            return null;
+        }
+        double x = WorldManager.worldsConfig.getDouble(path + ".x");
+        double y = WorldManager.worldsConfig.getDouble(path + ".y");
+        double z = WorldManager.worldsConfig.getDouble(path + ".z");
+        float yaw = (float) WorldManager.worldsConfig.getDouble(path + ".yaw");
+        float pitch = (float) WorldManager.worldsConfig.getDouble(path + ".pitch");
+        return new Location(world, x, y, z, yaw, pitch);
+    }
+
+    public static void setSpawn(Location location) {
+        String path = "worlds." + location.getWorld().getName() + ".spawn";
+        WorldManager.worldsConfig.set(path + ".x", location.getX());
+        WorldManager.worldsConfig.set(path + ".y", location.getY());
+        WorldManager.worldsConfig.set(path + ".z", location.getZ());
+        WorldManager.worldsConfig.set(path + ".yaw", (double) location.getYaw());
+        WorldManager.worldsConfig.set(path + ".pitch", (double) location.getPitch());
+        save();
+    }
+
+    /** Named world flags in the spirit of Multiverse-Core's per-world flags. */
+    public static boolean getFlag(String worldName, String flag, boolean defaultValue) {
+        return WorldManager.worldsConfig.getBoolean("worlds." + worldName + ".flags." + flag, defaultValue);
+    }
+
+    public static void setFlag(String worldName, String flag, boolean value) {
+        WorldManager.worldsConfig.set("worlds." + worldName + ".flags." + flag, value);
+        save();
+    }
+
+    /** Pushes stored PvP/mob-spawning/animal-spawning/weather-lock flags onto a just-(re)loaded world. */
+    public static void applyFlags(World world) {
+        String name = world.getName();
+        world.setPVP(getFlag(name, "pvp", true));
+        world.setSpawnFlags(getFlag(name, "mobSpawning", true), getFlag(name, "animalSpawning", true));
+        if (getFlag(name, "weatherLocked", false)) {
+            world.setStorm(false);
+            world.setThundering(false);
+        }
+    }
+
+    private static void save() {
+        try {
+            WorldManager.worldsConfig.save(WorldManager.configFile);
+        } catch (IOException e) {
+            Bukkit.getLogger().warning("[WorldManager] Failed to save worlds.yml: " + e.getMessage());
+        }
     }
 
     @SuppressWarnings("unchecked")

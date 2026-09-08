@@ -130,7 +130,8 @@ public class Create {
                 WorldManager.langConfig.sendSuccess(sender, "create.success", name);
                 try {
                     world.save();
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning("[WorldManager] Initial save failed for newly created world " + name + ": " + e.getMessage());
                 }
                 WorldManager.addWorld(player, creator.name(), creator.type().name(), creator.environment(), generator);
             }
@@ -140,7 +141,7 @@ public class Create {
 
     public void execute(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
         if (name == null || name.isBlank()) {
-            WorldManager.langConfig.sendError(sender, "dialog.creator.name_required");
+            WorldManager.langConfig.sendError(sender, "create.name_required");
             return;
         }
         if (!fr.mathildeuh.worldmanager.util.WorldNameValidator.isValid(name)) {
