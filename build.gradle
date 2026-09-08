@@ -56,8 +56,14 @@ dependencies {
 
     compileOnly 'me.clip:placeholderapi:2.11.6'
     // Soft dependency: only used to price custom portals (util/EconomyHook) - the plugin
-    // runs fully without it, every portal is simply free.
-    compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
+    // runs fully without it, every portal is simply free. Only the net.milkbowl.vault.economy.*
+    // interfaces are actually used (util/EconomyHook); every org.bukkit.* class it touches comes
+    // from paper-api above, never from VaultAPI's own bundled transitive - so that transitive
+    // (a several-years-stale org.bukkit:bukkit 1.13.1 snapshot, dragging in an unpatched,
+    // CVE-2025-48924-affected commons-lang:commons-lang 2.6) is excluded entirely.
+    compileOnly('com.github.MilkBowl:VaultAPI:1.7') {
+        exclude group: 'org.bukkit', module: 'bukkit'
+    }
 
     // JetBrains annotations for nullability hints (compileOnly)
     compileOnly 'org.jetbrains:annotations:24.0.1'
