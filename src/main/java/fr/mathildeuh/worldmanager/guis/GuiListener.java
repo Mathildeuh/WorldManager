@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.guis;
 
 import org.bukkit.Bukkit;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,12 +36,15 @@ public final class GuiListener implements Listener {
 
         if (event.getClickedInventory().equals(gui.getInventory())) {
             GuiUtils.playClick(player);
-            try {
-                gui.onClick(event);
-            } catch (Exception e) {
-                Bukkit.getLogger().severe("[WorldManager] GUI click handler threw an exception: " + e);
-                e.printStackTrace();
-            }
+            // Inventory open/close operations are unsafe inside InventoryClickEvent itself.
+            SchedulerUtil.runEntity(player, () -> {
+                if (GuiManager.get(player.getUniqueId()) != gui) return;
+                try {
+                    gui.onClick(event);
+                } catch (Exception e) {
+                    Bukkit.getLogger().log(java.util.logging.Level.SEVERE, "[WorldManager] GUI click handler failed", e);
+                }
+            });
         }
     }
 

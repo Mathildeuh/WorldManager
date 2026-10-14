@@ -5,9 +5,9 @@ plugins {
 
 
 group = 'fr.Mathildeuh'
-version = '4.0.0'
+version = '4.1.0'
 
-def mcVersion = '1.20.1-R0.1-SNAPSHOT'
+def mcVersion = providers.gradleProperty('paperApiVersion').getOrElse('1.20.1-R0.1-SNAPSHOT')
 
 repositories {
     mavenCentral()
@@ -36,6 +36,11 @@ repositories {
 }
 
 dependencies {
+    testImplementation "io.papermc.paper:paper-api:${mcVersion}"
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     // Target PaperMC API
     compileOnly "io.papermc.paper:paper-api:${mcVersion}"
     implementation "org.bstats:bstats-bukkit:3.0.2"
@@ -69,7 +74,7 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:24.0.1'
 }
 
-def targetJavaVersion = 21
+def targetJavaVersion = providers.gradleProperty('targetJavaVersion').getOrElse('21').toInteger()
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -98,7 +103,16 @@ processResources {
 
 compileJava.options.encoding("UTF-8")
 
+test {
+    useJUnitPlatform()
+}
+
 shadowJar {
+    duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
+    filesMatching('META-INF/services/**') {
+        duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
+    }
+    mergeServiceFiles()
     archiveClassifier.set('')
     relocate 'org.bstats', 'fr.mathildeuh.bstats'
 
@@ -107,7 +121,7 @@ shadowJar {
         if (!pluginDir.exists()) {
             pluginDir.mkdirs()
         }
-        def jarFile = jar.archiveFile.get().asFile
+        def jarFile = archiveFile.get().asFile
         copy {
             from jarFile
             into pluginDir

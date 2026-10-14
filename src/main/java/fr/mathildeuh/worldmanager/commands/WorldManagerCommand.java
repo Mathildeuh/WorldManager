@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class WorldManagerCommand implements CommandExecutor, TabCompleter {
     /** One pre-generation run per world, keyed by world name, so multiple worlds can pre-generate concurrently. */
@@ -221,7 +222,9 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                     break;
                 case "create":
                 case "c":
-                    completions.addAll(List.of("normal", "flat", "amplified", "large_biomes", "the_end", "the_nether"));
+                    if (hasPermission(sender, "worldmanager.create")) {
+                        completions.addAll(List.of("normal", "flat", "amplified", "large_biomes", "the_end", "the_nether", "empty"));
+                    }
                     break;
                 case "teleport":
                 case "tp":
@@ -247,6 +250,9 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
                 default:
                     break;
             }
+        } else if ((args.length == 4 || args.length == 5)
+                && (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("c"))) {
+            if (hasPermission(sender, "worldmanager.create")) completions.add("empty");
         } else if (args.length == 4 && args[0].equalsIgnoreCase("portal") && "destination".equalsIgnoreCase(args[1])) {
             for (World world : Bukkit.getWorlds()) {
                 completions.add(world.getName());
@@ -257,6 +263,10 @@ public class WorldManagerCommand implements CommandExecutor, TabCompleter {
             completions.add("radius:");
         }
 
+        if (args.length > 0 && (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("c"))) {
+            String prefix = args[args.length - 1].toLowerCase(Locale.ROOT);
+            completions.removeIf(value -> !value.toLowerCase(Locale.ROOT).startsWith(prefix));
+        }
         return completions;
     }
 

@@ -40,12 +40,11 @@ public final class GuiAnimator {
 
     private static void tick() {
         frame++;
-        for (WMGui gui : GuiManager.openGuis()) {
-            animate(gui.getInventory());
-        }
+        int currentFrame = frame;
+        GuiManager.forEachOpen((player, gui) -> animate(gui.getInventory(), currentFrame));
     }
 
-    private static void animate(Inventory inventory) {
+    private static void animate(Inventory inventory, int frame) {
         Material accent = null;
         int size = inventory.getSize();
         for (int slot = 0; slot < size; slot++) {

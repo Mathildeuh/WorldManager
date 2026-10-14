@@ -2,6 +2,8 @@ package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
+import fr.mathildeuh.worldmanager.util.WorldLifecycle;
+import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.Location;
@@ -69,17 +71,13 @@ public class WorldsConfig {
             }
         }
 
-        if ("Empty".equals(generator)) {
-            // Marker used by the empty-world creation flow (CreatorGui) - not an actual
-            // plugin-provided generator name, so it can't go through WorldCreator#generator(String).
-            worldCreator.generator(new fr.mathildeuh.worldmanager.worlds.EmptyWorldGenerator());
-        } else if (generator != null) {
-            worldCreator.generator(generator);
-        }
         SchedulerUtil.runGlobal(() -> {
-            World world = worldCreator.createWorld();
-            if (world != null) {
-                applyFlags(world);
+            try {
+                WorldLifecycle.applyGenerator(worldCreator, generator);
+                World world = worldCreator.createWorld();
+                if (world != null) applyFlags(world);
+            } catch (Exception e) {
+                WorldManager.getInstance().getLogger().log(Level.WARNING, "Could not load configured world " + name, e);
             }
         });
     }

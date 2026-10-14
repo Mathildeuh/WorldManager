@@ -2,6 +2,7 @@ package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
+import fr.mathildeuh.worldmanager.util.WorldLifecycle;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -14,6 +15,7 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
+import java.util.logging.Level;
 
 
 public class Create {
@@ -24,18 +26,25 @@ public class Create {
     }
 
     public void run(String name, @Nullable String type, @Nullable String seed, @Nullable String generator) {
-        long seedValue;
+        // Allow /wm create <name> <type> empty without requiring a seed placeholder.
+        if ("empty".equalsIgnoreCase(seed) && (generator == null || generator.isEmpty())) {
+            seed = null;
+            generator = "Empty";
+        }
+        if ("empty".equalsIgnoreCase(generator)) generator = "Empty";
 
-        if (seed != null && !seed.isEmpty()) {
-            if (seed.matches("-?\\d+")) {
-                seedValue = Long.parseLong(seed);
-            } else {
-                WorldManager.langConfig.sendError(sender, "create.invalid_seed");
-                return;
-            }
-        } else {
-            // Générer une seed aléatoire si aucune n'est spécifiée
-            seedValue = new Random().nextLong();
+        long seedValue;
+        try {
+            seedValue = seed == null || seed.isEmpty() ? new Random().nextLong() : Long.parseLong(seed);
+        } catch (NumberFormatException e) {
+            WorldManager.langConfig.sendError(sender, "create.invalid_seed");
+            return;
+        }
+
+        if ("empty".equalsIgnoreCase(type)) {
+            sendStarting(sender, "empty", name, seed, "Empty");
+            createWorld(sender, name, World.Environment.NORMAL, WorldType.FLAT, seedValue, "Empty");
+            return;
         }
 
         Object worldTypeOrEnvironment = getWorldType(type);
@@ -57,6 +66,7 @@ public class Create {
                 }
             }
 
+            WorldManager.langConfig.sendWaiting(sender, "create.dimension_list", "empty");
             for (WorldType worldType : WorldType.values()) {
                 WorldManager.langConfig.sendWaiting(sender, "create.dimension_list", worldType.name().toLowerCase());
             }
@@ -107,33 +117,28 @@ public class Create {
             throw new IllegalArgumentException("Environment cannot be null");
         }
 
-        WorldCreator creator = new WorldCreator(name).environment(environment).type(type);
-
-        // Si aucune seed n'est spécifiée, en générer une aléatoire pour éviter les mondes identiques
-        long seedValue = Objects.requireNonNullElseGet(seed, () -> new Random().nextLong());
-        creator.seed(seedValue);
-
-        if (generator != null) {
+        SchedulerUtil.runGlobal(() -> {
             try {
-                creator.generator(generator);
+                // Recheck after the scheduler handoff to avoid adopting a concurrently created world.
+                if (Bukkit.getWorld(name) != null) {
+                    WorldManager.langConfig.sendError(sender, "create.already_exists");
+                    return;
+                }
+                WorldCreator creator = new WorldCreator(name).environment(environment).type(type)
+                        .seed(Objects.requireNonNullElseGet(seed, () -> new Random().nextLong()));
+                WorldLifecycle.applyGenerator(creator, generator);
+                World world = creator.createWorld();
+                if (world == null) {
+                    WorldManager.langConfig.sendError(sender, "create.error", name);
+                } else {
+                    WorldManager.addWorld(player, name, type.name(), environment, generator);
+                    WorldManager.langConfig.sendSuccess(sender, "create.success", name);
+                }
             } catch (NoSuchElementException e) {
                 WorldManager.langConfig.sendError(sender, "create.generator_not_found", generator);
-                return;
-            }
-        }
-
-        SchedulerUtil.runGlobal(() -> {
-            World world = creator.createWorld();
-            if (world == null) {
+            } catch (Exception e) {
+                WorldManager.getInstance().getLogger().log(Level.WARNING, "Could not create world " + name, e);
                 WorldManager.langConfig.sendError(sender, "create.error", name);
-            } else {
-                WorldManager.langConfig.sendSuccess(sender, "create.success", name);
-                try {
-                    world.save();
-                } catch (Exception e) {
-                    Bukkit.getLogger().warning("[WorldManager] Initial save failed for newly created world " + name + ": " + e.getMessage());
-                }
-                WorldManager.addWorld(player, creator.name(), creator.type().name(), creator.environment(), generator);
             }
         });
     }
@@ -151,27 +156,21 @@ public class Create {
 
         if (Bukkit.getWorld(name) != null) {
             WorldManager.langConfig.sendError(sender, "create.already_exists");
-             return;
-         }
+            return;
+        }
 
         if (name.equalsIgnoreCase("plugins") || name.equalsIgnoreCase("logs") || name.equalsIgnoreCase("libraries") || name.equalsIgnoreCase("versions") || name.equalsIgnoreCase("config") || name.equalsIgnoreCase("cache")) {
             WorldManager.langConfig.sendError(sender, "create.name_unusable");
-             return;
-         }
+            return;
+        }
 
         if (getUnloadedWorlds().contains(name)) {
             WorldManager.langConfig.sendError(sender, "create.exists_but_not_loaded", name);
-             return;
-         }
+            return;
+        }
 
-         if (type == null) {
-             run(name, null, null, null);
-         } else if (seed == null) {
-             run(name, type, null, null);
-         } else {
-             run(name, type, seed, generator);
-         }
-     }
+        run(name, type, seed, generator);
+    }
 
     private List<String> getUnloadedWorlds() {
         return fr.mathildeuh.worldmanager.util.WorldFolders.listUnloadedWorldFolders();

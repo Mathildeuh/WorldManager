@@ -26,7 +26,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build project with alt.gradle
-        run: ./gradlew -b alt.gradle shadowJar --no-daemon
+        run: ./gradlew -b alt.gradle test shadowJar --no-daemon
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v7

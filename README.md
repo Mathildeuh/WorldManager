@@ -9,7 +9,7 @@ plus its Inventories and NetherPortals addons.
 
 ## Features
 
-- **World management** — create (normal, flat, large biomes, amplified, nether, the end, or a
+- **World management** — create (normal, flat, large biomes, amplified, nether, the end, empty, or a
   custom generator), load existing world folders, unload, and permanently delete worlds.
 - **Backups** — zip a world's folder on demand and restore it later, with the heavy I/O kept off
   the main thread so it doesn't freeze the server.
@@ -45,6 +45,9 @@ All commands are under `/worldmanager` (alias `/wm`).
 |---|---|
 | `/wm` or `/wm gui` | Open the main menu |
 | `/wm create <name> [type] [seed] [generator]` | Create a new world |
+| `/wm create <name> empty [seed]` | Create an empty overworld with the built-in generator |
+| `/wm create <name> <type> empty` | Create an empty world in the selected dimension, with a random seed |
+| `/wm create <name> <type> <seed> empty` | Create an empty world in the selected dimension, with a specific seed |
 | `/wm load <name> [dimension] [generator]` | Load an existing world folder |
 | `/wm unload <name>` | Unload a world |
 | `/wm delete <name>` | Permanently delete a world |
@@ -53,6 +56,12 @@ All commands are under `/worldmanager` (alias `/wm`).
 | `/wm teleport <world> [player]` | Teleport yourself or another player to a world |
 | `/wm pregen <start\|stop\|pause\|resume> <world> [center:x,z] [radius:n]` | Control world pre-generation |
 | `/wm list` | List currently loaded worlds |
+
+The `empty` option uses the same generator as the GUI's empty-world toggle. Use
+`/wm create lobby empty` for an empty overworld, `/wm create end_lobby the_end empty`
+for an empty End, or `/wm create nether_lobby nether 12345 empty` for an empty Nether
+with a specific seed. In the GUI, select the dimension and enable the empty-world toggle.
+The dimension and generator are saved in the world configuration and reused after a restart.
 
 ## Permissions
 
@@ -72,11 +81,34 @@ All commands are under `/worldmanager` (alias `/wm`).
 
 ## Supported versions
 
-**Paper 1.20.1 → 26.2.** Compiled against the 1.20.1 API (Paper's Bukkit-facing API is
+**Paper 1.20.1 → 26.3.** Compiled against the 1.20.1 API (Paper's Bukkit-facing API is
 backward-additive, so building against the floor rather than the latest keeps it running on
-every release in between) and boot-tested against a real 1.20.1 server. Spigot/CraftBukkit are
+older supported releases) and boot-tested against a real 1.20.1 server. Spigot/CraftBukkit are
 **not** supported — a shaded chest-GUI library the plugin depended on before 3.0.0 was dropped
 and hasn't been reintroduced.
+
+Folia scheduler ownership is respected for chat-input callbacks, GUI animations, portal
+velocity updates, and world-operation teleports. World creation/loading, game-rule mutations,
+and world-flag changes use the global scheduler; their GUI refreshes return to the player scheduler.
+Unloading selects the server's asynchronous unload API when available and otherwise uses the
+Bukkit API. Delete and restore only touch world files after a successful unload; rejected or
+unsupported operations abort safely. Runtime world creation/unloading still requires support
+from the running server. The compatibility checks compile against Paper 26.3; a live Folia
+26.3 test is still required.
+
+### Compatibility checks
+
+The default Java 21 build preserves the existing API floor:
+
+```sh
+bash gradlew clean test shadowJar
+```
+
+With a Java 25 toolchain installed, compile and test against the 26.3 API:
+
+```sh
+bash gradlew clean test -PpaperApiVersion=26.3.build.181-stable -PtargetJavaVersion=25
+```
 
 ## What's new in 4.0.0
 

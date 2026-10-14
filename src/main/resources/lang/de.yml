@@ -243,6 +243,8 @@ gui:
     confirm_delete: "<red>Welt {0} und ihren Ordner endgültig löschen?</red>"
     confirm_restore: "<aqua>Welt {0} aus dem letzten Backup wiederherstellen? Dies ersetzt die aktuelle Welt.</aqua>"
   gamerules:
+    update_failed: "<red>Diese Spielregel konnte nicht geändert werden.</red>"
+    invalid_value: "<red>Gib eine ganze Zahl zwischen 0 und 2147483647 ein; negative Werte werden auf 0 gesetzt.</red>"
     category_title: "<gradient:#4fd1ff:#7d66ff><b>Spielregeln</b></gradient> <white>{0}</white>"
     rules_title_paged: "{0} - Seite {1}/{2}"
     not_available: "<gray>Diese Spielregel ist in dieser Version nicht verfügbar.</gray>"

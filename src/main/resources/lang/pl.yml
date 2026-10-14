@@ -243,6 +243,8 @@ gui:
     confirm_delete: "<red>Trwale usunąć świat {0} i jego folder?</red>"
     confirm_restore: "<aqua>Przywrócić świat {0} z ostatniej kopii zapasowej? To zastąpi obecny świat.</aqua>"
   gamerules:
+    update_failed: "<red>Nie udało się zmienić tej reguły gry.</red>"
+    invalid_value: "<red>Wpisz liczbę całkowitą od 0 do 2147483647; wartości ujemne zostaną ustawione na 0.</red>"
     category_title: "<gradient:#4fd1ff:#7d66ff><b>Reguły gry</b></gradient> <gray>dla</gray> <white>{0}</white>"
     rules_title_paged: "{0} - Strona {1}/{2}"
     not_available: "<gray>Ta reguła gry nie jest dostępna w tej wersji.</gray>"

@@ -13,11 +13,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A single-use chat-based text prompt: closes whatever GUI is open, asks the player to type
  * their answer in chat (or {@code cancel} to abort), and hands the result to {@code onConfirm} -
- * {@code null} if cancelled or if the player disconnects before answering.
+ * {@code null} if cancelled. Disconnecting discards the prompt without reopening a GUI.
  *
  * <p>This replaces an earlier virtual-anvil-based implementation ({@code AnvilInput}). Three
  * different techniques for reading text back out of a virtual anvil's result slot all failed in
@@ -31,7 +32,7 @@ public final class ChatInput implements Listener {
 
     private final Player player;
     private final Consumer<String> onConfirm;
-    private boolean finished = false;
+    private final AtomicBoolean finished = new AtomicBoolean();
 
     private ChatInput(Player player, Consumer<String> onConfirm) {
         this.player = player;
@@ -51,27 +52,29 @@ public final class ChatInput implements Listener {
 
     @EventHandler
     public void onChat(AsyncChatEvent event) {
-        if (finished || !event.getPlayer().equals(player)) {
+        if (finished.get() || !event.getPlayer().equals(player)) {
             return;
         }
         event.setCancelled(true);
         String text = PlainTextComponentSerializer.plainText().serialize(event.message()).trim();
-        SchedulerUtil.runGlobal(() -> finish("cancel".equalsIgnoreCase(text) ? null : text));
+        SchedulerUtil.runEntity(player, () -> finish("cancel".equalsIgnoreCase(text) ? null : text), this::discard);
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        if (!finished && event.getPlayer().equals(player)) {
-            finish(null);
+        if (event.getPlayer().equals(player)) {
+            discard();
         }
     }
 
+    private void discard() {
+        if (finished.compareAndSet(false, true)) HandlerList.unregisterAll(this);
+    }
+
     private void finish(String text) {
-        if (finished) {
-            return;
+        if (finished.compareAndSet(false, true)) {
+            HandlerList.unregisterAll(this);
+            if (player.isOnline()) onConfirm.accept(text);
         }
-        finished = true;
-        HandlerList.unregisterAll(this);
-        onConfirm.accept(text);
     }
 }

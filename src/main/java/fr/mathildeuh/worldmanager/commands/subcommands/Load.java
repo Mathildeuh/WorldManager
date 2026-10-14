@@ -3,6 +3,8 @@ package fr.mathildeuh.worldmanager.commands.subcommands;
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.configs.WorldsConfig;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
+import fr.mathildeuh.worldmanager.util.WorldLifecycle;
+import java.util.logging.Level;
 import fr.mathildeuh.worldmanager.util.WorldNameValidator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -44,18 +46,24 @@ public class Load {
             return;
         }
 
-        WorldCreator worldCreator = new WorldCreator(worldName).environment(env);
-        if (generator != null && !generator.isEmpty()) {
-            worldCreator.generator(generator);
-        }
-
         SchedulerUtil.runGlobal(() -> {
-            World loadedWorld = Bukkit.createWorld(worldCreator);
-            if (loadedWorld != null) {
-                WorldsConfig.applyFlags(loadedWorld);
-                WorldManager.langConfig.sendSuccess(sender, "load.success", worldName);
-                WorldManager.addWorld(sender, worldCreator.name(), worldCreator.type().name(), worldCreator.environment(), generator);
-            } else {
+            try {
+                if (Bukkit.getWorld(worldName) != null) {
+                    WorldManager.langConfig.sendError(sender, "load.world_already_loaded", worldName);
+                    return;
+                }
+                WorldCreator worldCreator = new WorldCreator(worldName).environment(env);
+                WorldLifecycle.applyGenerator(worldCreator, generator);
+                World loadedWorld = Bukkit.createWorld(worldCreator);
+                if (loadedWorld != null) {
+                    WorldsConfig.applyFlags(loadedWorld);
+                    WorldManager.addWorld(sender, worldName, worldCreator.type().name(), env, generator);
+                    WorldManager.langConfig.sendSuccess(sender, "load.success", worldName);
+                } else {
+                    WorldManager.langConfig.sendError(sender, "load.failed", worldName);
+                }
+            } catch (Exception e) {
+                WorldManager.getInstance().getLogger().log(Level.WARNING, "Could not load world " + worldName, e);
                 WorldManager.langConfig.sendError(sender, "load.failed", worldName);
             }
         });

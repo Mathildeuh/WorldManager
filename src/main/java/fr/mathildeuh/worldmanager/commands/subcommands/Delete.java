@@ -2,23 +2,19 @@ package fr.mathildeuh.worldmanager.commands.subcommands;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
+import fr.mathildeuh.worldmanager.util.WorldLifecycle;
 import fr.mathildeuh.worldmanager.util.WorldNameValidator;
 import fr.mathildeuh.worldmanager.util.WorldOperationLock;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 public class Delete {
-
-    CommandSender sender;
+    private final CommandSender sender;
 
     public Delete(CommandSender sender) {
         this.sender = sender;
@@ -29,61 +25,61 @@ public class Delete {
             WorldManager.langConfig.sendError(sender, "general.invalid_world_name", name);
             return;
         }
+        SchedulerUtil.runGlobal(() -> delete(name));
+    }
 
+    private void delete(String name) {
         World targetWorld = Bukkit.getWorld(name);
-
         if (targetWorld == null) {
             WorldManager.langConfig.sendError(sender, "delete.world_not_found");
             return;
         }
-
         if (targetWorld.equals(Bukkit.getWorlds().get(0))) {
             WorldManager.langConfig.sendError(sender, "delete.default_world");
             return;
         }
-
         if (!WorldOperationLock.tryLock(name)) {
             WorldManager.langConfig.sendError(sender, "general.operation_in_progress", name);
             return;
         }
-
         WorldManager.langConfig.sendWaiting(sender, "delete.warning", name);
-
         File worldFolder = targetWorld.getWorldFolder();
-        String worldName = name;
-        List<CompletableFuture<Boolean>> teleports = new ArrayList<>();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getWorld().equals(targetWorld)) {
-                teleports.add(player.teleportAsync(Bukkit.getWorlds().get(0).getSpawnLocation()));
-                WorldManager.langConfig.sendError(player, "delete.kicked_players");
-            }
-        }
-
-        CompletableFuture.allOf(teleports.toArray(new CompletableFuture[0])).thenRun(() ->
-                SchedulerUtil.runGlobal(() -> {
-                    boolean unloadSuccess = WorldManager.getInstance().getServer().unloadWorld(targetWorld, false);
-                    if (!unloadSuccess) {
-                        WorldOperationLock.unlock(worldName);
-                        WorldManager.langConfig.sendError(sender, "delete.failed", name);
+        WorldLifecycle.evacuate(targetWorld,
+                player -> WorldManager.langConfig.sendError(player, "delete.kicked_players"))
+                .whenComplete((evacuated, error) -> WorldLifecycle.completeOnGlobal(name, () -> {
+                    if (error != null || !Boolean.TRUE.equals(evacuated)) {
+                        failed(name, error);
                         return;
                     }
-
-                    SchedulerUtil.runAsync(() -> {
-                        try {
-                            FileUtils.deleteDirectory(worldFolder);
-                            SchedulerUtil.runGlobal(() -> {
-                                WorldOperationLock.unlock(worldName);
-                                WorldManager.langConfig.sendSuccess(sender, "delete.success");
-                                WorldManager.removeWorld(worldName);
-                            });
-                        } catch (IOException e) {
-                            Bukkit.getLogger().warning("[WorldManager] Failed to delete world folder for " + worldName + ": " + e.getMessage());
-                            SchedulerUtil.runGlobal(() -> {
-                                WorldOperationLock.unlock(worldName);
-                                WorldManager.langConfig.sendError(sender, "delete.async_failed", worldName);
-                            });
-                        }
-                    });
+                    WorldLifecycle.unload(targetWorld, false).whenComplete((unloaded, unloadError) ->
+                            WorldLifecycle.completeOnGlobal(name, () -> {
+                                if (unloadError != null || !Boolean.TRUE.equals(unloaded)) {
+                                    failed(name, unloadError);
+                                    return;
+                                }
+                                // No file is touched until the unload callback confirms success.
+                                SchedulerUtil.runAsync(() -> {
+                                    try {
+                                        FileUtils.deleteDirectory(worldFolder);
+                                        WorldLifecycle.completeOnGlobal(name, () -> {
+                                            try {
+                                                WorldManager.removeWorld(name);
+                                                WorldManager.langConfig.sendSuccess(sender, "delete.success");
+                                            } finally {
+                                                WorldOperationLock.unlock(name);
+                                            }
+                                        });
+                                    } catch (Exception e) {
+                                        WorldLifecycle.completeOnGlobal(name, () -> failed(name, e));
+                                    }
+                                });
+                            }));
                 }));
+    }
+
+    private void failed(String name, Throwable error) {
+        WorldOperationLock.unlock(name);
+        if (error != null) WorldManager.getInstance().getLogger().log(Level.WARNING, "Could not delete world " + name, error);
+        WorldManager.langConfig.sendError(sender, "delete.failed", name);
     }
 }

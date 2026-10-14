@@ -4,28 +4,23 @@ import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.commands.subcommands.Create;
 import fr.mathildeuh.worldmanager.util.WorldFolders;
 import fr.mathildeuh.worldmanager.util.WorldNameValidator;
-import fr.mathildeuh.worldmanager.worlds.EmptyWorldGenerator;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.WorldType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.Set;
 
 /**
  * World-creation form. Unlike every other screen in this package, this one is NOT rebuilt
  * from scratch on every open: a chest inventory has no native multi-field form the way the
  * old Dialog did, so this instance holds the draft (name/type/seed/generator/empty) itself
- * across the several round trips (each {@link AnvilInput} prompt, each type-cycle click)
+ * across the several round trips (each chat prompt, each type-cycle click)
  * needed to fill it in, re-rendering the same {@link Inventory} in place each time.
  */
 public final class CreatorGui implements WMGui {
@@ -180,38 +175,8 @@ public final class CreatorGui implements WMGui {
         }
 
         player.closeInventory();
-        if (empty) {
-            createEmptyWorld();
-        } else {
-            new Create(player).execute(name, type, seed.isEmpty() ? null : seed, generator.isEmpty() ? null : generator);
-        }
-    }
-
-    private void createEmptyWorld() {
-        long seedValue = seed.isEmpty() ? new Random().nextLong() : Long.parseLong(seed);
-
-        Create.sendStarting(player, "Empty", name, seed, "Empty");
-
-        WorldCreator creator = new WorldCreator(name)
-                .environment(World.Environment.NORMAL)
-                .type(WorldType.FLAT)
-                .seed(seedValue)
-                .generator(new EmptyWorldGenerator());
-
-        World world = creator.createWorld();
-        if (world == null) {
-            WorldManager.langConfig.sendError(player, "create.error", name);
-            GuiUtils.playError(player);
-            return;
-        }
-        WorldManager.langConfig.sendSuccess(player, "create.success", name);
-        GuiUtils.playSuccess(player);
-        try {
-            world.save();
-        } catch (Exception e) {
-            Bukkit.getLogger().warning("[WorldManager] Initial save failed for newly created world " + name + ": " + e.getMessage());
-        }
-        WorldManager.addWorld(player, name, WorldType.FLAT.name(), World.Environment.NORMAL, "Empty");
+        new Create(player).execute(name, type, seed.isEmpty() ? null : seed,
+                empty ? "Empty" : generator.isEmpty() ? null : generator);
     }
 
     private static Material iconForType(String type) {

@@ -45,6 +45,7 @@ public final class WorldManager extends JavaPlugin {
     public static BackupConfig backupConfig;
     public static LangConfig langConfig;
     private boolean updated = true;
+    private volatile boolean stopping;
 
     private static WorldManager instance;
 
@@ -53,6 +54,10 @@ public final class WorldManager extends JavaPlugin {
             throw new IllegalStateException("Tried to access WorldManager instance before the plugin was enabled!");
         }
         return instance;
+    }
+
+    public boolean acceptsTasks() {
+        return isEnabled() && !stopping;
     }
 
     public static void addWorld(CommandSender player, String name, String type, World.Environment environement, String generator) {
@@ -249,7 +254,9 @@ public final class WorldManager extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        stopping = true;
         fr.mathildeuh.worldmanager.guis.GuiAnimator.stop();
+        fr.mathildeuh.worldmanager.guis.GuiManager.clear();
 
         // Clean up player inventory data
         PlayerInventoryManager.clearAllData();

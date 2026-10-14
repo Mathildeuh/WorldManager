@@ -1,6 +1,7 @@
 package fr.mathildeuh.worldmanager.guis;
 
 import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -75,11 +76,13 @@ public final class GameRuleListGui implements WMGui {
         if (slot == PREV_SLOT && page.index() > 0) {
             GameRuleListGui.open(player, worldName, page.index() - 1);
         } else if (slot == BACK_SLOT) {
-            World world = Bukkit.getWorld(worldName);
-            if (world != null) {
-                saveGameRules(world);
-            }
-            WorldOptionsGui.open(player, worldName);
+            SchedulerUtil.runGlobal(() -> {
+                World world = Bukkit.getWorld(worldName);
+                if (world != null) saveGameRules(world);
+                SchedulerUtil.runEntity(player, () -> {
+                    if (GuiManager.get(player.getUniqueId()) == this) WorldOptionsGui.open(player, worldName);
+                });
+            });
         } else if (slot == NEXT_SLOT && page.index() < page.count() - 1) {
             GameRuleListGui.open(player, worldName, page.index() + 1);
         } else if (slot < rulesOnPage.size()) {

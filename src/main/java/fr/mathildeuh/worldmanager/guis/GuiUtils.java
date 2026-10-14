@@ -129,7 +129,8 @@ public final class GuiUtils {
      */
     public static ItemStack glinted(ItemStack item) {
         ItemMeta meta = item.getItemMeta();
-        meta.addEnchant(Enchantment.LUCK, 1, true);
+        Enchantment glint = Enchantment.getByKey(NamespacedKey.minecraft("luck_of_the_sea"));
+        if (glint != null) meta.addEnchant(glint, 1, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         item.setItemMeta(meta);
         return item;

@@ -243,6 +243,8 @@ gui:
     confirm_delete: "<red>¿Eliminar permanentemente el mundo {0} y su carpeta?</red>"
     confirm_restore: "<aqua>¿Restaurar el mundo {0} desde su última copia de seguridad? Esto reemplazará el mundo actual.</aqua>"
   gamerules:
+    update_failed: "<red>No se pudo modificar esta regla del juego.</red>"
+    invalid_value: "<red>Introduce un entero entre 0 y 2147483647; los valores negativos se convierten en 0.</red>"
     category_title: "<gradient:#4fd1ff:#7d66ff><b>Reglas del juego</b></gradient> <gray>para</gray> <white>{0}</white>"
     rules_title_paged: "{0} - Página {1}/{2}"
     not_available: "<gray>Esta regla del juego no está disponible en esta versión.</gray>"

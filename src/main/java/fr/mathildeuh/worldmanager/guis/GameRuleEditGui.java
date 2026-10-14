@@ -1,5 +1,8 @@
 package fr.mathildeuh.worldmanager.guis;
 
+import fr.mathildeuh.worldmanager.WorldManager;
+import fr.mathildeuh.worldmanager.util.GameRuleUpdates;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.Material;
@@ -7,6 +10,9 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+
+import java.util.function.UnaryOperator;
+import java.util.logging.Level;
 
 /** Editor for a single game rule: boolean toggle or integer +/- stepper, applied immediately. */
 public final class GameRuleEditGui implements WMGui {
@@ -24,6 +30,7 @@ public final class GameRuleEditGui implements WMGui {
     private final GameRule<?> rule;
     private final int returnPage;
     private final Inventory inventory;
+    private final World editingWorld;
 
     private GameRuleEditGui(Player player, String worldName, GameRule<?> rule, int returnPage) {
         this.player = player;
@@ -36,6 +43,7 @@ public final class GameRuleEditGui implements WMGui {
         GuiUtils.fillBorder(inventory, GuiUtils.Theme.INFO);
 
         World world = Bukkit.getWorld(worldName);
+        this.editingWorld = world;
         if (world == null) {
             inventory.setItem(DISPLAY_SLOT, GuiUtils.item(Material.BARRIER, GuiUtils.miniFromLang("gui.options.not_loaded")));
         } else if (rule.getType() == Boolean.class) {
@@ -93,47 +101,61 @@ public final class GameRuleEditGui implements WMGui {
             return;
         }
 
-        World world = Bukkit.getWorld(worldName);
-        if (world == null) {
-            return;
-        }
+        if (editingWorld == null) return;
 
         if (rule.getType() == Boolean.class && slot == DISPLAY_SLOT) {
-            GameRule<Boolean> boolRule = (GameRule<Boolean>) rule;
-            boolean current = Boolean.TRUE.equals(world.getGameRuleValue(boolRule));
-            world.setGameRule(boolRule, !current);
-            GameRuleEditGui.open(player, worldName, rule, returnPage);
-            return;
-        }
-
-        if (rule.getType() == Integer.class) {
+            updateRule((GameRule<Boolean>) rule, current -> !current, this);
+        } else if (rule.getType() == Integer.class) {
             GameRule<Integer> intRule = (GameRule<Integer>) rule;
             if (slot == SET_EXACT_SLOT) {
-                promptExactValue(intRule, world);
+                promptExactValue(intRule);
                 return;
             }
-            Integer current = world.getGameRuleValue(intRule);
-            int value = current == null ? 0 : current;
-            Integer newValue = switch (slot) {
-                case MINUS_TEN_SLOT -> Math.max(0, value - 10);
-                case MINUS_ONE_SLOT -> Math.max(0, value - 1);
-                case PLUS_ONE_SLOT -> value + 1;
-                case PLUS_TEN_SLOT -> value + 10;
+            Integer delta = switch (slot) {
+                case MINUS_TEN_SLOT -> -10;
+                case MINUS_ONE_SLOT -> -1;
+                case PLUS_ONE_SLOT -> 1;
+                case PLUS_TEN_SLOT -> 10;
                 default -> null;
             };
-            if (newValue != null) {
-                world.setGameRule(intRule, newValue);
-                GameRuleEditGui.open(player, worldName, rule, returnPage);
-            }
+            if (delta != null) updateRule(intRule, current -> GameRuleUpdates.adjustInteger(current, delta), this);
         }
     }
 
-    private void promptExactValue(GameRule<Integer> intRule, World world) {
+    private <T> void updateRule(GameRule<T> typedRule, UnaryOperator<T> change, WMGui expectedScreen) {
+        GameRuleUpdates.update(editingWorld, typedRule, change).whenComplete((changed, error) -> {
+            if (error != null) {
+                WorldManager.getInstance().getLogger().log(Level.WARNING,
+                        "Could not update game rule " + rule.getName() + " in world " + worldName, error);
+            }
+            SchedulerUtil.runEntity(player, () -> {
+                if (error != null || !Boolean.TRUE.equals(changed)) {
+                    WorldManager.langConfig.sendError(player, "gui.gamerules.update_failed");
+                    GuiUtils.playError(player);
+                }
+                if (GuiManager.get(player.getUniqueId()) == expectedScreen) {
+                    if (expectedScreen == this && Bukkit.getWorld(worldName) == editingWorld) {
+                        // Keep the same screen for rapid clicks; an earlier refresh must not hide a later result.
+                        if (rule.getType() == Boolean.class) renderBoolean(editingWorld);
+                        else if (rule.getType() == Integer.class) renderInteger(editingWorld);
+                    } else {
+                        GameRuleEditGui.open(player, worldName, rule, returnPage);
+                    }
+                }
+            });
+        });
+    }
+
+    private void promptExactValue(GameRule<Integer> intRule) {
         ChatInput.open(player, text -> {
-            if (text != null && text.matches("-?\\d+")) {
-                World w = Bukkit.getWorld(worldName);
-                if (w != null) {
-                    w.setGameRule(intRule, Math.max(0, Integer.parseInt(text)));
+            if (text != null) {
+                try {
+                    int value = Math.max(0, Integer.parseInt(text));
+                    updateRule(intRule, current -> value, GuiManager.get(player.getUniqueId()));
+                    return;
+                } catch (NumberFormatException e) {
+                    WorldManager.langConfig.sendError(player, "gui.gamerules.invalid_value");
+                    GuiUtils.playError(player);
                 }
             }
             GameRuleEditGui.open(player, worldName, rule, returnPage);

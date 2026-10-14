@@ -17,13 +17,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 
 public class JoinListener implements Listener {
     private static final String GITHUB_API_URL = "https://api.github.com/repos/%s/%s/releases/latest";
-    private final Set<String> updateInfoSent = new HashSet<>();
+    private final Set<String> updateInfoSent = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     @EventHandler
     private void onJoin(PlayerJoinEvent event) {
@@ -31,13 +30,12 @@ public class JoinListener implements Listener {
         if (!player.isOp() || WorldManager.getInstance().isUpdated()) return;
 
         final String name = player.getName();
-        if (this.updateInfoSent.contains(name)) return;
-        this.updateInfoSent.add(name);
+        if (!this.updateInfoSent.add(name)) return;
 
         // The release-note fetch is a network call; never do it on the main thread.
         SchedulerUtil.runAsync(() -> {
             String releaseNote = getLatestReleaseNote();
-            SchedulerUtil.runGlobal(() -> sendUpdateNotice(player, releaseNote));
+            SchedulerUtil.runEntity(player, () -> sendUpdateNotice(player, releaseNote));
         });
     }
 

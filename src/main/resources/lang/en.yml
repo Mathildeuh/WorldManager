@@ -243,6 +243,8 @@ gui:
     confirm_delete: "<red>Permanently delete world {0} and its folder?</red>"
     confirm_restore: "<aqua>Restore world {0} from its latest backup? This replaces the current world.</aqua>"
   gamerules:
+    update_failed: "<red>Could not update this game rule.</red>"
+    invalid_value: "<red>Enter a whole number between 0 and 2147483647; negative values become 0.</red>"
     category_title: "<gradient:#4fd1ff:#7d66ff><b>Game Rules</b></gradient> <white>{0}</white>"
     rules_title_paged: "{0} - Page {1}/{2}"
     not_available: "<gray>This game rule is not available on this version.</gray>"

@@ -2,6 +2,7 @@ package fr.mathildeuh.worldmanager.configs;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.util.SchedulerUtil;
+import fr.mathildeuh.worldmanager.util.WorldLifecycle;
 import fr.mathildeuh.worldmanager.util.WorldNameValidator;
 import fr.mathildeuh.worldmanager.util.WorldOperationLock;
 import org.bukkit.Bukkit;
@@ -13,8 +14,9 @@ import org.bukkit.entity.Player;
 import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Queue;
+import java.util.logging.Level;
 import java.util.concurrent.CompletableFuture;
 
 public class BackupConfig {
@@ -34,6 +36,10 @@ public class BackupConfig {
     }
 
     public static void backupWorld(Player player, String name) {
+        SchedulerUtil.runGlobal(() -> backupOnGlobal(player, name));
+    }
+
+    private static void backupOnGlobal(Player player, String name) {
         if (!WorldNameValidator.isValid(name)) {
             WorldManager.langConfig.sendError(player, "general.invalid_world_name", name);
             return;
@@ -53,7 +59,14 @@ public class BackupConfig {
         Bukkit.getLogger().info("Backing up world " + name);
         WorldManager.langConfig.sendWaiting(player, "backup.started");
 
-        world.save();
+        try {
+            world.save();
+        } catch (Exception e) {
+            WorldOperationLock.unlock(name);
+            WorldManager.getInstance().getLogger().log(Level.WARNING, "Could not save world before backup " + name, e);
+            WorldManager.langConfig.sendError(player, "backup.failed");
+            return;
+        }
 
         File worldFolder = world.getWorldFolder();
         File backupFile = backupFileFor(name);
@@ -62,7 +75,8 @@ public class BackupConfig {
                 + ") to " + backupFile.getAbsolutePath());
         World.Environment environment = world.getEnvironment();
         String worldType = world.getWorldType().getName().equalsIgnoreCase("DEFAULT") ? "NORMAL" : world.getWorldType().getName();
-        org.bukkit.generator.ChunkGenerator generator = world.getGenerator();
+        String generator = world.getGenerator() instanceof fr.mathildeuh.worldmanager.worlds.EmptyWorldGenerator
+                ? "Empty" : WorldManager.worldsConfig.getString("worlds." + name + ".generator");
 
         SchedulerUtil.runAsync(() -> {
             try {
@@ -81,13 +95,13 @@ public class BackupConfig {
                 config.set("backups." + name + ".generator", generator);
                 config.save(configFile);
 
-                SchedulerUtil.runGlobal(() -> {
+                WorldLifecycle.completeOnGlobal(name, () -> {
                     WorldOperationLock.unlock(name);
                     WorldManager.langConfig.sendSuccess(player, "backup.finished");
                 });
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[WorldManager] Backup failed for " + name + ": " + e.getMessage());
-                SchedulerUtil.runGlobal(() -> {
+                WorldLifecycle.completeOnGlobal(name, () -> {
                     WorldOperationLock.unlock(name);
                     WorldManager.langConfig.sendError(player, "backup.failed");
                 });
@@ -96,6 +110,10 @@ public class BackupConfig {
     }
 
     public static void restoreWorld(Player player, String name) {
+        SchedulerUtil.runGlobal(() -> restoreOnGlobal(player, name));
+    }
+
+    private static void restoreOnGlobal(Player player, String name) {
         if (!WorldNameValidator.isValid(name)) {
             WorldManager.langConfig.sendError(player, "general.invalid_world_name", name);
             return;
@@ -116,99 +134,89 @@ public class BackupConfig {
             return;
         }
 
-        List<Player> worldPlayers = new ArrayList<>();
         World world = Bukkit.getWorld(name);
-        if (world != null) {
-            worldPlayers = new ArrayList<>(world.getPlayers());
+        if (world != null && world.equals(Bukkit.getWorlds().get(0))) {
+            WorldOperationLock.unlock(name);
+            WorldManager.langConfig.sendError(player, "restore.failed", name);
+            return;
         }
-
         WorldManager.langConfig.sendWaiting(player, "restore.started");
-
-        List<Player> finalWorldPlayers = worldPlayers;
-        List<CompletableFuture<Boolean>> teleports = finalWorldPlayers.stream()
-                .map(p -> p.teleportAsync(Bukkit.getWorlds().get(0).getSpawnLocation()))
-                .toList();
-
-        CompletableFuture.allOf(teleports.toArray(new CompletableFuture[0])).thenRun(() -> SchedulerUtil.runGlobal(() -> {
-            World worldToUnload = Bukkit.getWorld(name);
-            if (worldToUnload != null) {
-                Bukkit.unloadWorld(worldToUnload, false);
+        Queue<Player> finalWorldPlayers = new ConcurrentLinkedQueue<>();
+        CompletableFuture<Boolean> evacuated = world == null ? CompletableFuture.completedFuture(true)
+                : WorldLifecycle.evacuate(world, finalWorldPlayers::add);
+        evacuated.whenComplete((success, error) -> WorldLifecycle.completeOnGlobal(name, () -> {
+            if (error != null || !Boolean.TRUE.equals(success)) {
+                restoreFailed(player, name, error);
+                return;
             }
-
-            SchedulerUtil.runAsync(() -> {
-                try {
-                    if (worldFolder.exists()) {
-                        deleteFolder(worldFolder);
-                    }
-                    ZipUtil.unpack(backupFile, worldFolder);
-
-                    String envName = config.getString("backups." + name + ".env");
-                    String typeName = config.getString("backups." + name + ".type");
-                    if (envName == null || typeName == null) {
-                        Bukkit.getLogger().warning("[WorldManager] Restore failed for " + name + ": backup metadata missing from backups.yml");
-                        SchedulerUtil.runGlobal(() -> {
-                            WorldOperationLock.unlock(name);
-                            WorldManager.langConfig.sendError(player, "restore.missing_metadata", name);
-                        });
-                        return;
-                    }
-
-                    World.Environment env = World.Environment.valueOf(envName);
-                    WorldType type = WorldType.valueOf(typeName);
-                    String generator = config.getString("backups." + name + ".generator");
-
-                    SchedulerUtil.runGlobal(() -> {
-                        try {
-                            WorldCreator worldCreator = new WorldCreator(name).environment(env).type(type);
-                            if (generator != null && !generator.isEmpty()) {
-                                worldCreator.generator(generator);
-                            }
-
-                            World restoredWorld = Bukkit.createWorld(worldCreator);
-                            if (restoredWorld == null) {
-                                WorldManager.langConfig.sendError(player, "restore.failed", name);
-                                return;
-                            }
-
-                            WorldManager.langConfig.sendSuccess(player, "restore.finished");
-
-                            SchedulerUtil.runGlobalDelayed(() -> {
-                                for (Player p : finalWorldPlayers) {
-                                    if (p.isOnline()) {
-                                        p.teleportAsync(restoredWorld.getSpawnLocation());
-                                    }
-                                }
-                            }, 20L * 2L);
-                        } catch (Exception e) {
-                            Bukkit.getLogger().warning("[WorldManager] Restore failed for " + name + ": " + e.getMessage());
-                            WorldManager.langConfig.sendError(player, "restore.failed", name);
-                        } finally {
-                            WorldOperationLock.unlock(name);
-                        }
-                    });
-                } catch (Exception e) {
-                    Bukkit.getLogger().warning("[WorldManager] Restore failed for " + name + ": " + e.getMessage());
-                    SchedulerUtil.runGlobal(() -> {
-                        WorldOperationLock.unlock(name);
-                        WorldManager.langConfig.sendError(player, "restore.failed", name);
-                    });
+            CompletableFuture<Boolean> unloaded = world == null ? CompletableFuture.completedFuture(true)
+                    : WorldLifecycle.unload(world, false);
+            unloaded.whenComplete((unloadSuccess, unloadError) -> WorldLifecycle.completeOnGlobal(name, () -> {
+                if (unloadError != null || !Boolean.TRUE.equals(unloadSuccess)) {
+                    restoreFailed(player, name, unloadError);
+                    return;
                 }
-            });
+                restoreArchive(player, name, worldFolder, backupFile, finalWorldPlayers);
+            }));
         }));
     }
 
-
-    private static void deleteFolder(File folder) {
-        File[] files = folder.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    deleteFolder(file);
-                } else {
-                    file.delete();
+    private static void restoreArchive(Player player, String name, File worldFolder, File backupFile, Queue<Player> worldPlayers) {
+        SchedulerUtil.runAsync(() -> {
+            try {
+                String envName = config.getString("backups." + name + ".env");
+                String typeName = config.getString("backups." + name + ".type");
+                if (envName == null || typeName == null) {
+                    WorldLifecycle.completeOnGlobal(name, () -> {
+                        WorldOperationLock.unlock(name);
+                        WorldManager.langConfig.sendError(player, "restore.missing_metadata", name);
+                    });
+                    return;
                 }
+                World.Environment env = World.Environment.valueOf(envName);
+                WorldType type = WorldType.valueOf(typeName);
+                String generator = config.getString("backups." + name + ".generator");
+                if (worldFolder.exists()) org.apache.commons.io.FileUtils.deleteDirectory(worldFolder);
+                ZipUtil.unpack(backupFile, worldFolder);
+                WorldLifecycle.completeOnGlobal(name, () -> reloadRestoredWorld(player, name, env, type, generator, worldPlayers));
+            } catch (Exception e) {
+                WorldLifecycle.completeOnGlobal(name, () -> restoreFailed(player, name, e));
             }
+        });
+    }
+
+    private static void reloadRestoredWorld(Player player, String name, World.Environment env, WorldType type,
+                                            String generator, Queue<Player> worldPlayers) {
+        try {
+            WorldCreator creator = new WorldCreator(name).environment(env).type(type);
+            WorldLifecycle.applyGenerator(creator, generator);
+            World restoredWorld = creator.createWorld();
+            if (restoredWorld == null) {
+                WorldManager.langConfig.sendError(player, "restore.failed", name);
+                return;
+            }
+            WorldManager.langConfig.sendSuccess(player, "restore.finished");
+            org.bukkit.Location spawn = restoredWorld.getSpawnLocation();
+            for (Player returningPlayer : worldPlayers) {
+                SchedulerUtil.runEntity(returningPlayer, () -> {
+                    returningPlayer.teleportAsync(spawn.clone()).whenComplete((returned, failure) -> {
+                        if (failure != null || !Boolean.TRUE.equals(returned)) {
+                            WorldManager.getInstance().getLogger().log(Level.WARNING,
+                                    "Could not return player to restored world " + name, failure);
+                        }
+                    });
+                });
+            }
+        } catch (Exception e) {
+            restoreFailed(player, name, e);
+        } finally {
+            WorldOperationLock.unlock(name);
         }
-        folder.delete();
+    }
+
+    private static void restoreFailed(Player player, String name, Throwable error) {
+        WorldOperationLock.unlock(name);
+        if (error != null) WorldManager.getInstance().getLogger().log(Level.WARNING, "Could not restore world " + name, error);
+        WorldManager.langConfig.sendError(player, "restore.failed", name);
     }
 }

@@ -76,7 +76,7 @@ public class CustomPortalListener implements Listener {
         }
         player.teleportAsync(target).thenAccept(success -> {
             if (success && portal.launch != null) {
-                SchedulerUtil.runGlobal(() -> player.setVelocity(new Vector(portal.launch[0], portal.launch[1], portal.launch[2])));
+                SchedulerUtil.runEntity(player, () -> player.setVelocity(new Vector(portal.launch[0], portal.launch[1], portal.launch[2])));
             }
         });
     }
@@ -114,7 +114,7 @@ public class CustomPortalListener implements Listener {
         markCooldown(vehicle.getUniqueId());
         vehicle.teleportAsync(target).thenAccept(success -> {
             if (success && portal.launch != null) {
-                SchedulerUtil.runGlobal(() -> vehicle.setVelocity(new Vector(portal.launch[0], portal.launch[1], portal.launch[2])));
+                SchedulerUtil.runEntity(vehicle, () -> vehicle.setVelocity(new Vector(portal.launch[0], portal.launch[1], portal.launch[2])));
             }
         });
     }

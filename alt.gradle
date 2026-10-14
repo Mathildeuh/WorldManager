@@ -8,6 +8,8 @@ def buildGradleContent = file('build.gradle').text
 def versionMatcher = buildGradleContent =~ /version = '(.*)'/
 def version = versionMatcher[0][1]
 
+def mcVersion = providers.gradleProperty('paperApiVersion').getOrElse('1.20.1-R0.1-SNAPSHOT')
+
 repositories {
     mavenCentral()
     mavenLocal()
@@ -36,8 +38,13 @@ repositories {
 
 
 dependencies {
+    testImplementation "io.papermc.paper:paper-api:${mcVersion}"
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     // Target PaperMC API
-    compileOnly "io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT"
+    compileOnly "io.papermc.paper:paper-api:${mcVersion}"
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
 
@@ -69,7 +76,7 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:24.0.1'
 }
 
-def targetJavaVersion = 21
+def targetJavaVersion = providers.gradleProperty('targetJavaVersion').getOrElse('21').toInteger()
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -99,7 +106,16 @@ processResources {
 compileJava.options.encoding("UTF-8")
 
 libsDirectory = file("./out")
+test {
+    useJUnitPlatform()
+}
+
 shadowJar {
+    duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
+    filesMatching('META-INF/services/**') {
+        duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
+    }
+    mergeServiceFiles()
     archiveClassifier.set('')
     relocate 'org.bstats', 'fr.mathildeuh.bstats'
 }

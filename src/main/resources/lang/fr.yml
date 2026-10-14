@@ -243,6 +243,8 @@ gui:
     confirm_delete: "<red>Supprimer définitivement le monde {0} et son dossier ?</red>"
     confirm_restore: "<aqua>Restaurer le monde {0} depuis sa dernière sauvegarde ? Cela remplacera le monde actuel.</aqua>"
   gamerules:
+    update_failed: "<red>Impossible de modifier cette règle de jeu.</red>"
+    invalid_value: "<red>Saisissez un entier entre 0 et 2147483647 ; les valeurs négatives deviennent 0.</red>"
     category_title: "<gradient:#4fd1ff:#7d66ff><b>Règles du jeu</b></gradient> <gray>pour</gray> <white>{0}</white>"
     rules_title_paged: "{0} - Page {1}/{2}"
     not_available: "<gray>Cette règle du jeu n'est pas disponible sur cette version.</gray>"

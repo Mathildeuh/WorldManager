@@ -2,6 +2,7 @@ package fr.mathildeuh.worldmanager.guis;
 
 import fr.mathildeuh.worldmanager.WorldManager;
 import fr.mathildeuh.worldmanager.configs.WorldsConfig;
+import fr.mathildeuh.worldmanager.util.SchedulerUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -85,13 +86,15 @@ public final class WorldFlagsGui implements WMGui {
     }
 
     private void toggle(String flag, boolean defaultValue) {
-        boolean newValue = !WorldsConfig.getFlag(worldName, flag, defaultValue);
-        WorldsConfig.setFlag(worldName, flag, newValue);
-        World world = Bukkit.getWorld(worldName);
-        if (world != null) {
-            WorldsConfig.applyFlags(world);
-        }
-        render();
+        SchedulerUtil.runGlobal(() -> {
+            boolean newValue = !WorldsConfig.getFlag(worldName, flag, defaultValue);
+            WorldsConfig.setFlag(worldName, flag, newValue);
+            World world = Bukkit.getWorld(worldName);
+            if (world != null) WorldsConfig.applyFlags(world);
+            SchedulerUtil.runEntity(player, () -> {
+                if (GuiManager.get(player.getUniqueId()) == this) render();
+            });
+        });
     }
 
     private void setSpawnHere() {
@@ -99,8 +102,13 @@ public final class WorldFlagsGui implements WMGui {
             WorldManager.langConfig.sendError(player, "gui.flags.must_be_in_world");
             return;
         }
-        WorldsConfig.setSpawn(player.getLocation());
-        WorldManager.langConfig.sendSuccess(player, "gui.flags.spawn_set");
-        render();
+        org.bukkit.Location location = player.getLocation().clone();
+        SchedulerUtil.runGlobal(() -> {
+            WorldsConfig.setSpawn(location);
+            SchedulerUtil.runEntity(player, () -> {
+                WorldManager.langConfig.sendSuccess(player, "gui.flags.spawn_set");
+                if (GuiManager.get(player.getUniqueId()) == this) render();
+            });
+        });
     }
 }
