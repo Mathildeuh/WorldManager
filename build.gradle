@@ -41,7 +41,7 @@ dependencies {
     implementation "org.bstats:bstats-bukkit:3.0.2"
     implementation "net.kyori:adventure-text-minimessage:4.17.0"
 
-    implementation 'org.zeroturnaround:zt-zip:1.17'
+    implementation 'org.zeroturnaround:zt-zip:1.18.1'
 
     implementation 'org.json:json:20231013'
     implementation 'commons-io:commons-io:2.14.0'
